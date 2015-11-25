@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+{# ###### Macro definitions ###### #}
+{%- macro stylesheet(url) -%}
+    <link rel="stylesheet" type="text/css" href="{{ url }}" />
+{%- endmacro -%}
+{%- macro javascript(url) -%}
+    <script type="text/javascript" src="{{ url }}"></script>
+{%- endmacro -%}
+<head>
+{%- block head -%}
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title id="title">{{ site.title or site.verbose_name }}</title>
+    {# ###### CSS files ###### #}
+    {%- block css -%}
+        {# CSS files from plugins #}
+        {%- block css_plugins -%}
+            {%- for p in site.installed_plugins -%}
+                {%- if p.get_css_includes -%}
+                    {%- for name in p.get_css_includes(site) %}
+                        {{ stylesheet(name) }}
+                    {% endfor -%}
+                {%- endif -%}
+            {%- endfor -%}
+        {%- endblock css_plugins -%}
+        {%- block css_legacy -%}
+            {%- if run_jasmine -%}
+                {{ stylesheet(site.build_static_url("jasmine/jasmine.css")) }}
+            {%- endif -%}
+            {%- if site.use_vinylfox -%}
+                {{ stylesheet(site.build_static_url("vinylfox/resources/css/htmleditorplugins.css")) }}
+            {%- endif -%}
+            {%- if site.use_filterRow -%}
+                {{ stylesheet(site.build_static_url("filterRow/filterRow.css")) }}
+            {%- endif -%}
+            {%- if site.use_gridfilters -%}
+                {{ stylesheet(extjs.build_lib_url("examples/ux/statusbar/css/statusbar.css")) }}
+                {{ stylesheet(extjs.build_lib_url("examples/ux/gridfilters/css/GridFilters.css")) }}
+                {{ stylesheet(extjs.build_lib_url("examples/ux/gridfilters/css/RangeMenu.css")) }}
+            {%- endif -%}
+            {{ stylesheet(extjs.build_lib_url("examples/ux/fileuploadfield/css/fileuploadfield.css")) }}
+            {{ stylesheet(site.build_static_url("extjs/lino.css")) }}
+            {%- if site.use_awesome_uploader -%}
+                {{ stylesheet(site.build_static_url("AwesomeUploader/AwesomeUploader.css"))}}
+                {{ stylesheet(site.build_static_url("AwesomeUploader/AwesomeUploader Progress Bar.css"))}}
+            {%- endif -%}
+        {%- endblock css_legacy -%}
+    {%- endblock css -%}
+    {# ###### JavaScript files ###### #}
+    {%- block js -%}
+        {%- if settings.DEBUG -%}
+            {{ javascript(extjs.build_lib_url('adapter/ext/ext-base-debug.js'))}}
+            {{ javascript(extjs.build_lib_url('ext-all-debug.js')) }}
+        {%- else -%}
+            {{ javascript(extjs.build_lib_url('adapter/ext/ext-base.js')) }}
+            {{ javascript(extjs.build_lib_url('ext-all.js')) }}
+        {%- endif -%}
+    {%- endblock js -%}
+    {%- if not language.startswith('en') -%}
+        {{ javascript(extjs.build_lib_url('src/locale/ext-lang-' + language + '.js')) }}
+    {%- endif -%}
+    {{ javascript(extjs.build_lib_url('examples/ux/statusbar/StatusBar.js')) }}
+    {%- if site.use_spinner -%}
+        {{ javascript(extjs.build_lib_url('examples/ux/Spinner.js')) }}
+    {%- endif -%}
+    {{ javascript(site.build_static_url("extjs/Ext.ux.form.DateTime.js")) }}
+    {%- if run_jasmine -%}  {# site.use_jasmine #}
+        {{ javascript(site.build_static_url("jasmine/jasmine.js")) }}
+        {{ javascript(site.build_static_url("jasmine/jasmine-html.js")) }}
+        {{ javascript(site.build_static_url("jasmine/specs.js")) }}
+    {%- endif -%}
+    {%- for p in site.installed_plugins -%}
+        {%- if p.get_js_includes -%}
+            {%- for name in p.get_js_includes(settings, language) -%}
+                {{ javascript(name) }}
+            {%- endfor -%}
+        {%- endif -%}
+    {%- endfor -%}
+    {%- if site.use_gridfilters -%}
+        {%- set p = extjs.build_lib_url('examples/ux/gridfilters') -%}
+        {{ javascript(p + "/menu/RangeMenu.js") }}
+        {{ javascript(p + "/menu/ListMenu.js") }}
+        {{ javascript(p + "/GridFilters.js") }}
+        {{ javascript(p + "/filter/Filter.js") }}
+        {{ javascript(p + "/filter/StringFilter.js") }}
+        {{ javascript(p + "/filter/DateFilter.js") }}
+        {{ javascript(p + "/filter/ListFilter.js") }}
+        {{ javascript(p + "/filter/NumericFilter.js") }}
+        {{ javascript(p + "/filter/BooleanFilter.js") }}
+    {%- endif -%}
+    {{ javascript(extjs.build_lib_url("examples/ux/fileuploadfield/FileUploadField.js")) }}
+
+    {%- if site.use_filterRow -%}
+        {%- set p = site.build_static_url('filterRow') -%}
+        {{ javascript(p + "/filterRow.js") }}
+    {%- endif -%}
+    {%- if site.use_vinylfox -%}
+        {%- set p = site.build_static_url() + '/vinylfox/src/Ext.ux.form.HtmlEditor' -%}
+        {{ javascript(p + ".MidasCommand.js") }}
+        {{ javascript(p + ".Divider.js") }}
+        {{ javascript(p + ".HR.js") }}
+        {{ javascript(p + ".Image.js") }}
+        {{ javascript(p + ".RemoveFormat.js") }}
+        {{ javascript(p + ".IndentOutdent.js") }}
+        {{ javascript(p + ".SubSuperScript.js") }}
+        {{ javascript(p + ".FindAndReplace.js") }}
+        {{ javascript(p + ".Table.js") }}
+        {{ javascript(p + ".Word.js") }}
+        {{ javascript(p + ".Link.js") }}
+        {{ javascript(p + ".SpecialCharacters.js") }}
+        {{ javascript(p + ".UndoRedo.js") }}
+        {{ javascript(p + ".Heading.js") }}
+        {{ javascript(p + ".Plugins.js") }}
+    {%- endif -%}
+    {%- if site.use_awesome_uploader -%}
+        {%- set p = site.build_static_url() + '/AwesomeUploader/' -%}
+        {{ javascript(p + "/Ext.ux.XHRUpload.js") }}
+        {{ javascript(p + "/swfupload.js") }}
+     {# {{ javascript(p + "/swfupload.swfobject.js") }} #}
+        {{ javascript(p + "/Ext.ux.AwesomeUploaderLocalization.js") }}
+        {{ javascript(p + "/Ext.ux.AwesomeUploader.js") }}
+    {%- endif -%}
+    {%- for p in site.installed_plugins -%}
+        {%- for ln in p.get_head_lines(site, request) %}
+           {{ ln }}{% endfor -%}
+    {%- endfor -%}
+    {# Main Lino js code #}
+    {{ javascript(site.build_media_url(*ext_renderer.lino_js_parts())) }}
+    {# javascript(site.buildurl('linolib.js')) #}
+    {# ###### OnReady JS code ###### #}
+    <script type="text/javascript">
+    Ext.onReady(function() {
+    {% block js_onready %}
+        //console.time('onReady');
+        {# Render current user items #}
+        {%- for ln in ext_renderer.html_page_user(request, site) -%}
+            {{ ln }}
+        {%- endfor -%}
+        {# anonymous request using permalink: forward request.path as "on_login" URL #}
+        {%- if settings.SITE.user_model and not request.user.authenticated and on_ready -%}
+            {%- set on_ready = "Lino.show_login_window(" + py2js(request.path) + ")" -%}
+        {%- endif -%}
+        {# Render main window #}
+        {%- set win = ext_renderer.html_page_main_window(on_ready, request, site) -%}
+        {% for ln in jsgen.declare_vars(win) -%}
+            {{ ln }}
+        {%- endfor %}
+        Lino.viewport = new Lino.Viewport({items: {{ py2js(win) }} });
+        {% if site.use_esteid -%}
+            Lino.init_esteid();
+        {%- endif %}
+        {% if run_jasmine -%} {# site.use_jasmine #}
+            jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+            jasmine.getEnv().execute();
+        {%- else -%}
+            Lino.viewport.render("body");
+            {{ on_ready }}
+        {%- endif %}
+        //console.timeEnd('onReady');"
+    {% endblock %}
+    }); // end of onReady()"
+    </script>
+{%- endblock head -%}
+</head>
+
+<body>
+{%- block body -%}
+    {%- if  site.use_esteid -%}
+        <object id="esteid" type="application/x-esteid" style="width: 1px; height: 1px;"></object>
+    {%- endif -%}
+
+    {%- for p in site.installed_plugins -%}
+        {%- for ln in p.get_body_lines(site, request) -%}
+            {{ ln }}
+        {%- endfor -%}
+    {%- endfor -%}
+
+    <div id="body"></div>
+{%- endblock body -%}
+</body>
+</html>

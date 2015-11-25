@@ -1,57 +1,29 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
+*.elc
+*.pyc
+*~
+*.dpyc
 *.log
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
+*.class
+*.zip
+*.js.py
+*.bat
+dist
+tmp
+lino/ui/qx/app/build/resource
+*/SciTE.session
+default.db
+media/cache
+lino/tutorials/*/media
+lino/projects/*/media
+lino/sandbox/*/media
+*/test.db
+docs/media
+docs/dl/*
+lino.egg-info
+.build
+htmlcov
+warnings_linkcheck.txt
+.DS_Store
+.idea
+docs/api/lino.*
+docs/tutorials/pisa/pisa.Person-1.pdf
