@@ -17,80 +17,94 @@ String.prototype.toCamel = function(){
 
 
 
-/* MonthPickerPlugin: thanks to keypoint @ sencha forum
-   http://www.sencha.com/forum/showthread.php?74002-3.x-Ext.ux.MonthMenu&p=356860#post356860
+/* Ext.form.field.Month: thanks to Igor Semin @ sencha forum
+   http://stackoverflow.com/questions/28167452/date-picker-year-and-month-only
+   and
+   http://stackoverflow.com/questions/28197217/month-field-on-extjs-5-1
 */
-Ext.namespace('Ext.ux'); 
+Ext.onReady(function() {
+    Ext.define('Ext.form.field.Month', {
+        extend: 'Ext.form.field.Date',
+        alias: 'widget.monthfield',
+        requires: ['Ext.picker.Month'],
+        alternateClassName: ['Ext.form.MonthField', 'Ext.form.Month'],
+        selectMonth: null,
+        createPicker: function() {
+            var me = this,
+                format = Ext.String.format;
+            return Ext.create('Ext.picker.Month', {
+                pickerField: me,
+                ownerCt: me.ownerCt,
+                renderTo: document.body,
+                floating: true,
+                hidden: true,
+                focusOnShow: true,
+                minDate: me.minValue,
+                maxDate: me.maxValue,
+                disabledDatesRE: me.disabledDatesRE,
+                disabledDatesText: me.disabledDatesText,
+                disabledDays: me.disabledDays,
+                disabledDaysText: me.disabledDaysText,
+                format: me.format,
+                showToday: me.showToday,
+                startDay: me.startDay,
+                minText: format(me.minText, me.formatDate(me.minValue)),
+                maxText: format(me.maxText, me.formatDate(me.maxValue)),
+                listeners: {
+                    select: {
+                        scope: me,
+                        fn: me.onSelect
+                    },
+                    monthdblclick: {
+                        scope: me,
+                        fn: me.onOKClick
+                    },
+                    yeardblclick: {
+                        scope: me,
+                        fn: me.onOKClick
+                    },
+                    OkClick: {
+                        scope: me,
+                        fn: me.onOKClick
+                    },
+                    CancelClick: {
+                        scope: me,
+                        fn: me.onCancelClick
+                    }
+                },
+                keyNavConfig: {
+                    esc: function() {
+                        me.collapse();
+                    }
+                }
+            });
+        },
+        onCancelClick: function() {
+            var me = this;
+            me.selectMonth = null;
+            me.collapse();
+        },
+        onOKClick: function() {
+            var me = this;
+            if (me.selectMonth) {
+                me.setValue(me.selectMonth);
+                me.fireEvent('select', me, me.selectMonth);
+            }
+            me.collapse();
+        },
+        onSelect: function(m, d) {
+            var me = this;
+            me.selectMonth = new Date((d[0] + 1) + '/1/' + d[1]);
+        }
+    });
 
-Ext.ux.MonthPickerPlugin = function() { 
-    var picker; 
-    var oldDateDefaults; 
-
-    this.init = function(pk) { 
-        picker = pk; 
-        picker.onTriggerClick = picker.onTriggerClick.createSequence(onClick); 
-        picker.getValue = picker.getValue.createInterceptor(setDefaultMonthDay).createSequence(restoreDefaultMonthDay); 
-        picker.beforeBlur = picker.beforeBlur.createInterceptor(setDefaultMonthDay).createSequence(restoreDefaultMonthDay); 
-    }; 
-
-    function setDefaultMonthDay() { 
-        oldDateDefaults = Date.defaults.d; 
-        Date.defaults.d = 1; 
-        return true; 
-    } 
-
-    function restoreDefaultMonthDay(ret) { 
-        Date.defaults.d = oldDateDefaults; 
-        return ret; 
-    } 
-
-    function onClick(e, el, opt) { 
-        var p = picker.menu.picker; 
-        p.activeDate = p.activeDate.getFirstDateOfMonth(); 
-        if (p.value) { 
-            p.value = p.value.getFirstDateOfMonth(); 
-        } 
-
-        p.showMonthPicker(); 
-         
-        if (!p.disabled) { 
-            p.monthPicker.stopFx(); 
-            p.monthPicker.show(); 
-
-            p.mun(p.monthPicker, 'click', p.onMonthClick, p); 
-            p.mun(p.monthPicker, 'dblclick', p.onMonthDblClick, p); 
-            p.onMonthClick = p.onMonthClick.createSequence(pickerClick); 
-            p.onMonthDblClick = p.onMonthDblClick.createSequence(pickerDblclick); 
-            p.mon(p.monthPicker, 'click', p.onMonthClick, p); 
-            p.mon(p.monthPicker, 'dblclick', p.onMonthDblClick, p); 
-        } 
-    } 
-
-    function pickerClick(e, t) { 
-        var el = new Ext.Element(t); 
-        if (el.is('button.x-date-mp-cancel')) { 
-            picker.menu.hide(); 
-        } else if(el.is('button.x-date-mp-ok')) { 
-            var p = picker.menu.picker; 
-            p.setValue(p.activeDate); 
-            p.fireEvent('select', p, p.value); 
-        } 
-    } 
-
-    function pickerDblclick(e, t) { 
-        var el = new Ext.Element(t); 
-        if (el.parent() 
-            && (el.parent().is('td.x-date-mp-month') 
-            || el.parent().is('td.x-date-mp-year'))) { 
-
-            var p = picker.menu.picker; 
-            p.setValue(p.activeDate); 
-            p.fireEvent('select', p, p.value); 
-        } 
-    } 
-}; 
-
-Ext.preg('monthPickerPlugin', Ext.ux.MonthPickerPlugin);  
+    //Ext.create('Ext.form.field.Month', {
+    //    format: 'F, Y',
+    //    fieldLabel: 'Date',
+    //    renderTo: Ext.getBody()
+    //});
+});
+//Ext.preg('monthPickerPlugin', Ext.ux.MonthPickerPlugin);
 
 
 /**
@@ -102,47 +116,48 @@ Added special handling for checkbox inputs.
 ExtJS defines disabled checkboxes `readonly`, not `disabled` as for other inputs.
 
 */
-Ext.lib.Ajax.serializeForm = function(form) {
-    //~ console.log('20120203 linolib.js serializeForm',form);
-    var fElements = form.elements || (document.forms[form] || Ext.getDom(form)).elements, 
-        hasSubmit = false, 
-        encoder = encodeURIComponent, 
-        name, 
-        data = '', 
-        type, 
-        hasValue;
-
-    Ext.each(fElements, function(element){
-        name = element.name;
-        type = element.type;
-
-        if (!element.disabled && name && !(type == 'checkbox' && element.readonly)) {
-            if (/select-(one|multiple)/i.test(type)) {
-                Ext.each(element.options, function(opt){
-                    if (opt.selected) {
-                        hasValue = opt.hasAttribute ? opt.hasAttribute('value') : opt.getAttributeNode('value').specified;
-                        data += String.format("{0}={1}&", encoder(name), encoder(hasValue ? opt.value : opt.text));
-                    }
-                });
-            } else if (!(/file|undefined|reset|button/i.test(type))) {
-                //~ if (!(/radio|checkbox/i.test(type) && !element.checked) && !(type == 'submit' && hasSubmit)) {
-                if (!(type == 'submit' && hasSubmit)) {
-                    if (type == 'checkbox') {
-                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&');
-                        data += encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&';
-                    } else {
-                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + encoder(element.value) + '&');
-                        data += encoder(name) + '=' + encoder(element.value) + '&';
-                    }
-                    hasSubmit = /submit/i.test(type);
-                }
-            }
-        //~ } else {
-            //~ console.log(name,type,element.readonly);
-        }
-    });
-    return data.substr(0, data.length - 1);
-};
+// Disable by HKC (Migratio to Exjts6)
+//Ext.lib.Ajax.serializeForm = function(form) {
+//    //~ console.log('20120203 linolib.js serializeForm',form);
+//    var fElements = form.elements || (document.forms[form] || Ext.getDom(form)).elements,
+//        hasSubmit = false,
+//        encoder = encodeURIComponent,
+//        name,
+//        data = '',
+//        type,
+//        hasValue;
+//
+//    Ext.each(fElements, function(element){
+//        name = element.name;
+//        type = element.type;
+//
+//        if (!element.disabled && name && !(type == 'checkbox' && element.readonly)) {
+//            if (/select-(one|multiple)/i.test(type)) {
+//                Ext.each(element.options, function(opt){
+//                    if (opt.selected) {
+//                        hasValue = opt.hasAttribute ? opt.hasAttribute('value') : opt.getAttributeNode('value').specified;
+//                        data += String.format("{0}={1}&", encoder(name), encoder(hasValue ? opt.value : opt.text));
+//                    }
+//                });
+//            } else if (!(/file|undefined|reset|button/i.test(type))) {
+//                //~ if (!(/radio|checkbox/i.test(type) && !element.checked) && !(type == 'submit' && hasSubmit)) {
+//                if (!(type == 'submit' && hasSubmit)) {
+//                    if (type == 'checkbox') {
+//                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&');
+//                        data += encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&';
+//                    } else {
+//                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + encoder(element.value) + '&');
+//                        data += encoder(name) + '=' + encoder(element.value) + '&';
+//                    }
+//                    hasSubmit = /submit/i.test(type);
+//                }
+//            }
+//        //~ } else {
+//            //~ console.log(name,type,element.readonly);
+//        }
+//    });
+//    return data.substr(0, data.length - 1);
+//};
 
 
 
@@ -223,64 +238,65 @@ Ext.override(Ext.QuickTip,{
 /*
 Another hack. See /docs/blog/2012/0228
 */
-Ext.Element.addMethods(
-    function() {
-        var VISIBILITY      = "visibility",
-            DISPLAY         = "display",
-            HIDDEN          = "hidden",
-            NONE            = "none",
-            XMASKED         = "x-masked",
-            XMASKEDRELATIVE = "x-masked-relative",
-            data            = Ext.Element.data;
-
-        return {
-            
-            mask : function(msg, msgCls) {
-                var me  = this,
-                    dom = me.dom,
-                    dh  = Ext.DomHelper,
-                    EXTELMASKMSG = "ext-el-mask-msg",
-                    el,
-                    mask;
-                // removed the following lines. See /docs/blog/2012/0228
-                //~ if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
-                    //~ console.log(20120228,dom.tagName,me);
-                    //~ me.addClass(XMASKEDRELATIVE); 
-                //~ }
-                if (el = data(dom, 'maskMsg')) {
-                    el.remove();
-                }
-                if (el = data(dom, 'mask')) {
-                    el.remove();
-                }
-
-                mask = dh.append(dom, {cls : "ext-el-mask"}, true);
-                data(dom, 'mask', mask);
-
-                me.addClass(XMASKED);
-                mask.setDisplayed(true);
-                
-                if (typeof msg == 'string') {
-                    var mm = dh.append(dom, {cls : EXTELMASKMSG, cn:{tag:'div'}}, true);
-                    data(dom, 'maskMsg', mm);
-                    mm.dom.className = msgCls ? EXTELMASKMSG + " " + msgCls : EXTELMASKMSG;
-                    mm.dom.firstChild.innerHTML = msg;
-                    mm.setDisplayed(true);
-                    mm.center(me);
-                }
-                
-                
-                if (Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && me.getStyle('height') == 'auto') {
-                    mask.setSize(undefined, me.getHeight());
-                }
-                
-                return mask;
-            }
-
-            
-        };
-    }()
-);
+// Disable by HKC (Migratio to Exjts6)
+//Ext.Element.addMethods(
+//    function() {
+//        var VISIBILITY      = "visibility",
+//            DISPLAY         = "display",
+//            HIDDEN          = "hidden",
+//            NONE            = "none",
+//            XMASKED         = "x-masked",
+//            XMASKEDRELATIVE = "x-masked-relative",
+//            data            = Ext.Element.data;
+//
+//        return {
+//
+//            mask : function(msg, msgCls) {
+//                var me  = this,
+//                    dom = me.dom,
+//                    dh  = Ext.DomHelper,
+//                    EXTELMASKMSG = "ext-el-mask-msg",
+//                    el,
+//                    mask;
+//                // removed the following lines. See /docs/blog/2012/0228
+//                //~ if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
+//                    //~ console.log(20120228,dom.tagName,me);
+//                    //~ me.addClass(XMASKEDRELATIVE);
+//                //~ }
+//                if (el = data(dom, 'maskMsg')) {
+//                    el.remove();
+//                }
+//                if (el = data(dom, 'mask')) {
+//                    el.remove();
+//                }
+//
+//                mask = dh.append(dom, {cls : "ext-el-mask"}, true);
+//                data(dom, 'mask', mask);
+//
+//                me.addClass(XMASKED);
+//                mask.setDisplayed(true);
+//
+//                if (typeof msg == 'string') {
+//                    var mm = dh.append(dom, {cls : EXTELMASKMSG, cn:{tag:'div'}}, true);
+//                    data(dom, 'maskMsg', mm);
+//                    mm.dom.className = msgCls ? EXTELMASKMSG + " " + msgCls : EXTELMASKMSG;
+//                    mm.dom.firstChild.innerHTML = msg;
+//                    mm.setDisplayed(true);
+//                    mm.center(me);
+//                }
+//
+//
+//                if (Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && me.getStyle('height') == 'auto') {
+//                    mask.setSize(undefined, me.getHeight());
+//                }
+//
+//                return mask;
+//            }
+//
+//
+//        };
+//    }()
+//);
 
 
 
@@ -961,8 +977,9 @@ Lino.CheckColumn = Ext.extend(Ext.grid.Column, {
 // backwards compat. Remove in 4.0
 // Ext.grid.CheckColumn = Lino.CheckColumn;
 
+// Disable by HKC (Migratio to Exjts6)
 // register Column xtype
-Ext.grid.Column.types.checkcolumn = Lino.CheckColumn;
+//Ext.grid.Column.types.checkcolumn = Lino.CheckColumn;
 
 
 /* 20110725 : 
@@ -994,12 +1011,16 @@ Lino.DatePickerField = Ext.extend(Ext.DatePicker,{
       return Ext.isDate(date) ? date.dateFormat(this.format) : date;
   }
   });
-Lino.DateTimeField = Ext.extend(Ext.ux.form.DateTime,{
+// edited by HKC (Migratio to Exjts6)
+//Lino.DateTimeField = Ext.extend(Ext.ux.form.DateTime,{
+Lino.DateTimeField = Ext.extend(Ext.ux.DateTimeField,{
   dateFormat: '{{settings.SITE.date_format_extjs}}',
   timeFormat: '{{settings.SITE.time_format_extjs}}'
   //~ ,hiddenFormat: '{{settings.SITE.date_format_extjs}} {{settings.SITE.time_format_extjs}}'
   });
-Lino.URLField = Ext.extend(Ext.form.TriggerField,{
+// edited by HKC (Migratio to Exjts6)
+//Lino.URLField = Ext.extend(Ext.form.TriggerField,{
+Lino.URLField = Ext.extend(Ext.form.field.Text,{
   triggerClass : 'x-form-search-trigger',
   //~ triggerClass : 'x-form-world-trigger',
   vtype: 'url',
@@ -1086,7 +1107,9 @@ Lino.FileUploadField = Ext.extend(Ext.ux.form.FileUploadField,{
     }
 });
 
-Lino.FileField = Ext.extend(Ext.form.TriggerField,{
+// edited by HKC (Migratio to Exjts6)
+//Lino.FileField = Ext.extend(Ext.form.TriggerField,{
+Lino.FileField = Ext.extend(Ext.form.field.Text,{
   triggerClass : 'x-form-search-trigger',
   editable: false,
   onTriggerClick : function() {
@@ -1188,186 +1211,188 @@ Lino.VBorderPanel = Ext.extend(Ext.Panel,{
   modifications to the standard behaviour of a CellSelectionModel:
   
 */
-Ext.override(Ext.grid.CellSelectionModel, {
-//~ var dummy = {
-
-    handleKeyDown : function(e){
-        /* removed because F2 wouldn't pass
-        if(!e.isNavKeyPress()){
-            return;
-        }
-        */
-        //~ console.log('handleKeyDown',e)
-        var k = e.getKey(),
-            g = this.grid,
-            s = this.selection,
-            sm = this,
-            walk = function(row, col, step){
-                return g.walkCells(
-                    row,
-                    col,
-                    step,
-                    g.isEditor && g.editing ? sm.acceptsNav : sm.isSelectable, 
-                    sm
-                );
-            },
-            cell, newCell, r, c, ae;
-
-        switch(k){
-            case e.ESC:
-            case e.PAGE_UP:
-            case e.PAGE_DOWN:
-                break;
-            default:
-                // e.stopEvent(); // removed because Browser keys like Alt-Home, Ctrl-R wouldn't work
-                break;
-        }
-
-        if(!s){
-            cell = walk(0, 0, 1); 
-            if(cell){
-                this.select(cell[0], cell[1]);
-            }
-            return;
-        }
-
-        cell = s.cell;  
-        r = cell[0];    
-        c = cell[1];    
-        
-        switch(k){
-            case e.TAB:
-                if(e.shiftKey){
-                    newCell = walk(r, c - 1, -1);
-                }else{
-                    newCell = walk(r, c + 1, 1);
-                }
-                break;
-            case e.HOME:
-                if (! (g.isEditor && g.editing)) {
-                  if (!e.hasModifier()){
-                      newCell = [r, 0];
-                      //~ console.log('home',newCell);
-                      break;
-                  }else if(e.ctrlKey){
-                      var t = g.getTopToolbar();
-                      var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
-                      if (activePage > 1) {
-                          e.stopEvent();
-                          t.moveFirst();
-                          return;
-                      }
-                      newCell = [0, c];
-                      break;
-                  }
-                }
-            case e.END:
-                if (! (g.isEditor && g.editing)) {
-                  c = g.colModel.getColumnCount()-1;
-                  if (!e.hasModifier()) {
-                      newCell = [r, c];
-                      //~ console.log('end',newCell);
-                      break;
-                  }else if(e.ctrlKey){
-                      var t = g.getTopToolbar();
-                      var d = t.getPageData();
-                      if (d.activePage < d.pages) {
-                          e.stopEvent();
-                          var self = this;
-                          t.on('change',function(tb,pageData) {
-                              var r = g.store.getCount()-2;
-                              self.select(r, c);
-                              //~ console.log('change',r,c);
-                          },this,{single:true});
-                          t.moveLast();
-                          return;
-                      } else {
-                          newCell = [g.store.getCount()-1, c];
-                          //~ console.log('ctrl-end',newCell);
-                          break;
-                      }
-                  }
-                }
-            case e.DOWN:
-                newCell = walk(r + 1, c, 1);
-                break;
-            case e.UP:
-                newCell = walk(r - 1, c, -1);
-                break;
-            case e.RIGHT:
-                newCell = walk(r, c + 1, 1);
-                break;
-            case e.LEFT:
-                newCell = walk(r, c - 1, -1);
-                break;
-            case e.F2:
-                if (!e.hasModifier()) {
-                    if (g.isEditor && !g.editing) {
-                        g.startEditing(r, c);
-                        e.stopEvent();
-                        return;
-                    }
-                    break;
-                }
-            case e.INSERT:
-                if (!e.hasModifier()) {
-                    if (g.ls_insert_handler && !g.editing) {
-                        e.stopEvent();
-                        Lino.show_insert(g);
-                        return;
-                    }
-                    break;
-                }
-            // case e.DELETE:
-            //     if (!e.hasModifier()) {
-            //         if (!g.editing) {
-            //             e.stopEvent();
-            //             Lino.delete_selected(g);
-            //             return;
-            //         }
-            //         break;
-            //     }
-
-            case e.ENTER:
-                e.stopEvent();
-                g.onCellDblClick(r,c);
-                break;
-
-            default:
-                g.handle_key_event(e);
-                
-        }
-        
-
-        if(newCell){
-          e.stopEvent();
-          r = newCell[0];
-          c = newCell[1];
-          this.select(r, c); 
-          if(g.isEditor && g.editing){ 
-            ae = g.activeEditor;
-            if(ae && ae.field.triggerBlur){
-                ae.field.triggerBlur();
-            }
-            g.startEditing(r, c);
-          }
-        //~ } else if (g.isEditor && !g.editing && e.charCode) {
-        //~ // } else if (!e.isSpecialKey() && g.isEditor && !g.editing) {
-            //~ g.set_start_value(String.fromCharCode(e.charCode));
-            //~ // g.set_start_value(String.fromCharCode(k));
-            //~ // g.set_start_value(e.charCode);
-            //~ g.startEditing(r, c);
-            //~ // e.stopEvent();
-            //~ return;
-        // } else {
-          // console.log('20120513',e,g);
-        }
-        
-    }
-
-
-//~ };
-});
+    // disabled by HKC (Migratio to Exjts6)
+    // CellSelectionModel does not exist any more.
+//Ext.override(Ext.grid.CellSelectionModel, {
+////~ var dummy = {
+//
+//    handleKeyDown : function(e){
+//        /* removed because F2 wouldn't pass
+//        if(!e.isNavKeyPress()){
+//            return;
+//        }
+//        */
+//        //~ console.log('handleKeyDown',e)
+//        var k = e.getKey(),
+//            g = this.grid,
+//            s = this.selection,
+//            sm = this,
+//            walk = function(row, col, step){
+//                return g.walkCells(
+//                    row,
+//                    col,
+//                    step,
+//                    g.isEditor && g.editing ? sm.acceptsNav : sm.isSelectable,
+//                    sm
+//                );
+//            },
+//            cell, newCell, r, c, ae;
+//
+//        switch(k){
+//            case e.ESC:
+//            case e.PAGE_UP:
+//            case e.PAGE_DOWN:
+//                break;
+//            default:
+//                // e.stopEvent(); // removed because Browser keys like Alt-Home, Ctrl-R wouldn't work
+//                break;
+//        }
+//
+//        if(!s){
+//            cell = walk(0, 0, 1);
+//            if(cell){
+//                this.select(cell[0], cell[1]);
+//            }
+//            return;
+//        }
+//
+//        cell = s.cell;
+//        r = cell[0];
+//        c = cell[1];
+//
+//        switch(k){
+//            case e.TAB:
+//                if(e.shiftKey){
+//                    newCell = walk(r, c - 1, -1);
+//                }else{
+//                    newCell = walk(r, c + 1, 1);
+//                }
+//                break;
+//            case e.HOME:
+//                if (! (g.isEditor && g.editing)) {
+//                  if (!e.hasModifier()){
+//                      newCell = [r, 0];
+//                      //~ console.log('home',newCell);
+//                      break;
+//                  }else if(e.ctrlKey){
+//                      var t = g.getTopToolbar();
+//                      var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
+//                      if (activePage > 1) {
+//                          e.stopEvent();
+//                          t.moveFirst();
+//                          return;
+//                      }
+//                      newCell = [0, c];
+//                      break;
+//                  }
+//                }
+//            case e.END:
+//                if (! (g.isEditor && g.editing)) {
+//                  c = g.colModel.getColumnCount()-1;
+//                  if (!e.hasModifier()) {
+//                      newCell = [r, c];
+//                      //~ console.log('end',newCell);
+//                      break;
+//                  }else if(e.ctrlKey){
+//                      var t = g.getTopToolbar();
+//                      var d = t.getPageData();
+//                      if (d.activePage < d.pages) {
+//                          e.stopEvent();
+//                          var self = this;
+//                          t.on('change',function(tb,pageData) {
+//                              var r = g.store.getCount()-2;
+//                              self.select(r, c);
+//                              //~ console.log('change',r,c);
+//                          },this,{single:true});
+//                          t.moveLast();
+//                          return;
+//                      } else {
+//                          newCell = [g.store.getCount()-1, c];
+//                          //~ console.log('ctrl-end',newCell);
+//                          break;
+//                      }
+//                  }
+//                }
+//            case e.DOWN:
+//                newCell = walk(r + 1, c, 1);
+//                break;
+//            case e.UP:
+//                newCell = walk(r - 1, c, -1);
+//                break;
+//            case e.RIGHT:
+//                newCell = walk(r, c + 1, 1);
+//                break;
+//            case e.LEFT:
+//                newCell = walk(r, c - 1, -1);
+//                break;
+//            case e.F2:
+//                if (!e.hasModifier()) {
+//                    if (g.isEditor && !g.editing) {
+//                        g.startEditing(r, c);
+//                        e.stopEvent();
+//                        return;
+//                    }
+//                    break;
+//                }
+//            case e.INSERT:
+//                if (!e.hasModifier()) {
+//                    if (g.ls_insert_handler && !g.editing) {
+//                        e.stopEvent();
+//                        Lino.show_insert(g);
+//                        return;
+//                    }
+//                    break;
+//                }
+//            // case e.DELETE:
+//            //     if (!e.hasModifier()) {
+//            //         if (!g.editing) {
+//            //             e.stopEvent();
+//            //             Lino.delete_selected(g);
+//            //             return;
+//            //         }
+//            //         break;
+//            //     }
+//
+//            case e.ENTER:
+//                e.stopEvent();
+//                g.onCellDblClick(r,c);
+//                break;
+//
+//            default:
+//                g.handle_key_event(e);
+//
+//        }
+//
+//
+//        if(newCell){
+//          e.stopEvent();
+//          r = newCell[0];
+//          c = newCell[1];
+//          this.select(r, c);
+//          if(g.isEditor && g.editing){
+//            ae = g.activeEditor;
+//            if(ae && ae.field.triggerBlur){
+//                ae.field.triggerBlur();
+//            }
+//            g.startEditing(r, c);
+//          }
+//        //~ } else if (g.isEditor && !g.editing && e.charCode) {
+//        //~ // } else if (!e.isSpecialKey() && g.isEditor && !g.editing) {
+//            //~ g.set_start_value(String.fromCharCode(e.charCode));
+//            //~ // g.set_start_value(String.fromCharCode(k));
+//            //~ // g.set_start_value(e.charCode);
+//            //~ g.startEditing(r, c);
+//            //~ // e.stopEvent();
+//            //~ return;
+//        // } else {
+//          // console.log('20120513',e,g);
+//        }
+//
+//    }
+//
+//
+////~ };
+//});
 
  
 
