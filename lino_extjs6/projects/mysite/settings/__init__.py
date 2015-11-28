@@ -26,6 +26,7 @@ class Site(Site):
         yield 'django.contrib.staticfiles'
         yield 'lino.modlib.about'
 
+
         # for a in super(Site, self).get_installed_apps():
         #     yield a
         yield 'lino_extjs6.extjs'
@@ -39,7 +40,3 @@ class Site(Site):
         yield 'lino.modlib.contacts'
         yield 'lino.modlib.cal'
         yield 'lino.modlib.export_excel'
-
-SITE = Site(globals())
-
-SECRET_KEY = "123"

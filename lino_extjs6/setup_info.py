@@ -2,9 +2,9 @@
 # Copyright 2015 Luc Saffre
 # License: GPL (see file COPYING for details)
 
-#~ Note that this module may not have a docstring because any
-#~ global variable defined here will override the global
-#~ namespace of lino/__init__.py who includes it with execfile.
+# ~ Note that this module may not have a docstring because any
+# ~ global variable defined here will override the global
+# ~ namespace of lino/__init__.py who includes it with execfile.
 
 # This module is part of the Lino test suite.
 # To test only this module:
@@ -54,5 +54,7 @@ The Sencha ExtJS 6 user interface for Lino
 SETUP_INFO.update(packages=[str(n) for n in """
 lino_extjs6
 lino_extjs6.extjs
+lino_extjs6.projects
+lino_extjs6.projects.mysite
+lino_extjs6.projects.mysite.settings
 """.splitlines() if n])
-

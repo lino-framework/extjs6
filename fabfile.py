@@ -1,5 +1,6 @@
 from atelier.fablib import *
 setup_from_fabfile(globals(), 'lino_extjs6')
+add_demo_project('lino_extjs6.projects.mysite.settings.demo')
 
 #env.locale_dir = 'lino/modlib/lino_startup/locale'
 env.languages = "en de fr et".split()

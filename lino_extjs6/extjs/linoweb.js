@@ -116,48 +116,49 @@ Added special handling for checkbox inputs.
 ExtJS defines disabled checkboxes `readonly`, not `disabled` as for other inputs.
 
 */
-// Disable by HKC (Migratio to Exjts6)
+// editef by HKC (Migratio to Exjts6)
 //Ext.lib.Ajax.serializeForm = function(form) {
-//    //~ console.log('20120203 linolib.js serializeForm',form);
-//    var fElements = form.elements || (document.forms[form] || Ext.getDom(form)).elements,
-//        hasSubmit = false,
-//        encoder = encodeURIComponent,
-//        name,
-//        data = '',
-//        type,
-//        hasValue;
-//
-//    Ext.each(fElements, function(element){
-//        name = element.name;
-//        type = element.type;
-//
-//        if (!element.disabled && name && !(type == 'checkbox' && element.readonly)) {
-//            if (/select-(one|multiple)/i.test(type)) {
-//                Ext.each(element.options, function(opt){
-//                    if (opt.selected) {
-//                        hasValue = opt.hasAttribute ? opt.hasAttribute('value') : opt.getAttributeNode('value').specified;
-//                        data += String.format("{0}={1}&", encoder(name), encoder(hasValue ? opt.value : opt.text));
-//                    }
-//                });
-//            } else if (!(/file|undefined|reset|button/i.test(type))) {
-//                //~ if (!(/radio|checkbox/i.test(type) && !element.checked) && !(type == 'submit' && hasSubmit)) {
-//                if (!(type == 'submit' && hasSubmit)) {
-//                    if (type == 'checkbox') {
-//                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&');
-//                        data += encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&';
-//                    } else {
-//                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + encoder(element.value) + '&');
-//                        data += encoder(name) + '=' + encoder(element.value) + '&';
-//                    }
-//                    hasSubmit = /submit/i.test(type);
-//                }
-//            }
-//        //~ } else {
-//            //~ console.log(name,type,element.readonly);
-//        }
-//    });
-//    return data.substr(0, data.length - 1);
-//};
+Ext.Ajax.serializeForm = function(form) {
+    //~ console.log('20120203 linolib.js serializeForm',form);
+    var fElements = form.elements || (document.forms[form] || Ext.getDom(form)).elements,
+        hasSubmit = false,
+        encoder = encodeURIComponent,
+        name,
+        data = '',
+        type,
+        hasValue;
+
+    Ext.each(fElements, function(element){
+        name = element.name;
+        type = element.type;
+
+        if (!element.disabled && name && !(type == 'checkbox' && element.readonly)) {
+            if (/select-(one|multiple)/i.test(type)) {
+                Ext.each(element.options, function(opt){
+                    if (opt.selected) {
+                        hasValue = opt.hasAttribute ? opt.hasAttribute('value') : opt.getAttributeNode('value').specified;
+                        data += String.format("{0}={1}&", encoder(name), encoder(hasValue ? opt.value : opt.text));
+                    }
+                });
+            } else if (!(/file|undefined|reset|button/i.test(type))) {
+                //~ if (!(/radio|checkbox/i.test(type) && !element.checked) && !(type == 'submit' && hasSubmit)) {
+                if (!(type == 'submit' && hasSubmit)) {
+                    if (type == 'checkbox') {
+                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&');
+                        data += encoder(name) + '=' + (element.checked ? 'on' : 'off') + '&';
+                    } else {
+                        //~ console.log('20111001',element,'data += ',encoder(name) + '=' + encoder(element.value) + '&');
+                        data += encoder(name) + '=' + encoder(element.value) + '&';
+                    }
+                    hasSubmit = /submit/i.test(type);
+                }
+            }
+        //~ } else {
+            //~ console.log(name,type,element.readonly);
+        }
+    });
+    return data.substr(0, data.length - 1);
+};
 
 
 
@@ -236,7 +237,7 @@ Ext.override(Ext.QuickTip,{
 });
 
 /*
-Another hack. See /docs/blog/2012/0228
+Another hack. See /docs/blog/touch 2012/0228
 */
 // Disable by HKC (Migratio to Exjts6)
 //Ext.Element.addMethods(
@@ -670,7 +671,10 @@ Lino.Viewport = Ext.extend(Lino.Viewport, {
   ,initComponent : function(){
     Lino.Viewport.superclass.initComponent.call(this);
     this.on('render',function(){
-      this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
+      //  Edited by HKC
+      //  https://www.sencha.com/forum/showthread.php?282509-Update-Ext.LoadMask-Example
+      //this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
+      //this.loadMask = new Ext.getBody().mask("{{_('Please wait...')}}");
       //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
     },this);
   }
@@ -1211,188 +1215,189 @@ Lino.VBorderPanel = Ext.extend(Ext.Panel,{
   modifications to the standard behaviour of a CellSelectionModel:
   
 */
-    // disabled by HKC (Migratio to Exjts6)
-    // CellSelectionModel does not exist any more.
+    // Edited by HKC (Migratio to Exjts6)
+    // CellSelectionModel does not exist any more. replaced by Ext.selection.CellModel
 //Ext.override(Ext.grid.CellSelectionModel, {
-////~ var dummy = {
-//
-//    handleKeyDown : function(e){
-//        /* removed because F2 wouldn't pass
-//        if(!e.isNavKeyPress()){
-//            return;
-//        }
-//        */
-//        //~ console.log('handleKeyDown',e)
-//        var k = e.getKey(),
-//            g = this.grid,
-//            s = this.selection,
-//            sm = this,
-//            walk = function(row, col, step){
-//                return g.walkCells(
-//                    row,
-//                    col,
-//                    step,
-//                    g.isEditor && g.editing ? sm.acceptsNav : sm.isSelectable,
-//                    sm
-//                );
-//            },
-//            cell, newCell, r, c, ae;
-//
-//        switch(k){
-//            case e.ESC:
-//            case e.PAGE_UP:
-//            case e.PAGE_DOWN:
-//                break;
-//            default:
-//                // e.stopEvent(); // removed because Browser keys like Alt-Home, Ctrl-R wouldn't work
-//                break;
-//        }
-//
-//        if(!s){
-//            cell = walk(0, 0, 1);
-//            if(cell){
-//                this.select(cell[0], cell[1]);
-//            }
-//            return;
-//        }
-//
-//        cell = s.cell;
-//        r = cell[0];
-//        c = cell[1];
-//
-//        switch(k){
-//            case e.TAB:
-//                if(e.shiftKey){
-//                    newCell = walk(r, c - 1, -1);
-//                }else{
-//                    newCell = walk(r, c + 1, 1);
-//                }
-//                break;
-//            case e.HOME:
-//                if (! (g.isEditor && g.editing)) {
-//                  if (!e.hasModifier()){
-//                      newCell = [r, 0];
-//                      //~ console.log('home',newCell);
-//                      break;
-//                  }else if(e.ctrlKey){
-//                      var t = g.getTopToolbar();
-//                      var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
-//                      if (activePage > 1) {
-//                          e.stopEvent();
-//                          t.moveFirst();
-//                          return;
-//                      }
-//                      newCell = [0, c];
-//                      break;
-//                  }
-//                }
-//            case e.END:
-//                if (! (g.isEditor && g.editing)) {
-//                  c = g.colModel.getColumnCount()-1;
-//                  if (!e.hasModifier()) {
-//                      newCell = [r, c];
-//                      //~ console.log('end',newCell);
-//                      break;
-//                  }else if(e.ctrlKey){
-//                      var t = g.getTopToolbar();
-//                      var d = t.getPageData();
-//                      if (d.activePage < d.pages) {
-//                          e.stopEvent();
-//                          var self = this;
-//                          t.on('change',function(tb,pageData) {
-//                              var r = g.store.getCount()-2;
-//                              self.select(r, c);
-//                              //~ console.log('change',r,c);
-//                          },this,{single:true});
-//                          t.moveLast();
-//                          return;
-//                      } else {
-//                          newCell = [g.store.getCount()-1, c];
-//                          //~ console.log('ctrl-end',newCell);
-//                          break;
-//                      }
-//                  }
-//                }
-//            case e.DOWN:
-//                newCell = walk(r + 1, c, 1);
-//                break;
-//            case e.UP:
-//                newCell = walk(r - 1, c, -1);
-//                break;
-//            case e.RIGHT:
-//                newCell = walk(r, c + 1, 1);
-//                break;
-//            case e.LEFT:
-//                newCell = walk(r, c - 1, -1);
-//                break;
-//            case e.F2:
-//                if (!e.hasModifier()) {
-//                    if (g.isEditor && !g.editing) {
-//                        g.startEditing(r, c);
-//                        e.stopEvent();
-//                        return;
-//                    }
-//                    break;
-//                }
-//            case e.INSERT:
-//                if (!e.hasModifier()) {
-//                    if (g.ls_insert_handler && !g.editing) {
-//                        e.stopEvent();
-//                        Lino.show_insert(g);
-//                        return;
-//                    }
-//                    break;
-//                }
-//            // case e.DELETE:
-//            //     if (!e.hasModifier()) {
-//            //         if (!g.editing) {
-//            //             e.stopEvent();
-//            //             Lino.delete_selected(g);
-//            //             return;
-//            //         }
-//            //         break;
-//            //     }
-//
-//            case e.ENTER:
-//                e.stopEvent();
-//                g.onCellDblClick(r,c);
-//                break;
-//
-//            default:
-//                g.handle_key_event(e);
-//
-//        }
-//
-//
-//        if(newCell){
-//          e.stopEvent();
-//          r = newCell[0];
-//          c = newCell[1];
-//          this.select(r, c);
-//          if(g.isEditor && g.editing){
-//            ae = g.activeEditor;
-//            if(ae && ae.field.triggerBlur){
-//                ae.field.triggerBlur();
-//            }
-//            g.startEditing(r, c);
-//          }
-//        //~ } else if (g.isEditor && !g.editing && e.charCode) {
-//        //~ // } else if (!e.isSpecialKey() && g.isEditor && !g.editing) {
-//            //~ g.set_start_value(String.fromCharCode(e.charCode));
-//            //~ // g.set_start_value(String.fromCharCode(k));
-//            //~ // g.set_start_value(e.charCode);
-//            //~ g.startEditing(r, c);
-//            //~ // e.stopEvent();
-//            //~ return;
-//        // } else {
-//          // console.log('20120513',e,g);
-//        }
-//
-//    }
-//
-//
-////~ };
-//});
+Ext.override(Ext.selection.CellModel, {
+//~ var dummy = {
+
+    handleKeyDown : function(e){
+        /* removed because F2 wouldn't pass
+        if(!e.isNavKeyPress()){
+            return;
+        }
+        */
+        //~ console.log('handleKeyDown',e)
+        var k = e.getKey(),
+            g = this.grid,
+            s = this.selection,
+            sm = this,
+            walk = function(row, col, step){
+                return g.walkCells(
+                    row,
+                    col,
+                    step,
+                    g.isEditor && g.editing ? sm.acceptsNav : sm.isSelectable,
+                    sm
+                );
+            },
+            cell, newCell, r, c, ae;
+
+        switch(k){
+            case e.ESC:
+            case e.PAGE_UP:
+            case e.PAGE_DOWN:
+                break;
+            default:
+                // e.stopEvent(); // removed because Browser keys like Alt-Home, Ctrl-R wouldn't work
+                break;
+        }
+
+        if(!s){
+            cell = walk(0, 0, 1);
+            if(cell){
+                this.select(cell[0], cell[1]);
+            }
+            return;
+        }
+
+        cell = s.cell;
+        r = cell[0];
+        c = cell[1];
+
+        switch(k){
+            case e.TAB:
+                if(e.shiftKey){
+                    newCell = walk(r, c - 1, -1);
+                }else{
+                    newCell = walk(r, c + 1, 1);
+                }
+                break;
+            case e.HOME:
+                if (! (g.isEditor && g.editing)) {
+                  if (!e.hasModifier()){
+                      newCell = [r, 0];
+                      //~ console.log('home',newCell);
+                      break;
+                  }else if(e.ctrlKey){
+                      var t = g.getTopToolbar();
+                      var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
+                      if (activePage > 1) {
+                          e.stopEvent();
+                          t.moveFirst();
+                          return;
+                      }
+                      newCell = [0, c];
+                      break;
+                  }
+                }
+            case e.END:
+                if (! (g.isEditor && g.editing)) {
+                  c = g.colModel.getColumnCount()-1;
+                  if (!e.hasModifier()) {
+                      newCell = [r, c];
+                      //~ console.log('end',newCell);
+                      break;
+                  }else if(e.ctrlKey){
+                      var t = g.getTopToolbar();
+                      var d = t.getPageData();
+                      if (d.activePage < d.pages) {
+                          e.stopEvent();
+                          var self = this;
+                          t.on('change',function(tb,pageData) {
+                              var r = g.store.getCount()-2;
+                              self.select(r, c);
+                              //~ console.log('change',r,c);
+                          },this,{single:true});
+                          t.moveLast();
+                          return;
+                      } else {
+                          newCell = [g.store.getCount()-1, c];
+                          //~ console.log('ctrl-end',newCell);
+                          break;
+                      }
+                  }
+                }
+            case e.DOWN:
+                newCell = walk(r + 1, c, 1);
+                break;
+            case e.UP:
+                newCell = walk(r - 1, c, -1);
+                break;
+            case e.RIGHT:
+                newCell = walk(r, c + 1, 1);
+                break;
+            case e.LEFT:
+                newCell = walk(r, c - 1, -1);
+                break;
+            case e.F2:
+                if (!e.hasModifier()) {
+                    if (g.isEditor && !g.editing) {
+                        g.startEditing(r, c);
+                        e.stopEvent();
+                        return;
+                    }
+                    break;
+                }
+            case e.INSERT:
+                if (!e.hasModifier()) {
+                    if (g.ls_insert_handler && !g.editing) {
+                        e.stopEvent();
+                        Lino.show_insert(g);
+                        return;
+                    }
+                    break;
+                }
+            // case e.DELETE:
+            //     if (!e.hasModifier()) {
+            //         if (!g.editing) {
+            //             e.stopEvent();
+            //             Lino.delete_selected(g);
+            //             return;
+            //         }
+            //         break;
+            //     }
+
+            case e.ENTER:
+                e.stopEvent();
+                g.onCellDblClick(r,c);
+                break;
+
+            default:
+                g.handle_key_event(e);
+
+        }
+
+
+        if(newCell){
+          e.stopEvent();
+          r = newCell[0];
+          c = newCell[1];
+          this.select(r, c);
+          if(g.isEditor && g.editing){
+            ae = g.activeEditor;
+            if(ae && ae.field.triggerBlur){
+                ae.field.triggerBlur();
+            }
+            g.startEditing(r, c);
+          }
+        //~ } else if (g.isEditor && !g.editing && e.charCode) {
+        //~ // } else if (!e.isSpecialKey() && g.isEditor && !g.editing) {
+            //~ g.set_start_value(String.fromCharCode(e.charCode));
+            //~ // g.set_start_value(String.fromCharCode(k));
+            //~ // g.set_start_value(e.charCode);
+            //~ g.startEditing(r, c);
+            //~ // e.stopEvent();
+            //~ return;
+        // } else {
+          // console.log('20120513',e,g);
+        }
+
+    }
+
+
+//~ };
+});
 
  
 
@@ -3190,7 +3195,10 @@ Lino.auto_height_cell_template = new Ext.Template(
 '</td>'
 );
 
-Lino.GridPanel = Ext.extend(Ext.grid.EditorGridPanel, Lino.MainPanel);
+// Edited by HKC (Migration to Exjts6)
+// EditorGridPanel does not exist any more. replaced by Ext.grid.plugin.CellEditing
+//Lino.GridPanel = Ext.extend(Ext.grid.EditorGridPanel, Lino.MainPanel);
+Lino.GridPanel = Ext.extend(Ext.grid.plugin.CellEditing, Lino.MainPanel);
 Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
 Lino.GridPanel = Ext.extend(Lino.GridPanel, {
   quick_search_text : '',
