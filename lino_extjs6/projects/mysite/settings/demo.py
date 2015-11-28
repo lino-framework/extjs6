@@ -11,6 +11,8 @@ class Site(Site):
 
 SITE = Site(globals())
 
+
+
 SECRET_KEY = "1234"
 # ALLOWED_HOSTS = ['*']
 # DEBUG = True
