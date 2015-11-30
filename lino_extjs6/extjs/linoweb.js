@@ -239,64 +239,68 @@ Ext.override(Ext.QuickTip,{
 /*
 Another hack. See /docs/blog/touch 2012/0228
 */
-// Disable by HKC (Migratio to Exjts6)
+// Editef by HKC (Migration to Exjts6)
+// https://docs.sencha.com/extjs/6.0/core_concepts/components.html -> Subclassing
 //Ext.Element.addMethods(
-//    function() {
-//        var VISIBILITY      = "visibility",
-//            DISPLAY         = "display",
-//            HIDDEN          = "hidden",
-//            NONE            = "none",
-//            XMASKED         = "x-masked",
-//            XMASKEDRELATIVE = "x-masked-relative",
-//            data            = Ext.Element.data;
-//
-//        return {
-//
-//            mask : function(msg, msgCls) {
-//                var me  = this,
-//                    dom = me.dom,
-//                    dh  = Ext.DomHelper,
-//                    EXTELMASKMSG = "ext-el-mask-msg",
-//                    el,
-//                    mask;
-//                // removed the following lines. See /docs/blog/2012/0228
-//                //~ if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
-//                    //~ console.log(20120228,dom.tagName,me);
-//                    //~ me.addClass(XMASKEDRELATIVE);
-//                //~ }
-//                if (el = data(dom, 'maskMsg')) {
-//                    el.remove();
-//                }
-//                if (el = data(dom, 'mask')) {
-//                    el.remove();
-//                }
-//
-//                mask = dh.append(dom, {cls : "ext-el-mask"}, true);
-//                data(dom, 'mask', mask);
-//
-//                me.addClass(XMASKED);
-//                mask.setDisplayed(true);
-//
-//                if (typeof msg == 'string') {
-//                    var mm = dh.append(dom, {cls : EXTELMASKMSG, cn:{tag:'div'}}, true);
-//                    data(dom, 'maskMsg', mm);
-//                    mm.dom.className = msgCls ? EXTELMASKMSG + " " + msgCls : EXTELMASKMSG;
-//                    mm.dom.firstChild.innerHTML = msg;
-//                    mm.setDisplayed(true);
-//                    mm.center(me);
-//                }
-//
-//
-//                if (Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && me.getStyle('height') == 'auto') {
-//                    mask.setSize(undefined, me.getHeight());
-//                }
-//
-//                return mask;
-//            }
-//
-//
-//        };
-//    }()
+Ext.define('My.Lino.Component', {
+    extend: 'Ext.Element',
+    newMethod : function() {
+        var VISIBILITY      = "visibility",
+            DISPLAY         = "display",
+            HIDDEN          = "hidden",
+            NONE            = "none",
+            XMASKED         = "x-masked",
+            XMASKEDRELATIVE = "x-masked-relative",
+            data            = Ext.Element.data;
+
+        return {
+
+            mask : function(msg, msgCls) {
+                var me  = this,
+                    dom = me.dom,
+                    dh  = Ext.DomHelper,
+                    EXTELMASKMSG = "ext-el-mask-msg",
+                    el,
+                    mask;
+                // removed the following lines. See /docs/blog/2012/0228
+                //~ if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
+                    //~ console.log(20120228,dom.tagName,me);
+                    //~ me.addClass(XMASKEDRELATIVE);
+                //~ }
+                if (el = data(dom, 'maskMsg')) {
+                    el.remove();
+                }
+                if (el = data(dom, 'mask')) {
+                    el.remove();
+                }
+
+                mask = dh.append(dom, {cls : "ext-el-mask"}, true);
+                data(dom, 'mask', mask);
+
+                me.addClass(XMASKED);
+                mask.setDisplayed(true);
+
+                if (typeof msg == 'string') {
+                    var mm = dh.append(dom, {cls : EXTELMASKMSG, cn:{tag:'div'}}, true);
+                    data(dom, 'maskMsg', mm);
+                    mm.dom.className = msgCls ? EXTELMASKMSG + " " + msgCls : EXTELMASKMSG;
+                    mm.dom.firstChild.innerHTML = msg;
+                    mm.setDisplayed(true);
+                    mm.center(me);
+                }
+
+
+                if (Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && me.getStyle('height') == 'auto') {
+                    mask.setSize(undefined, me.getHeight());
+                }
+
+                return mask;
+            }
+
+
+        };
+    }()
+});
 //);
 
 
@@ -395,7 +399,9 @@ Lino.show_login_window = function(on_login) {
           modal: true,
           closeAction: "hide",
           keys: {
-            key: Ext.EventObject.ENTER,
+            //  Edited by HKC
+            //key: Ext.EventObject.ENTER,
+            key: Ext.event.Event.ENTER,
             fn: function() { do_login()}
           },
           items: [login_panel] });
@@ -434,8 +440,10 @@ Lino.chars2width = function(cols) {  return cols * 9; }
 Lino.rows2height = function(cols) {  return cols * 20; }
 
 
-
-Lino.MainPanel = {
+// HKC
+//Lino.MainPanel = {
+Ext.define('Lino.MainPanel',{
+    extend: 'Ext.panel.Panel',
   is_home_page : false,
   setting_param_values : false,
   config_containing_window : function(wincfg) { }
@@ -659,24 +667,30 @@ Lino.MainPanel = {
       //~ this.params_panel.form.resumeEvents();
     }
   }
-};
+});
 
 
 
-
-Lino.Viewport = Ext.extend(Ext.Viewport, Lino.MainPanel);
-Lino.Viewport = Ext.extend(Lino.Viewport, {
+// Edited by
+// Ext.Viewport (extjs3) <==> Ext.container.Viewport (Extjs6)
+//Lino.Viewport = Ext.extend(Ext.Viewport, Lino.MainPanel);
+Ext.define('Lino.Viewport', {
+     mixins: [
+         'Ext.container.Viewport',
+         'Lino.MainPanel'],
+    //extend: 'Ext.plugin.Viewport',
+//Lino.Viewport = Ext.extend(Lino.Viewport, {
   layout : "fit"
   ,is_home_page : true
   ,initComponent : function(){
-    Lino.Viewport.superclass.initComponent.call(this);
     this.on('render',function(){
       //  Edited by HKC
       //  https://www.sencha.com/forum/showthread.php?282509-Update-Ext.LoadMask-Example
-      //this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
+      this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
       //this.loadMask = new Ext.getBody().mask("{{_('Please wait...')}}");
       //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
     },this);
+        this.callParent();
   }
   ,refresh : function() {
       var caller = this;
@@ -853,8 +867,10 @@ Lino.WindowAction = Ext.extend(Lino.WindowAction,{
   
 });
 
-
-Lino.PanelMixin = {
+// HKC
+//Lino.PanelMixin = {
+Ext.define('Lino.PanelMixin', {
+    extend: 'Ext.panel.Panel',
   get_containing_window : function (){
       if (this.containing_window) return this.containing_window;
       return this.containing_panel.get_containing_window();
@@ -875,7 +891,7 @@ Lino.PanelMixin = {
     //~ else console.log('20111202 not set_window_title(',title,') for',this);
   }
   
-};
+});
 
 
 // Lino.status_bar = new Ext.ux.StatusBar({defaultText:'Lino version {{lino.__version__}}.'});
@@ -2248,7 +2264,11 @@ if (Ext.ux.grid !== undefined) {
 
 {% endif %}
 
-Lino.FieldBoxMixin = {
+//    HKC Ext.data.field.Field
+
+//Lino.FieldBoxMixin = {
+Ext.define('Lino.FieldBoxMixin', {
+    extend: 'Ext.data.field.Field',
   before_init : function(config,params) {
     if (params) Ext.apply(config,params);
     var actions = Lino.build_buttons(this, config.ls_bbar_actions);
@@ -2281,17 +2301,25 @@ Lino.FieldBoxMixin = {
   set_base_param : function(k,v) {
     this.base_params[k] = v;
   }
-};
+});
 
 
+// HKC
+//Lino.HtmlBoxPanel = Ext.extend(Ext.Panel, Lino.PanelMixin);
+//Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
+//Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
+Ext.define('Lino.HtmlBoxPanel', {
+     mixins: [
+         'Ext.panel.Panel',
+         'Lino.PanelMixin',
+         'Lino.FieldBoxMixin',
+     ],
 
-Lino.HtmlBoxPanel = Ext.extend(Ext.Panel, Lino.PanelMixin);
-Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
-Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
   disabled_in_insert_window : true,
   constructor : function(config,params) {
     this.before_init(config,params);
-    Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
+    //Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
+      this.callParent(arguments);
   },
   //~ constructor : function(ww,config,params){
     //~ this.ww = ww;
@@ -2310,7 +2338,8 @@ Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
   //~ disable : function() { var tb = this.getBottomToolbar(); if(tb) tb.disable()},
   //~ enable : function() { var tb = this.getBottomToolbar(); if(tb) tb.enable()},
   onRender : function(ct, position){
-    Lino.HtmlBoxPanel.superclass.onRender.call(this, ct, position);
+    //Lino.HtmlBoxPanel.superclass.onRender.call(this, ct, position);
+      this.callParent(arguments);
     //~ console.log(20111125,this.containing_window);
     if (this.containing_panel) {
       this.containing_panel.on('enable',this.enable,this);
@@ -2375,11 +2404,19 @@ Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
 });
 //~ Ext.override(Lino.HtmlBoxPanel,Lino.FieldBoxMixin);
 
+// HKC
+//Lino.ActionFormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
+//Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.PanelMixin);
+//Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.FieldBoxMixin);
+//Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, {
+Ext.define('Lino.ActionFormPanel', {
+     mixins: [
+         'Ext.form.FormPanel',
+         'Lino.MainPanel',
+         'Lino.PanelMixin',
+         'Lino.FieldBoxMixin'
+     ],
 
-Lino.ActionFormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
-Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.PanelMixin);
-Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.FieldBoxMixin);
-Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, {
   //~ layout:'fit'
   //~ ,autoHeight: true
   //~ ,frame: true
@@ -2389,7 +2426,8 @@ Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, {
         {text: 'OK', handler: this.on_ok, scope: this},
         {text: 'Cancel', handler: this.on_cancel, scope: this}
     ];
-    Lino.ActionFormPanel.superclass.constructor.call(this, config);
+    //Lino.ActionFormPanel.superclass.constructor.call(this, config);
+      this.callParent(arguments);
   }
   //~ ,initComponent : function(){
     //~ Lino.ActionFormPanel.superclass.initComponent.call(this);
@@ -2518,10 +2556,17 @@ Lino.fields2array = function(fields,values) {
     return pv;
 }
 
+// HKC
+//Lino.FormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
+//Lino.FormPanel = Ext.extend(Lino.FormPanel,Lino.PanelMixin);
+//Lino.FormPanel = Ext.extend(Lino.FormPanel,{
+Ext.define('Lino.FormPanel', {
+     mixins: [
+         'Ext.form.FormPanel',
+         'Lino.MainPanel',
+         'Lino.PanelMixin',
+     ],
 
-Lino.FormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
-Lino.FormPanel = Ext.extend(Lino.FormPanel,Lino.PanelMixin);
-Lino.FormPanel = Ext.extend(Lino.FormPanel,{
   params_panel_hidden : false,
   save_action_name : null, 
   //~ base_params : {},
@@ -2539,7 +2584,8 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
       
     config.trackResetOnLoad = true;
     
-    Lino.FormPanel.superclass.constructor.call(this, config);
+    //Lino.FormPanel.superclass.constructor.call(this, config);
+      this.callParent(arguments);
       
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
@@ -3198,9 +3244,16 @@ Lino.auto_height_cell_template = new Ext.Template(
 // Edited by HKC (Migration to Exjts6)
 // EditorGridPanel does not exist any more. replaced by Ext.grid.plugin.CellEditing
 //Lino.GridPanel = Ext.extend(Ext.grid.EditorGridPanel, Lino.MainPanel);
-Lino.GridPanel = Ext.extend(Ext.grid.plugin.CellEditing, Lino.MainPanel);
-Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
-Lino.GridPanel = Ext.extend(Lino.GridPanel, {
+//Lino.GridPanel = Ext.extend(Ext.grid.plugin.CellEditing, Lino.MainPanel);
+//Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
+//Lino.GridPanel = Ext.extend(Lino.GridPanel, {
+Ext.define('Lino.GridPanel', {
+     mixins: [
+         'Ext.grid.plugin.CellEditing',
+         'Lino.MainPanel',
+         'Lino.PanelMixin',
+     ],
+
   quick_search_text : '',
   start_at_bottom : false,
   is_searching : false,
