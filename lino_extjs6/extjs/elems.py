@@ -147,7 +147,7 @@ class GridColumn(jsgen.Component):
             def fk_renderer(fld, name):
                 # FK fields are clickable only if their target has a
                 # detail view
-                rpt = fld.rel.to.get_default_table()
+                rpt = fld.rel.model.get_default_table()
                 if rpt.detail_action is not None:
                     if rpt.detail_action.get_view_permission(
                             jsgen._for_user_profile):
@@ -849,13 +849,13 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
 
     def get_field_options(self, **kw):
         kw = super(ForeignKeyElement, self).get_field_options(**kw)
-        if isinstance(self.field.rel.to, basestring):
-            raise Exception("20130827 %s.rel.to is %r" %
-                            (self.field, self.field.rel.to))
-        pw = self.field.rel.to.preferred_foreignkey_width
+        if isinstance(self.field.rel.model, basestring):
+            raise Exception("20130827 %s.rel.model is %r" %
+                            (self.field, self.field.rel.model))
+        pw = self.field.rel.model.preferred_foreignkey_width
         if pw is not None:
             kw.setdefault('preferred_width', pw)
-        actor = self.field.rel.to.get_default_table()
+        actor = self.field.rel.model.get_default_table()
         if not isinstance(self.layout_handle.layout, layouts.ColumnsLayout):
             a1 = actor.detail_action
             a2 = actor.insert_action
