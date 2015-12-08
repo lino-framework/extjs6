@@ -13,6 +13,8 @@
      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title id="title">{{ site.title or site.verbose_name }}</title>
     {# ###### CSS files ###### #}
+    {{ stylesheet(extjs.build_lib_url('theme-neptune-all_1.css')) }}
+    {{ stylesheet(extjs.build_lib_url('theme-neptune-all_2.css')) }}
     {%- block css -%}
         {# CSS files from plugins #}
         {%- block css_plugins -%}
@@ -128,6 +130,7 @@
     {# Main Lino js code #}
     {{ javascript(site.build_media_url(*ext_renderer.lino_js_parts())) }}
     {# javascript(site.buildurl('linolib.js')) #}
+    {{ javascript(extjs.build_lib_url('theme-neptune.js')) }}
     {# ###### OnReady JS code ###### #}
     <script type="text/javascript">
     Ext.onReady(function() {
@@ -146,7 +149,7 @@
         {% for ln in jsgen.declare_vars(win) -%}
             {{ ln }}
         {%- endfor %}
-        Lino.viewport = new Lino.Viewport({items: {{ py2js(win) }} });
+        Lino.viewport = Ext.create('Lino.Viewport',{items: {{ py2js(win) }} });
         {% if site.use_esteid -%}
             Lino.init_esteid();
         {%- endif %}
@@ -154,7 +157,17 @@
             jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
             jasmine.getEnv().execute();
         {%- else -%}
-            Lino.viewport.render("body");
+//            Lino.viewport.render("body");
+                Ext.application({
+                    name: 'Lino',
+                    launch: function () {
+                        Ext.create('Lino.MainPanel', {
+                            renderTo: Ext.get('body'),
+                            items: [{{ py2js(win) }},
+                                    ],
+                        })
+                    }
+                });
             {{ on_ready }}
         {%- endif %}
         //console.timeEnd('onReady');"
