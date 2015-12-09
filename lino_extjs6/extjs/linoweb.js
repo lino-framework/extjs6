@@ -193,7 +193,10 @@ Ext.Ajax.on('beforerequest', function (conn, options) {
 My fix for the "Cannot set QuickTips dismissDelay to 0" bug,
 see http://www.sencha.com/forum/showthread.php?183515 
 */
-Ext.override(Ext.QuickTip,{
+//Edited by HKC
+//Ext.override(Ext.QuickTip,{
+Ext.define('Lino.QuickTip', {
+    override : 'Ext.QuickTip',
   showAt : function(xy){
         var t = this.activeTarget;
         //~ console.log("20120224 QuickTip.showAt",this.title,this.dismissDelay,t.dismissDelay);
@@ -232,71 +235,76 @@ Ext.override(Ext.QuickTip,{
                 this.constrainPosition = true;
             }
         }
-        Ext.QuickTip.superclass.showAt.call(this, xy);
+        //Ext.QuickTip.superclass.showAt.call(this, xy);
+       this.callSuper(this, xy);
     }
 });
 
 /*
 Another hack. See /docs/blog/touch 2012/0228
 */
-// Disable by HKC (Migratio to Exjts6)
+// Editef by HKC (Migration to Exjts6)
+// https://docs.sencha.com/extjs/6.0/core_concepts/components.html -> Subclassing
 //Ext.Element.addMethods(
-//    function() {
-//        var VISIBILITY      = "visibility",
-//            DISPLAY         = "display",
-//            HIDDEN          = "hidden",
-//            NONE            = "none",
-//            XMASKED         = "x-masked",
-//            XMASKEDRELATIVE = "x-masked-relative",
-//            data            = Ext.Element.data;
-//
-//        return {
-//
-//            mask : function(msg, msgCls) {
-//                var me  = this,
-//                    dom = me.dom,
-//                    dh  = Ext.DomHelper,
-//                    EXTELMASKMSG = "ext-el-mask-msg",
-//                    el,
-//                    mask;
-//                // removed the following lines. See /docs/blog/2012/0228
-//                //~ if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
-//                    //~ console.log(20120228,dom.tagName,me);
-//                    //~ me.addClass(XMASKEDRELATIVE);
-//                //~ }
-//                if (el = data(dom, 'maskMsg')) {
-//                    el.remove();
-//                }
-//                if (el = data(dom, 'mask')) {
-//                    el.remove();
-//                }
-//
-//                mask = dh.append(dom, {cls : "ext-el-mask"}, true);
-//                data(dom, 'mask', mask);
-//
-//                me.addClass(XMASKED);
-//                mask.setDisplayed(true);
-//
-//                if (typeof msg == 'string') {
-//                    var mm = dh.append(dom, {cls : EXTELMASKMSG, cn:{tag:'div'}}, true);
-//                    data(dom, 'maskMsg', mm);
-//                    mm.dom.className = msgCls ? EXTELMASKMSG + " " + msgCls : EXTELMASKMSG;
-//                    mm.dom.firstChild.innerHTML = msg;
-//                    mm.setDisplayed(true);
-//                    mm.center(me);
-//                }
-//
-//
-//                if (Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && me.getStyle('height') == 'auto') {
-//                    mask.setSize(undefined, me.getHeight());
-//                }
-//
-//                return mask;
-//            }
-//
-//
-//        };
-//    }()
+Ext.define('My.Lino.Component', {
+    extend: 'Ext.Element',
+    newMethod : function() {
+        var VISIBILITY      = "visibility",
+            DISPLAY         = "display",
+            HIDDEN          = "hidden",
+            NONE            = "none",
+            XMASKED         = "x-masked",
+            XMASKEDRELATIVE = "x-masked-relative",
+            data            = Ext.Element.data;
+
+        return {
+
+            mask : function(msg, msgCls) {
+                var me  = this,
+                    dom = me.dom,
+                    dh  = Ext.DomHelper,
+                    EXTELMASKMSG = "ext-el-mask-msg",
+                    el,
+                    mask;
+                // removed the following lines. See /docs/blog/2012/0228
+                //~ if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
+                    //~ console.log(20120228,dom.tagName,me);
+                    //~ me.addClass(XMASKEDRELATIVE);
+                //~ }
+                if (el = data(dom, 'maskMsg')) {
+                    el.remove();
+                }
+                if (el = data(dom, 'mask')) {
+                    el.remove();
+                }
+
+                mask = dh.append(dom, {cls : "ext-el-mask"}, true);
+                data(dom, 'mask', mask);
+
+                me.addClass(XMASKED);
+                mask.setDisplayed(true);
+
+                if (typeof msg == 'string') {
+                    var mm = dh.append(dom, {cls : EXTELMASKMSG, cn:{tag:'div'}}, true);
+                    data(dom, 'maskMsg', mm);
+                    mm.dom.className = msgCls ? EXTELMASKMSG + " " + msgCls : EXTELMASKMSG;
+                    mm.dom.firstChild.innerHTML = msg;
+                    mm.setDisplayed(true);
+                    mm.center(me);
+                }
+
+
+                if (Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && me.getStyle('height') == 'auto') {
+                    mask.setSize(undefined, me.getHeight());
+                }
+
+                return mask;
+            }
+
+
+        };
+    }()
+});
 //);
 
 
@@ -385,8 +393,9 @@ Lino.show_login_window = function(on_login) {
             allowBlank:false 
         }],        
         buttons:[ login_button ]});
-        
-      Lino.login_window = new Ext.Window({
+        //Edited by HKC Ext.window  -> Ext.window.Window
+      //Lino.login_window = new Ext.Window({
+      Lino.login_window = new Ext.window.Window({
           layout:'fit',
           defaultButton: 'username',
           width:300,
@@ -395,7 +404,9 @@ Lino.show_login_window = function(on_login) {
           modal: true,
           closeAction: "hide",
           keys: {
-            key: Ext.EventObject.ENTER,
+            //  Edited by HKC
+            //key: Ext.EventObject.ENTER,
+            key: Ext.event.Event.ENTER,
             fn: function() { do_login()}
           },
           items: [login_panel] });
@@ -434,8 +445,10 @@ Lino.chars2width = function(cols) {  return cols * 9; }
 Lino.rows2height = function(cols) {  return cols * 20; }
 
 
-
-Lino.MainPanel = {
+// HKC
+//Lino.MainPanel = {
+Ext.define('Lino.MainPanel',{
+    extend: 'Ext.panel.Panel',
   is_home_page : false,
   setting_param_values : false,
   config_containing_window : function(wincfg) { }
@@ -659,24 +672,31 @@ Lino.MainPanel = {
       //~ this.params_panel.form.resumeEvents();
     }
   }
-};
+});
 
 
 
-
-Lino.Viewport = Ext.extend(Ext.Viewport, Lino.MainPanel);
-Lino.Viewport = Ext.extend(Lino.Viewport, {
+// Edited by
+// Ext.Viewport (extjs3) <==> Ext.container.Viewport (Extjs6)
+//Lino.Viewport = Ext.extend(Ext.Viewport, Lino.MainPanel);
+Ext.define('Lino.Viewport', {
+     mixins: [
+         'Ext.plugin.Viewport',
+         'Lino.MainPanel'],
+    //extend: 'Ext.plugin.Viewport',
+//Lino.Viewport = Ext.extend(Lino.Viewport, {
   layout : "fit"
   ,is_home_page : true
   ,initComponent : function(){
-    Lino.Viewport.superclass.initComponent.call(this);
     this.on('render',function(){
       //  Edited by HKC
       //  https://www.sencha.com/forum/showthread.php?282509-Update-Ext.LoadMask-Example
       //this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
+       this.loadMask =  Ext.create('Ext.LoadMask',this.el,{msg:"{{_('Please wait...')}}"});
       //this.loadMask = new Ext.getBody().mask("{{_('Please wait...')}}");
       //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
     },this);
+        this.callSuper();
   }
   ,refresh : function() {
       var caller = this;
@@ -748,7 +768,7 @@ Lino.load_url = function(url) {
     //~ foo.bar.baz = 2; 
     //~ console.log("20121120 Lino.load_url()");
     //~ Lino.body_loadMask.show();
-    Lino.viewport.loadMask.show();
+    //Lino.viewport.loadMask.show();
     //~ location.replace(url);
     document.location = url;
 }
@@ -831,9 +851,15 @@ Lino.WindowAction = function(windowConfig,main_item_fn) {
     //~ this.mainItemClass = mainItemClass;
 };
 
-Lino.WindowAction = Ext.extend(Lino.WindowAction,{
+Ext.define('Lino.WindowAction', {
+    //extend: 'Lino.WindowAction',
+//Lino.WindowAction = Ext.extend(Lino.WindowAction,{
     window : null,
     //~ mainItemClass: null,
+    constructor : function(windowConfig,main_item_fn){
+        this.windowConfig = windowConfig;
+        this.main_item_fn = main_item_fn;
+    },
     get_window : function() {
       //~ if(mainConfig) Ext.apply(this.mainConfig,mainConfig);
       // if (this.window == null || this.window.isDestroyed)  { // 20140829
@@ -853,8 +879,10 @@ Lino.WindowAction = Ext.extend(Lino.WindowAction,{
   
 });
 
-
-Lino.PanelMixin = {
+// HKC
+//Lino.PanelMixin = {
+Ext.define('Lino.PanelMixin', {
+    extend: 'Ext.panel.Panel',
   get_containing_window : function (){
       if (this.containing_window) return this.containing_window;
       return this.containing_panel.get_containing_window();
@@ -875,7 +903,7 @@ Lino.PanelMixin = {
     //~ else console.log('20111202 not set_window_title(',title,') for',this);
   }
   
-};
+});
 
 
 // Lino.status_bar = new Ext.ux.StatusBar({defaultText:'Lino version {{lino.__version__}}.'});
@@ -926,7 +954,8 @@ Lino.CheckColumn = Ext.extend(Ext.grid.Column, {
         //~ if (name == 'dblclick') {
             return this.toggleValue(grid, rowIndex, colIndex);
         } else {
-            return Ext.grid.ActionColumn.superclass.processEvent.apply(this, arguments);
+            //return Ext.grid.ActionColumn.superclass.processEvent.apply(this, arguments);
+             this.callSuper(this, arguments);
         }
     },
     
@@ -1080,7 +1109,8 @@ Lino.IncompleteDateField = Ext.extend(Ext.form.TextField,{
 
 Lino.FileUploadField = Ext.extend(Ext.ux.form.FileUploadField,{
     unused_onRender : function(ct, position){
-      Lino.FileUploadField.superclass.onRender.call(this, ct, position);
+      //Lino.FileUploadField.superclass.onRender.call(this, ct, position);
+         this.callSuper(this,ct, position);
       this.el.on({
         dragenter:function(event){
           event.browserEvent.dataTransfer.dropEffect = 'move';
@@ -1148,7 +1178,8 @@ Lino.VBorderPanel = Ext.extend(Ext.Panel,{
     constructor : function(config) {
       config.layout = 'border';
       delete config.layoutConfig;
-      Lino.VBorderPanel.superclass.constructor.call(this,config);
+      //Lino.VBorderPanel.superclass.constructor.call(this,config);
+         this.callSuper(this, config);
       for(var i=0; i < this.items.length;i++) {
         var item = this.items.get(i);
         if (this.isVertical(item) && item.collapsible) {
@@ -1206,7 +1237,8 @@ Lino.VBorderPanel = Ext.extend(Ext.Panel,{
           //~ else console.log('non-vertical item in VBoderPanel:',item)
         }
       }
-      Lino.VBorderPanel.superclass.onBodyResize.call(this, w, h);
+      //Lino.VBorderPanel.superclass.onBodyResize.call(this, w, h);
+         this.callSuper(this,w, h);
     }
 });
 
@@ -1218,7 +1250,9 @@ Lino.VBorderPanel = Ext.extend(Ext.Panel,{
     // Edited by HKC (Migratio to Exjts6)
     // CellSelectionModel does not exist any more. replaced by Ext.selection.CellModel
 //Ext.override(Ext.grid.CellSelectionModel, {
-Ext.override(Ext.selection.CellModel, {
+//Ext.override(Ext.selection.CellModel, {
+Ext.define('Lino.selection.CellModel', {
+    override : 'Ext.selection.CellModel',
 //~ var dummy = {
 
     handleKeyDown : function(e){
@@ -2248,7 +2282,11 @@ if (Ext.ux.grid !== undefined) {
 
 {% endif %}
 
-Lino.FieldBoxMixin = {
+//    HKC Ext.data.field.Field
+
+//Lino.FieldBoxMixin = {
+Ext.define('Lino.FieldBoxMixin', {
+    extend: 'Ext.data.field.Field',
   before_init : function(config,params) {
     if (params) Ext.apply(config,params);
     var actions = Lino.build_buttons(this, config.ls_bbar_actions);
@@ -2281,17 +2319,25 @@ Lino.FieldBoxMixin = {
   set_base_param : function(k,v) {
     this.base_params[k] = v;
   }
-};
+});
 
 
+// HKC
+//Lino.HtmlBoxPanel = Ext.extend(Ext.Panel, Lino.PanelMixin);
+//Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
+//Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
+Ext.define('Lino.HtmlBoxPanel', {
+     mixins: [
+         'Ext.panel.Panel',
+         'Lino.PanelMixin',
+         'Lino.FieldBoxMixin',
+     ],
 
-Lino.HtmlBoxPanel = Ext.extend(Ext.Panel, Lino.PanelMixin);
-Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
-Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
   disabled_in_insert_window : true,
   constructor : function(config,params) {
     this.before_init(config,params);
-    Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
+    //Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
+      this.callSuper(arguments);
   },
   //~ constructor : function(ww,config,params){
     //~ this.ww = ww;
@@ -2310,7 +2356,8 @@ Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
   //~ disable : function() { var tb = this.getBottomToolbar(); if(tb) tb.disable()},
   //~ enable : function() { var tb = this.getBottomToolbar(); if(tb) tb.enable()},
   onRender : function(ct, position){
-    Lino.HtmlBoxPanel.superclass.onRender.call(this, ct, position);
+    //Lino.HtmlBoxPanel.superclass.onRender.call(this, ct, position);
+      this.callSuper(arguments);
     //~ console.log(20111125,this.containing_window);
     if (this.containing_panel) {
       this.containing_panel.on('enable',this.enable,this);
@@ -2375,11 +2422,19 @@ Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
 });
 //~ Ext.override(Lino.HtmlBoxPanel,Lino.FieldBoxMixin);
 
+// HKC
+//Lino.ActionFormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
+//Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.PanelMixin);
+//Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.FieldBoxMixin);
+//Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, {
+Ext.define('Lino.ActionFormPanel', {
+     mixins: [
+         'Ext.form.FormPanel',
+         'Lino.MainPanel',
+         'Lino.PanelMixin',
+         'Lino.FieldBoxMixin'
+     ],
 
-Lino.ActionFormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
-Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.PanelMixin);
-Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.FieldBoxMixin);
-Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, {
   //~ layout:'fit'
   //~ ,autoHeight: true
   //~ ,frame: true
@@ -2389,7 +2444,8 @@ Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, {
         {text: 'OK', handler: this.on_ok, scope: this},
         {text: 'Cancel', handler: this.on_cancel, scope: this}
     ];
-    Lino.ActionFormPanel.superclass.constructor.call(this, config);
+    //Lino.ActionFormPanel.superclass.constructor.call(this, config);
+      this.callSuper(arguments);
   }
   //~ ,initComponent : function(){
     //~ Lino.ActionFormPanel.superclass.initComponent.call(this);
@@ -2518,10 +2574,17 @@ Lino.fields2array = function(fields,values) {
     return pv;
 }
 
+// HKC
+//Lino.FormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
+//Lino.FormPanel = Ext.extend(Lino.FormPanel,Lino.PanelMixin);
+//Lino.FormPanel = Ext.extend(Lino.FormPanel,{
+Ext.define('Lino.FormPanel', {
+     mixins: [
+         'Ext.form.Panel',
+         'Lino.MainPanel',
+         'Lino.PanelMixin',
+     ],
 
-Lino.FormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
-Lino.FormPanel = Ext.extend(Lino.FormPanel,Lino.PanelMixin);
-Lino.FormPanel = Ext.extend(Lino.FormPanel,{
   params_panel_hidden : false,
   save_action_name : null, 
   //~ base_params : {},
@@ -2539,7 +2602,8 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
       
     config.trackResetOnLoad = true;
     
-    Lino.FormPanel.superclass.constructor.call(this, config);
+    //Lino.FormPanel.superclass.constructor.call(this, config);
+      this.callSuper(this,config);
       
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
@@ -2632,7 +2696,7 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
     
       this.tbar = this.tbar.concat([
           '->',
-          this.displayItem = new Ext.Toolbar.TextItem({})
+          this.displayItem = Ext.create('Ext.Toolbar.TextItem',{})
       ]);
           
     }
@@ -2650,15 +2714,16 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
     //~ if (this.master_panel) {
         //~ this.set_base_params(this.master_panel.get_master_params());
     //~ }
-      
-    Lino.FormPanel.superclass.initComponent.call(this);
+    //  Edited by HKC
+    //Lino.FormPanel.superclass.initComponent.call(this);
+      this.callSuper(this);
 
     // this.on('show',
     //         function(){ this.init_focus();}, 
     //         this);
     
     this.on('render',function(){
-      this.loadMask = new Ext.LoadMask(this.bwrap,{msg:"{{_('Please wait...')}}"});
+      this.loadMask = Ext.create('Ext.LoadMask',(this.bwrap,{msg:"{{_('Please wait...')}}"}));
     },this);
     
     
@@ -2716,7 +2781,7 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
     //~ if (status.param_values) 
     this.set_param_values(status.param_values);
     if (status.base_params) this.set_base_params(status.base_params);
-    var tp = this.items.get(0);
+    var tp = this.containing_window.items.get(0);
     if (tp instanceof Ext.TabPanel) {
       if (status.active_tab) {
         //~ console.log('20111201 active_tab',this.active_tab,this.items.get(0));
@@ -2843,7 +2908,7 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
     var p = Ext.apply({}, this.get_base_params());
     if (this.action_name)
         p.{{constants.URL_PARAM_ACTION_NAME}} = this.action_name;
-    p.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.getId();
+    p.{{constants.URL_PARAM_REQUESTING_PANEL}} = record_id;
     p.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
     this.add_param_values(p);
     if (this.loadMask) this.loadMask.show();
@@ -3080,18 +3145,19 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
       // focus when Window is focussed.  If no defaultButton set,
       // specify the first form field.
 
-      if (!wincfg.defaultButton) this.getForm().items.each(function(f){
-          if(f.isFormField){ 
-              wincfg.defaultButton = f;
+      //if (!wincfg.defaultButton) this.getForm().items.each(function(f){
+      //    if(f.isFormField){
+      //        wincfg.defaultButton = f;
               // console.log("20140205 defaultButton", f);
-              return false;
-          }
-      });
+              //return false;
+          //}
+      //});
 
       wincfg.keys = [];
 {% if settings.SITE.plugins.extjs.enter_submits_form %}
       wincfg.keys.push({
-              key: Ext.EventObject.ENTER,
+              //key: Ext.EventObject.ENTER,
+                key : Ext.String.escape,
               scope:this,
               stopEvent: false,
               handler: function(k, e) {
@@ -3106,7 +3172,8 @@ Lino.FormPanel = Ext.extend(Lino.FormPanel,{
           });
 {% endif %}
       wincfg.keys.push({
-          key: Ext.EventObject.ESCAPE, 
+          //key: Ext.EventObject.ESCAPE,
+          key : Ext.String.escape,
           handler: this.on_cancel, scope:this });
       wincfg.keys.push({
           key: 's', ctrl: true, 
@@ -3175,7 +3242,8 @@ Lino.GridStore = Ext.extend(Ext.data.ArrayStore,{
     this.grid_panel.add_param_values(options.params);
     //~ Lino.insert_subst_user(options.params);
     //~ console.log("20120814 GridStore.load()",options.params,this.baseParams);
-    return Lino.GridStore.superclass.load.call(this, options);
+    //return Lino.GridStore.superclass.load.call(this, options);
+    return this.callSuper(this, options);
   }
   // ,insert : function(index, records) {
   //   return Ext.data.Store.prototype.insert.call(this, index, records)
@@ -3198,9 +3266,16 @@ Lino.auto_height_cell_template = new Ext.Template(
 // Edited by HKC (Migration to Exjts6)
 // EditorGridPanel does not exist any more. replaced by Ext.grid.plugin.CellEditing
 //Lino.GridPanel = Ext.extend(Ext.grid.EditorGridPanel, Lino.MainPanel);
-Lino.GridPanel = Ext.extend(Ext.grid.plugin.CellEditing, Lino.MainPanel);
-Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
-Lino.GridPanel = Ext.extend(Lino.GridPanel, {
+//Lino.GridPanel = Ext.extend(Ext.grid.plugin.CellEditing, Lino.MainPanel);
+//Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
+//Lino.GridPanel = Ext.extend(Lino.GridPanel, {
+Ext.define('Lino.GridPanel', {
+     mixins: [
+         'Ext.grid.plugin.CellEditing',
+         'Lino.MainPanel',
+         'Lino.PanelMixin',
+     ],
+
   quick_search_text : '',
   start_at_bottom : false,
   is_searching : false,
@@ -3226,7 +3301,8 @@ Lino.GridPanel = Ext.extend(Lino.GridPanel, {
 {% if settings.SITE.use_filterRow %}
     config.plugins = [new Ext.ux.grid.FilterRow()];
 {% endif %}    
-    Lino.GridPanel.superclass.constructor.call(this,config);
+    //Lino.GridPanel.superclass.constructor.call(this,config);
+    this.callSuper(this, config);
     
     //~ if (this.containing_window) {
         //~ console.log("20111206 install refresh");
@@ -3446,7 +3522,8 @@ Lino.GridPanel = Ext.extend(Lino.GridPanel, {
     };
     this.columns  = this.apply_grid_config(this.gc_name,this.ls_grid_configs,this.ls_columns);
     
-    Lino.GridPanel.superclass.initComponent.call(this);
+    //Lino.GridPanel.superclass.initComponent.call(this);
+      this.callSuper(this);
     
     this.on('resize', function(){
       //~ console.log("20120213 resize",arguments)
@@ -3843,13 +3920,17 @@ Lino.GridPanel = Ext.extend(Lino.GridPanel, {
         {dataIndex:'filters',header:'filters'} 
       ]
     });
-    var win = new Ext.Window({title:'GridConfigs Manager',layout:'fit',items:main,height:200});
+    //  edited by HKC Ext.window -> Ext.window.Window
+    //var win = new Ext.Window({title:'GridConfigs Manager',layout:'fit',items:main,height:200});
+    var win = new Ext.window.Window({title:'GridConfigs Manager',layout:'fit',items:main,height:200});
     win.show();
   },
   
   unused_edit_grid_config : function(name) {
     gc = this.ls_grid_configs[name];
-    var win = new Ext.Window({
+      //  edited by HKC Ext.window -> Ext.window.Window
+    //var win = new Ext.Window({
+    var win = new Ext.window.Window({
       title:'Edit Grid Config',layout:'vbox', 
       //~ layoutConfig:'stretch'
       items:[
@@ -4007,7 +4088,8 @@ Lino.GridPanel = Ext.extend(Lino.GridPanel, {
   },
 
   afterRender : function() {
-    Lino.GridPanel.superclass.afterRender.call(this);
+    //Lino.GridPanel.superclass.afterRender.call(this);
+      this.callSuper(this);
     // this.getView().mainBody.focus();
     // console.log(20100114,this.getView().getRows());
     // if (this.getView().getRows().length > 0) {
@@ -4039,7 +4121,8 @@ Lino.GridPanel = Ext.extend(Lino.GridPanel, {
     this.getSelectionModel().addListener('rowselect',fn,scope);
   },
   postEditValue : function(value, originalValue, r, field){
-    value = Lino.GridPanel.superclass.postEditValue.call(this,value,originalValue,r,field);
+    //value = Lino.GridPanel.superclass.postEditValue.call(this,value,originalValue,r,field);
+      this.callSuper(this, value,originalValue, r, field);
     //~ console.log('GridPanel.postEdit()',value, originalValue, r, field);
     return value;
   },
@@ -4135,8 +4218,10 @@ Lino.chooser_handler = function(combo,name) {
 };
 
 
-
+// Edited by HKC
 Lino.ComboBox = Ext.extend(Ext.form.ComboBox,{
+//Ext.define('Override.form.field.Text', {
+//    extend : 'Ext.form.ComboBox',
   forceSelection: "yes but select on tab",
   // forceSelection: true,
   triggerAction: 'all',
@@ -4151,7 +4236,8 @@ Lino.ComboBox = Ext.extend(Ext.form.ComboBox,{
   initComponent : function(){
       this.contextParams = {};
       //~ Ext.form.ComboBox.initComponent(this);
-      Lino.ComboBox.superclass.initComponent.call(this);
+      //Lino.ComboBox.superclass.initComponent.call(this);
+      this.callSuper(this);
   },
   setValue : function(v,record_data){
       /*
@@ -4214,7 +4300,8 @@ Lino.ComboBox = Ext.extend(Ext.form.ComboBox,{
           //~ this.hiddenField.originalValue = v;
           this.hiddenField.value = v;
       }
-      Ext.form.ComboBox.superclass.setValue.call(this, text);
+      //Ext.form.ComboBox.superclass.setValue.call(this, text);
+      this.callSuper(this, text);
       this.value = v; // needed for grid.afteredit
   },
   
@@ -4252,11 +4339,18 @@ Lino.ChoicesFieldElement = Ext.extend(Lino.ComboBox,{
 Lino.SimpleRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   // forceSelection: true,  20140206 why was this here?
   constructor: function(config){
-      Lino.SimpleRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
+      //Lino.SimpleRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
+      //    totalProperty: 'count',
+      //    root: 'rows',
+      //    id: '{{constants.CHOICES_VALUE_FIELD}}', // 'value'
+      //    fields: ['{{constants.CHOICES_VALUE_FIELD}}' ],
+      //    listeners: { exception: Lino.on_store_exception }
+      //}));
+      this.callSuper(this, Ext.apply(config, {
           totalProperty: 'count',
           root: 'rows',
           id: '{{constants.CHOICES_VALUE_FIELD}}', // 'value'
-          fields: ['{{constants.CHOICES_VALUE_FIELD}}' ], 
+          fields: ['{{constants.CHOICES_VALUE_FIELD}}' ],
           listeners: { exception: Lino.on_store_exception }
       }));
   }
@@ -4264,7 +4358,14 @@ Lino.SimpleRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
 
 Lino.ComplexRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   constructor: function(config){
-      Lino.ComplexRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
+      //Lino.ComplexRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
+      //    totalProperty: 'count',
+      //    root: 'rows',
+      //    id: 'value', // constants.CHOICES_VALUE_FIELD
+      //    fields: ['value','text'], // constants.CHOICES_VALUE_FIELD, // constants.CHOICES_TEXT_FIELD
+      //    listeners: { exception: Lino.on_store_exception }
+      //}));
+      this.callSuper(this, Ext.apply(config, {
           totalProperty: 'count',
           root: 'rows',
           id: 'value', // constants.CHOICES_VALUE_FIELD
@@ -4284,7 +4385,8 @@ Lino.RemoteComboFieldElement = Ext.extend(Lino.ComboBox,{
   //~ selectOnFocus: true, // select any existing text in the field immediately on focus.
   resizable: true
   ,initList : function() {
-      Lino.RemoteComboFieldElement.superclass.initList.call(this);
+      //Lino.RemoteComboFieldElement.superclass.initList.call(this);
+         this.callSuper(this);
       if (this.pageTb) {
           
           var me = this;
@@ -4337,8 +4439,10 @@ Lino.SimpleRemoteComboFieldElement = Ext.extend(Lino.RemoteComboFieldElement,{
 
 
 
-
-Lino.Window = Ext.extend(Ext.Window,{
+// Edit by HKC Ext.window  ->  Ext.window.Window
+Ext.define('Lino.Window', {
+    extend: 'Ext.window.Window',
+//Lino.Window = Ext.extend(Ext.window.Window,{
   //~ layout: "fit", 
   closeAction : 'hide',
   renderTo: 'main_area', 
@@ -4413,14 +4517,17 @@ Lino.Window = Ext.extend(Ext.Window,{
     this.main_item.config_containing_window(config);
     
     // console.log('20150514 Lino.Window.constructor() 2');
-    Lino.Window.superclass.constructor.call(this,config);
+    //Lino.Window.superclass.constructor.call(this,config);
+      this.callSuper(this,config);
+
     
-    //~ console.log('20120110 Lino.Window.constructor() 3');
+    console.log('20120110 Lino.Window.constructor() 3');
     
   },
   initComponent : function() {
     this.main_item.init_containing_window(this);
-    Lino.Window.superclass.initComponent.call(this);
+    //Lino.Window.superclass.initComponent.call(this);
+    this.callSuper(arguments);
   
   },
   hide : function() { 
@@ -4428,11 +4535,13 @@ Lino.Window = Ext.extend(Ext.Window,{
         Lino.close_window(); });
   },
   hide_really : function() { 
-    Lino.Window.superclass.hide.call(this);
+    //Lino.Window.superclass.hide.call(this);
+    this.callSuper(arguments);
   },
   onRender : function(ct, position){
     // console.log('20140829 Lino.Window.onRender() 1');
-    Lino.Window.superclass.onRender.call(this, ct, position);
+    //Lino.Window.superclass.onRender.call(this, ct, position);
+    this.callSuper(arguments);
     var main_area = Ext.getCmp('main_area')
     //~ console.log('20120110 Lino.Window.onRender() 2');
   
@@ -4448,8 +4557,10 @@ Lino.Window = Ext.extend(Ext.Window,{
   }
 });
 
-
-Ext.override(Ext.form.BasicForm,{
+//Edited by HKC
+//Ext.override(Ext.form.BasicForm,{
+Ext.define('Lino.form.Panel', {
+    extend : 'Ext.form.Panel',
     my_loadRecord : function(values){
     //~ loadRecord : function(record){
         /* Same as ExtJS's loadRecord() (setValues()), except that we 
@@ -4518,7 +4629,9 @@ function initializeFooBarDropZone(cmp) {
 }
 
 {% if settings.SITE.use_awesome_uploader %}
-Lino.AwesomeUploaderWindow = new Ext.Window({
+//Edited by HKC Ext.window -> Ext.window.Window
+//Lino.AwesomeUploaderWindow = new Ext.Window({
+Lino.AwesomeUploaderWindow = new Ext.window.Window({
 		title:'Awesome Uploader in a Window!'
 		,closeAction:'hide'
 		,frame:true
