@@ -16,19 +16,26 @@ logger = logging.getLogger(__name__)
 from cgi import escape
 import decimal
 
+from lino import AFTER17, AFTER18
+
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.utils.translation import string_concat
 from django.conf import settings
-from django.db.models.fields.related import SingleRelatedObjectDescriptor
-from django.db.models.fields.related import ForeignRelatedObjectsDescriptor
-from django.db.models.fields.related import ManyRelatedObjectsDescriptor
-from lino import AFTER17
-if AFTER17:
-    from django.contrib.contenttypes.fields import GenericForeignKey
-    from django.db.models.fields.related import ManyToManyRel, ManyToOneRel
+if AFTER18:
+    from django.db.models.fields.related import \
+        ReverseOneToOneDescriptor as SingleRelatedObjectDescriptor
+    from django.db.models.fields.related import \
+        ReverseManyToOneDescriptor as ForeignRelatedObjectsDescriptor
+    from django.db.models.fields.related import \
+        ManyToManyDescriptor as ManyRelatedObjectsDescriptor
 else:
-    from django.contrib.contenttypes.generic import GenericForeignKey
+    from django.db.models.fields.related import SingleRelatedObjectDescriptor
+    from django.db.models.fields.related import ForeignRelatedObjectsDescriptor
+    from django.db.models.fields.related import ManyRelatedObjectsDescriptor
+
+if AFTER17:
+    from django.db.models.fields.related import ManyToManyRel, ManyToOneRel
 from django.db.models.fields import NOT_PROVIDED
 
 from lino.core import layouts
@@ -52,6 +59,7 @@ from lino.core.layouts import (FormLayout, ParamsLayout,
 
 from lino.utils.mldbc.fields import BabelCharField, BabelTextField
 from lino.core import tables
+from lino.core.gfks import GenericForeignKey
 
 from lino.utils.xmlgen import etree
 from lino.utils.xmlgen.html import E
@@ -878,7 +886,6 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
         return ui.obj2html(obj)
 
     def value2html(self, ar, v, **cellattrs):
-        #~ return ar.renderer.obj2html(ar,v)
         return E.td(ar.obj2html(v), **cellattrs)
 
 
@@ -2120,10 +2127,6 @@ def create_layout_element(lh, name, **kw):
             e = ManyRelatedObjectElement(lh, de, **kw)
             lh.add_store_field(e.field)
             return e
-
-        
-
-
 
     if isinstance(de, models.Field):
         if isinstance(de, (BabelCharField, BabelTextField)):

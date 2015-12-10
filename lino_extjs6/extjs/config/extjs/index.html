@@ -160,14 +160,13 @@
                 Ext.application({
                     name: 'Lino',
                     launch: function () {
-                        Ext.create('Lino.MainPanel', {
+                        Lino.viewport = Ext.create('Lino.Viewport', {
                             renderTo: Ext.get('body'),
                             items: [{{ py2js(win) }},
                                     ],
                         })
                     }
                 });
-                Lino.viewport = Ext.create('Lino.Viewport',{items: {{ py2js(win) }} });
             {{ on_ready }}
         {%- endif %}
         //console.timeEnd('onReady');"
