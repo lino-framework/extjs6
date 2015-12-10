@@ -345,22 +345,26 @@ Lino.show_login_window = function(on_login) {
   if (Lino.login_window == null) {
     
       function do_login() { 
-            Lino.viewport.loadMask.show()
-            login_panel.getForm().submit({ 
+            Lino.viewport.mask();
+            //Ext.getBody().mask();
+            login_panel.getForm().submit({
                 method:'POST', 
                 waitTitle:'Connecting', 
                 waitMsg:'Sending data...',
                 success:function(){ 
                   Lino.login_window.hide();
                   Lino.handle_home_button();
-                  Lino.viewport.loadMask.hide();
+                  Lino.viewport.unmask();
+                    //Ext.getBody().unmask();
                   if (typeof on_login == 'string') {
                       Lino.load_url(on_login);
                   } 
                 },
                 failure: function(form,action) { 
                   Lino.on_submit_failure(form, action);
-                  Lino.viewport.loadMask.hide()
+                  //Lino.viewport.loadMask.hide()
+                  Lino.viewport.unmask();
+                    //Ext.getBody().unmask();
                 }
             }); 
       };
@@ -680,9 +684,9 @@ Ext.define('Lino.MainPanel',{
 // Ext.Viewport (extjs3) <==> Ext.container.Viewport (Extjs6)
 //Lino.Viewport = Ext.extend(Ext.Viewport, Lino.MainPanel);
 Ext.define('Lino.Viewport', {
-    //extend :  'Ext.plugin.Viewport',
+    extend :  'Ext.container.Viewport',
      mixins: [
-         'Ext.plugin.Viewport',
+         //'Ext.container.Viewport',
          'Lino.MainPanel'],
     //extend: 'Ext.plugin.Viewport',
 //Lino.Viewport = Ext.extend(Lino.Viewport, {
@@ -693,7 +697,7 @@ Ext.define('Lino.Viewport', {
       //  Edited by HKC
       //  https://www.sencha.com/forum/showthread.php?282509-Update-Ext.LoadMask-Example
       //this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
-       this.loadMask =  Ext.create('Ext.LoadMask',this.el,{msg:"{{_('Please wait...')}}"});
+      // this.loadMask =  new Ext.create('Ext.LoadMask',{msg:"{{_('Please wait...')}}"});
       //this.loadMask = new Ext.getBody().mask("{{_('Please wait...')}}");
       //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
     },this);
