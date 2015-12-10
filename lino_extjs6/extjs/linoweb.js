@@ -680,6 +680,7 @@ Ext.define('Lino.MainPanel',{
 // Ext.Viewport (extjs3) <==> Ext.container.Viewport (Extjs6)
 //Lino.Viewport = Ext.extend(Ext.Viewport, Lino.MainPanel);
 Ext.define('Lino.Viewport', {
+    //extend :  'Ext.plugin.Viewport',
      mixins: [
          'Ext.plugin.Viewport',
          'Lino.MainPanel'],
@@ -2327,8 +2328,9 @@ Ext.define('Lino.FieldBoxMixin', {
 //Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
 //Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
 Ext.define('Lino.HtmlBoxPanel', {
+    extend : 'Ext.panel.Panel',
      mixins: [
-         'Ext.panel.Panel',
+         //'Ext.panel.Panel',
          'Lino.PanelMixin',
          'Lino.FieldBoxMixin',
      ],
@@ -2428,8 +2430,9 @@ Ext.define('Lino.HtmlBoxPanel', {
 //Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, Lino.FieldBoxMixin);
 //Lino.ActionFormPanel = Ext.extend(Lino.ActionFormPanel, {
 Ext.define('Lino.ActionFormPanel', {
+    extend : 'Ext.form.FormPanel',
      mixins: [
-         'Ext.form.FormPanel',
+         //'Ext.form.FormPanel',
          'Lino.MainPanel',
          'Lino.PanelMixin',
          'Lino.FieldBoxMixin'
@@ -2578,9 +2581,11 @@ Lino.fields2array = function(fields,values) {
 //Lino.FormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
 //Lino.FormPanel = Ext.extend(Lino.FormPanel,Lino.PanelMixin);
 //Lino.FormPanel = Ext.extend(Lino.FormPanel,{
+// https://www.sencha.com/forum/showthread.php?287211-extjs5-amp-initComponent&p=1050308&viewfull=1#post1050308
 Ext.define('Lino.FormPanel', {
+    extend : 'Ext.form.Panel',
      mixins: [
-         'Ext.form.Panel',
+         //'Ext.form.Panel',
          'Lino.MainPanel',
          'Lino.PanelMixin',
      ],
@@ -2603,7 +2608,7 @@ Ext.define('Lino.FormPanel', {
     config.trackResetOnLoad = true;
     
     //Lino.FormPanel.superclass.constructor.call(this, config);
-      this.callSuper(this,config);
+      this.callParent(this,config);
       
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
@@ -2716,7 +2721,7 @@ Ext.define('Lino.FormPanel', {
     //~ }
     //  Edited by HKC
     //Lino.FormPanel.superclass.initComponent.call(this);
-      this.callSuper(this);
+      this.callParent(this);
 
     // this.on('show',
     //         function(){ this.init_focus();}, 
@@ -2948,29 +2953,33 @@ Ext.define('Lino.FormPanel', {
     if (record && record.data) {
       this.enable();
       this.form.my_loadRecord(record.data);
+        console.log("HKC disable form");
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
+        console.log("HKC disable getBottomToolbar");
       var da = record.data.disabled_actions;
       if (da) {
           //~ console.log('20120528 disabled_actions =',da,this.getBottomToolbar());
           //~ 20121016 this.getBottomToolbar().items.each(function(item,index,length){
-          var tb = this.getTopToolbar();
-          if (tb) tb.items.each(function(item,index,length){
+          //var tb = this.getTopToolbar();
+          if (this.containing_window) this.containing_window.items.each(function(item,index,length){
               //~ console.log('20120528 ',item.itemId,'-->',da[item.itemId]);
               if (da[item.itemId]) item.disable(); else item.enable();
           });
       };
+        console.log("HKC disable form");
       if (this.disable_editing | record.data.disable_editing) {
-          //~ console.log("20120202 disable_editing",record.title);
-          this.form.items.each(function(cmp){
-            if (!cmp.always_enabled) cmp.disable();
-          },this);
-      } else {
-          this.form.items.each(function(cmp){
-            //~ console.log("20120202",cmp);
-            if (record.data.disabled_fields[cmp.name]) cmp.disable();
-            else cmp.enable();
-          },this);
+      //    ~ console.log("20120202 disable_editing",record.title);
+          //this.form.items.each(function(cmp){
+          //  if (!cmp.always_enabled) cmp.disable();
+          //},this);
+      //} else {
+
+          //this.form.items.each(function(cmp){
+          //  if (record.data.disabled_fields[cmp.name]) cmp.disable();
+          //  else cmp.enable();
+          //},
+        //this);
         
           //~ if (record.data.disabled_fields) {
               //~ for (i = 0; i < record.data.disabled_fields.length; i++) {
@@ -3270,8 +3279,9 @@ Lino.auto_height_cell_template = new Ext.Template(
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, {
 Ext.define('Lino.GridPanel', {
+    extend : 'Ext.grid.plugin.CellEditing',
      mixins: [
-         'Ext.grid.plugin.CellEditing',
+         //'Ext.grid.plugin.CellEditing',
          'Lino.MainPanel',
          'Lino.PanelMixin',
      ],
@@ -4558,9 +4568,9 @@ Ext.define('Lino.Window', {
 });
 
 //Edited by HKC
-//Ext.override(Ext.form.BasicForm,{
-Ext.define('Lino.form.Panel', {
-    extend : 'Ext.form.Panel',
+Ext.override('Lino.form.Panel',{
+//Ext.define('Lino.form.Panel', {
+//    extend : 'Ext.form.Panel',
     my_loadRecord : function(values){
     //~ loadRecord : function(record){
         /* Same as ExtJS's loadRecord() (setValues()), except that we 
