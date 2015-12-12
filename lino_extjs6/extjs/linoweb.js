@@ -195,50 +195,50 @@ see http://www.sencha.com/forum/showthread.php?183515
 */
 //Edited by HKC
 //Ext.override(Ext.QuickTip,{
-Ext.define('Lino.QuickTip', {
-    override : 'Ext.QuickTip',
-  showAt : function(xy){
-        var t = this.activeTarget;
+//Ext.define('Lino.QuickTip', {
+//    override : 'Ext.QuickTip',
+//  showAt : function(xy){
+//        var t = this.activeTarget;
         //~ console.log("20120224 QuickTip.showAt",this.title,this.dismissDelay,t.dismissDelay);
-        if(t){
-            if(!this.rendered){
-                this.render(Ext.getBody());
-                this.activeTarget = t;
-            }
-            if(t.width){
-                this.setWidth(t.width);
-                this.body.setWidth(this.adjustBodyWidth(t.width - this.getFrameWidth()));
-                this.measureWidth = false;
-            } else{
-                this.measureWidth = true;
-            }
-            this.setTitle(t.title || '');
-            this.body.update(t.text);
-            this.autoHide = t.autoHide;
-            // bugfix by Luc 20120226
-            if (t.dismissDelay != undefined) this.dismissDelay = t.dismissDelay;
-            //~ this.dismissDelay = t.dismissDelay || this.dismissDelay;
-            if(this.lastCls){
-                this.el.removeClass(this.lastCls);
-                delete this.lastCls;
-            }
-            if(t.cls){
-                this.el.addClass(t.cls);
-                this.lastCls = t.cls;
-            }
-            if(this.anchor){
-                this.constrainPosition = false;
-            }else if(t.align){ 
-                xy = this.el.getAlignToXY(t.el, t.align);
-                this.constrainPosition = false;
-            }else{
-                this.constrainPosition = true;
-            }
-        }
+        //if(t){
+        //    if(!this.rendered){
+        //        this.render(Ext.getBody());
+        //        this.activeTarget = t;
+        //    }
+        //    if(t.width){
+        //        this.setWidth(t.width);
+        //        this.body.setWidth(this.adjustBodyWidth(t.width - this.getFrameWidth()));
+        //        this.measureWidth = false;
+        //    } else{
+        //        this.measureWidth = true;
+        //    }
+        //    this.setTitle(t.title || '');
+        //    this.body.update(t.text);
+        //    this.autoHide = t.autoHide;
+        //     bugfix by Luc 20120226
+        //    if (t.dismissDelay != undefined) this.dismissDelay = t.dismissDelay;
+        //    ~ this.dismissDelay = t.dismissDelay || this.dismissDelay;
+        //    if(this.lastCls){
+        //        this.el.removeClass(this.lastCls);
+        //        delete this.lastCls;
+        //    }
+        //    if(t.cls){
+        //        this.el.addClass(t.cls);
+        //        this.lastCls = t.cls;
+        //    }
+        //    if(this.anchor){
+        //        this.constrainPosition = false;
+        //    }else if(t.align){
+        //        xy = this.el.getAlignToXY(t.el, t.align);
+        //        this.constrainPosition = false;
+        //    }else{
+        //        this.constrainPosition = true;
+        //    }
+        //}
         //Ext.QuickTip.superclass.showAt.call(this, xy);
-       this.callSuper(this, xy);
-    }
-});
+       //this.callSuper([xy]);
+    //}
+//});
 
 /*
 Another hack. See /docs/blog/touch 2012/0228
@@ -339,9 +339,11 @@ Lino.autorefresh = function() {
 }
 {%- endif %}
 
-Lino.show_login_window = function(on_login) {
+Lino.show_login_window = function(on_login,username, password ) {
   //~ console.log('20121103 show_login_window',arguments);
   //~ var current_window = Lino.current_window;
+  if (typeof username != 'string') username = '';
+  if (typeof password != 'string') password = '';
   if (Lino.login_window == null) {
     
       function do_login() { 
@@ -386,12 +388,15 @@ Lino.show_login_window = function(on_login) {
         items:[{ 
             fieldLabel:"{{_('Username')}}", 
             id: 'username',
-            name:'username', 
+            name:'username',
+            value: username,
             autoHeight:true,
             allowBlank:false 
         },{ 
-            fieldLabel:"{{_('Password')}}", 
-            name:'password', 
+            fieldLabel:"{{_('Password')}}",
+            id:'password',
+            name:'password',
+            value: password,
             inputType:'password', 
             autoHeight:true,
             allowBlank:false 
@@ -414,6 +419,11 @@ Lino.show_login_window = function(on_login) {
             fn: function() { do_login()}
           },
           items: [login_panel] });
+  }else {
+      var fld = Lino.login_window.items.first().form.findField('username');
+      fld.setValue(username);
+      var fld = Lino.login_window.items.first().form.findField('password');
+      fld.setValue(password);
   };
   Lino.login_window.show();
 };
@@ -452,7 +462,7 @@ Lino.rows2height = function(cols) {  return cols * 20; }
 // HKC
 //Lino.MainPanel = {
 Ext.define('Lino.MainPanel',{
-    extend: 'Ext.panel.Panel',
+    extend: 'Ext.panel.Table',
   is_home_page : false,
   setting_param_values : false,
   config_containing_window : function(wincfg) { }
@@ -887,7 +897,7 @@ Ext.define('Lino.WindowAction', {
 // HKC
 //Lino.PanelMixin = {
 Ext.define('Lino.PanelMixin', {
-    extend: 'Ext.panel.Panel',
+    extend: 'Ext.panel.Table',
   get_containing_window : function (){
       if (this.containing_window) return this.containing_window;
       return this.containing_panel.get_containing_window();
@@ -2013,11 +2023,17 @@ Lino.build_buttons = function(panel,actions) {
             menu : a.menu
           };
       if (a.panel_btn_handler) {
-          var h = a.panel_btn_handler.createCallback(panel);
+          //Edited by HKC
+          //var h = a.panel_btn_handler.createCallback(panel);
+          var h = Ext.callback(a.panel_btn_handler,this, [panel]);
           if (a.auto_save == true) {
-              h = panel.do_when_clean.createDelegate(panel,[true,h]);
+              //Edited by HKC
+              //h = panel.do_when_clean.createDelegate(panel,[true,h]);
+              h = Ext.bind(panel.do_when_clean,panel,[true,h]);
           } else if (a.auto_save == null) {
-              h = panel.do_when_clean.createDelegate(panel,[false,h]);
+              //Edited by HKC
+              //h = panel.do_when_clean.createDelegate(panel,[false,h]);
+              h = Ext.bind(panel.do_when_clean,panel,[false,h]);
           } else if (a.auto_save == false) {
               // h = h;
           } else {
@@ -2332,9 +2348,9 @@ Ext.define('Lino.FieldBoxMixin', {
 //Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
 //Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
 Ext.define('Lino.HtmlBoxPanel', {
-    extend : 'Ext.panel.Panel',
+    extend : 'Ext.panel.Table',
      mixins: [
-         //'Ext.panel.Panel',
+         //'Ext.panel.Table',
          'Lino.PanelMixin',
          'Lino.FieldBoxMixin',
      ],
@@ -2667,16 +2683,16 @@ Ext.define('Lino.FormPanel', {
         this.tbar = this.tbar.concat([this.record_selector]);
         
         this.tbar = this.tbar.concat([
-          this.first = new Ext.Toolbar.Button({
+          this.first = new Ext.toolbar.Toolbar({
               tooltip:"{{_('First')}}",disabled:true,
               handler:this.moveFirst,scope:this,iconCls:'x-tbar-page-first'}),
-          this.prev = new Ext.Toolbar.Button({
+          this.prev = new Ext.toolbar.Toolbar({
               tooltip:"{{_('Previous')}}",disabled:true,
               handler:this.movePrev,scope:this,iconCls:'x-tbar-page-prev'}),
-          this.next = new Ext.Toolbar.Button({
+          this.next = new Ext.toolbar.Toolbar({
               tooltip:"{{_('Next')}}",disabled:true,
               handler:this.moveNext,scope:this,iconCls:'x-tbar-page-next'}),
-          this.last = new Ext.Toolbar.Button({
+          this.last = new Ext.toolbar.Toolbar({
               tooltip:"{{_('Last')}}",disabled:true,
               handler:this.moveLast,scope:this,iconCls:'x-tbar-page-last'})
         ]);
@@ -2725,7 +2741,7 @@ Ext.define('Lino.FormPanel', {
     //~ }
     //  Edited by HKC
     //Lino.FormPanel.superclass.initComponent.call(this);
-      this.callParent(this);
+      this.callParent(arguments);
 
     // this.on('show',
     //         function(){ this.init_focus();}, 
@@ -3283,7 +3299,7 @@ Lino.auto_height_cell_template = new Ext.Template(
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, {
 Ext.define('Lino.GridPanel', {
-    extend : 'Ext.grid.plugin.CellEditing',
+    extend : 'Ext.grid.Panel',
      mixins: [
          //'Ext.grid.plugin.CellEditing',
          'Lino.MainPanel',
@@ -3433,7 +3449,8 @@ Ext.define('Lino.GridPanel', {
         //~ this.quick_search_field.focus(); // 20121024
       }, this
     );
-    var actions = Lino.build_buttons(this, this.ls_bbar_actions);
+    //var actions = Lino.build_buttons(this, this.ls_bbar_actions);
+    var actions;
     //~ Ext.apply(config,Lino.build_buttons(this,config.ls_bbar_actions));
     //~ config.bbar, this.cmenu = Lino.build_buttons(this,config.ls_bbar_actions);
     //~ this.cmenu = new Ext.menu.Menu({items: config.bbar});
@@ -3509,7 +3526,9 @@ Ext.define('Lino.GridPanel', {
     }
       
     if (this.cell_edit) {
-      this.selModel = new Ext.grid.CellSelectionModel()
+      //  Edited by HKC
+      //this.selModel = new Ext.grid.CellSelectionModel();
+        this.selModel = new Ext.selection.CellModel();
       this.get_selected = function() {
         //~ console.log(this.getSelectionModel().selection);
         if (this.selModel.selection)
@@ -3572,7 +3591,9 @@ Ext.define('Lino.GridPanel', {
   get_status : function(){
     var st = { base_params : this.get_base_params()};
     if (!this.hide_top_toolbar) {
-        st.current_page = this.getTopToolbar().current;
+        //Edited by HKC
+        //st.current_page = this.getTopToolbar().current;
+        st.current_page = this.getDockedComponent('toptoolbar');
     }
     st.param_values = this.status_param_values;
     //~ console.log("20120213 GridPanel.get_status",st);
@@ -3600,7 +3621,9 @@ Ext.define('Lino.GridPanel', {
     if (!this.hide_top_toolbar) {
       //~ console.log("20120213 GridPanel.getTopToolbar().changePage",
           //~ status.current_page || 1);
-      this.getTopToolbar().changePage(status.current_page || 1);
+      //  Edited by HKC
+      //this.getTopToolbar().changePage(status.current_page || 1);
+      this.getDockedComponent('toptoolbar');
     }
     //~ this.fireEvent('resize');
     //~ this.refresh.defer(100,this); 
@@ -3866,7 +3889,10 @@ Ext.define('Lino.GridPanel', {
   },
   
   get_current_grid_config : function () {
+      var cm= this.getColumns();
     var cm = this.getColumnModel();
+      //var f = this.getColumns();
+    //var cm  = this.grid.getView().getHeaderCt().getGridColumns();
     var widths = Array(cm.config.length);
     var hiddens = Array(cm.config.length);
     //~ var hiddens = Array(cm.config.length);
@@ -4233,9 +4259,9 @@ Lino.chooser_handler = function(combo,name) {
 
 
 // Edited by HKC
-Lino.ComboBox = Ext.extend(Ext.form.ComboBox,{
-//Ext.define('Override.form.field.Text', {
-//    extend : 'Ext.form.ComboBox',
+//Lino.ComboBox = Ext.extend(Ext.form.ComboBox,{
+Ext.define('Lino.ComboBox', {
+    extend : 'Ext.form.ComboBox',
   forceSelection: "yes but select on tab",
   // forceSelection: true,
   triggerAction: 'all',
@@ -4247,12 +4273,12 @@ Lino.ComboBox = Ext.extend(Ext.form.ComboBox,{
   valueField: '{{constants.CHOICES_VALUE_FIELD}}', // 'value',
   
   //~ initComponent : Ext.form.ComboBox.prototype.initComponent.createSequence(function() {
-  initComponent : function(){
-      this.contextParams = {};
+  //initComponent : function(){
+  //    this.contextParams = {};
       //~ Ext.form.ComboBox.initComponent(this);
       //Lino.ComboBox.superclass.initComponent.call(this);
-      this.callSuper(this);
-  },
+      //this.callSuper(this);
+  //},
   setValue : function(v,record_data){
       /*
       Based on feature request developed in http://extjs.net/forum/showthread.php?t=75751
@@ -4389,7 +4415,8 @@ Lino.ComplexRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   }
 });
 
-Lino.RemoteComboFieldElement = Ext.extend(Lino.ComboBox,{
+Ext.define('Lino.RemoteComboFieldElement',{
+  extend:'Lino.ComboBox',
   mode: 'remote',
   //~ forceSelection:false,
   minChars: 2, // default 4 is too much
@@ -4445,8 +4472,10 @@ Lino.TwinCombo.prototype.onTrigger1Click = Ext.form.ComboBox.prototype.onTrigger
 
 
 
-Lino.SimpleRemoteComboFieldElement = Ext.extend(Lino.RemoteComboFieldElement,{
-  displayField: 'value', 
+//Lino.SimpleRemoteComboFieldElement = Ext.extend(Lino.RemoteComboFieldElement,{
+Ext.define('Lino.SimpleRemoteComboFieldElement',{
+    extend : 'Lino.RemoteComboFieldElement',
+  displayField: 'value',
   valueField: null,
   forceSelection: false
 });
@@ -4575,6 +4604,7 @@ Ext.define('Lino.Window', {
 Ext.override('Lino.form.Panel',{
 //Ext.define('Lino.form.Panel', {
 //    extend : 'Ext.form.Panel',
+    xtype  : 'myview',
     my_loadRecord : function(values){
     //~ loadRecord : function(record){
         /* Same as ExtJS's loadRecord() (setValues()), except that we 
