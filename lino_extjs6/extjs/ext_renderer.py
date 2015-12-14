@@ -1040,7 +1040,7 @@ class ExtRenderer(HtmlRenderer):
              if isinstance(e, ext_elems.FieldElement)])
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
         #     dh.layout._formpanel_name
-        yield "this.callSuper(this);"
+        yield "this.callSuper();"
         yield "  }"
         yield "});"
         yield ""
@@ -1082,7 +1082,7 @@ class ExtRenderer(HtmlRenderer):
              if isinstance(e, ext_elems.FieldElement)])
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
         #     dh.layout._formpanel_name
-        yield "this.callSuper(this);";
+        yield "this.callSuper();";
         yield "  }"
         yield "});"
         yield ""
@@ -1137,12 +1137,12 @@ class ExtRenderer(HtmlRenderer):
                 yield "      " + ln
             # yield "      Lino.%s.superclass.onRender.call(this, ct, position);" % \
             #     dh.layout._formpanel_name
-                yield "      this.callSuper(this, ct, position);"
+                yield "      this.callSuper(ct, position);"
             yield "    }"
 
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
         #     dh.layout._formpanel_name
-        yield "  this.callSuper(this);"
+        yield "  this.callSuper();"
 
         # Seems that checkboxes don't emit a change event
         # when they are changed:
@@ -1205,7 +1205,7 @@ class ExtRenderer(HtmlRenderer):
         #     % action.full_name()
         # this.callParent(arguments);
         # this.callSuper(arguments);
-        yield "    this.callSuper(this);"
+        yield "    this.callSuper();"
         yield "  }"
         yield "});"
         yield ""
@@ -1292,8 +1292,8 @@ class ExtRenderer(HtmlRenderer):
             yield "    this.onRender = function(ct, position) {"
             for ln in on_render:
                 yield "      " + ln
-            # yield "      Lino.%s.GridPanel.superclass.onRender.call(this, ct, position);" % rh.actor
-            yield "this.callSuper(this, ct, position);"
+            yield "      Lino.%s.GridPanel.superclass.onRender.call(this, ct, position);" % rh.actor
+            # yield "this.callParent(ct, position);"
             yield "    }"
 
         yield "    this.ls_columns = %s;" % py2js([
@@ -1302,7 +1302,7 @@ class ExtRenderer(HtmlRenderer):
 
         # yield "    Lino.%s.GridPanel.superclass.initComponent.call(this);" \
         #     % rh.actor
-        yield "this.callSuper(this);"
+        yield "this.callSuper();"
         yield "  }"
         yield "});"
         yield ""
