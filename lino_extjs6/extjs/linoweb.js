@@ -1926,7 +1926,8 @@ Lino.help_text_editor = function() {
     //~ console.log(20120202,bp);
   //~ Lino.lino.ContentTypes.detail({},{base_params:bp});
   //~ Lino.lino.ContentTypes.detail.run(null,{record_id:this.content_type});
-  Lino.lino.ContentTypes.detail.run(null,{record_id:this.content_type});
+  //  Edited by HKC
+  Lino.gfks.ContentTypes.detail.run(null,{record_id:this.content_type});
 }
 
 // Path to the blank image should point to a valid location on your server
@@ -2628,7 +2629,7 @@ Ext.define('Lino.FormPanel', {
     config.trackResetOnLoad = true;
     
     //Lino.FormPanel.superclass.constructor.call(this, config);
-      this.callParent(this,config);
+      this.callParent(arguments);
       
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
@@ -2683,7 +2684,7 @@ Ext.define('Lino.FormPanel', {
         this.tbar = this.tbar.concat([this.record_selector]);
         
         this.tbar = this.tbar.concat([
-          this.first = new Ext.toolbar.Toolbar({
+          this.first = new Ext.toolbar.Button({
               tooltip:"{{_('First')}}",disabled:true,
               handler:this.moveFirst,scope:this,iconCls:'x-tbar-page-first'}),
           this.prev = new Ext.toolbar.Toolbar({
@@ -2987,19 +2988,17 @@ Ext.define('Lino.FormPanel', {
               if (da[item.itemId]) item.disable(); else item.enable();
           });
       };
-        console.log("HKC disable form");
-      if (this.disable_editing | record.data.disable_editing) {
-      //    ~ console.log("20120202 disable_editing",record.title);
-          //this.form.items.each(function(cmp){
-          //  if (!cmp.always_enabled) cmp.disable();
-          //},this);
-      //} else {
-
-          //this.form.items.each(function(cmp){
-          //  if (record.data.disabled_fields[cmp.name]) cmp.disable();
-          //  else cmp.enable();
-          //},
-        //this);
+if (this.disable_editing | record.data.disable_editing) {
+          //~ console.log("20120202 disable_editing",record.title);
+          this.form.items.each(function(cmp){
+            if (!cmp.always_enabled) cmp.disable();
+          },this);
+      } else {
+          this.form.items.each(function(cmp){
+            //~ console.log("20120202",cmp);
+            if (record.data.disabled_fields[cmp.name]) cmp.disable();
+            else cmp.enable();
+          },this);
         
           //~ if (record.data.disabled_fields) {
               //~ for (i = 0; i < record.data.disabled_fields.length; i++) {
@@ -3236,8 +3235,9 @@ Lino.getRowClass = function(record, rowIndex, rowParams, store) {
 //Edited by HKC
 //Lino.GridStore = Ext.extend(Ext.data.ArrayStore,{
 Ext.define('Lino.GridStore', {
-    extend : 'Ext.data.ArrayStore',
-  autoLoad: false
+    extend : 'Ext.data.Store',
+    //extend : 'Ext.data.ArrayStore',
+  autoLoad: true
   ,load: function(options) {
     //~ foo.bar = baz; // 20120213
     if (!options) options = {};
@@ -3255,14 +3255,18 @@ Ext.define('Lino.GridStore', {
         }
     } else {
         //var ps = this.grid_panel.calculatePageSize();
-        var ps
+        var ps = 100;
         if (!ps) {
           // console.log("GridStore.load() failed to calculate pagesize");
           return false;
         } 
         options.params.{{constants.URL_PARAM_LIMIT}} = ps;
       
-        this.grid_panel.getTopToolbar().pageSize =  ps;
+        //this.grid_panel.getTopToolbar().pageSize =  ps;
+        var toptoolbar = this.grid_panel.getDockedComponent('toptoolbar');
+        if (toptoolbar){
+            toptoolbar.pageSize =  ps;
+        }
         if (options.params.{{constants.URL_PARAM_START}} == undefined)
             // if (start != -1) 
             //     start = this.grid_panel.getTopToolbar().cursor
@@ -3275,7 +3279,7 @@ Ext.define('Lino.GridStore', {
     //~ Lino.insert_subst_user(options.params);
     //~ console.log("20120814 GridStore.load()",options.params,this.baseParams);
     //return Lino.GridStore.superclass.load.call(this, options);
-    return this.callSuper(options);
+    return this.callSuper(arguments);
   }
   // ,insert : function(index, records) {
   //   return Ext.data.Store.prototype.insert.call(this, index, records)
@@ -3384,24 +3388,26 @@ Ext.define('Lino.GridPanel', {
     /* e.g. when slave gridwindow called from a permalink */
     //~ if (this.base_params) Ext.apply(bp,this.base_params);  
     
-    var proxy = new Ext.data.HttpProxy({ 
+    var proxy = new Ext.data.HttpProxy({
+    //var proxy = {
       // 20120814 
       url: '{{extjs.build_plain_url("api")}}' + this.ls_url
-      ,method: "GET"
+      ,method: "GET",
+        //type: 'ajax',
       //~ ,url: ADMIN_URL + '/restful' + this.ls_url
       //~ ,restful: true 
       //~ ,listeners: {load:on_proxy_load} 
       //~ ,listeners: {write:on_proxy_write} 
     });
     //~ config.store = new Ext.data.JsonStore({ 
-    //~ this.store = new Ext.data.ArrayStore({ 
-    this.store = new Lino.GridStore({ 
+    //this.store = new Ext.data.ArrayStore({
+    this.store = new Lino.GridStore({
       grid_panel: this
       ,listeners: { exception: Lino.on_store_exception }
       ,remoteSort: true
       ,totalProperty: "count"
       ,root: "rows"
-      //~ ,id: "id" 
+      //~ ,id: "id"
       ,proxy: proxy
       //~ autoLoad: this.containing_window ? true : false
       ,idIndex: this.pk_index
@@ -3427,7 +3433,7 @@ Ext.define('Lino.GridPanel', {
         //~ this_.set_status(this_.store.reader.arrayData.status);
         //~ 20120918
         this.getView().getRowClass = Lino.getRowClass;
-        
+
         if (this_.store.reader.arrayData.no_data_text) {
             //~ this.viewConfig.emptyText = this_.store.reader.arrayData.no_data_text;
             this.getView().emptyText = this_.store.reader.arrayData.no_data_text;
@@ -3440,12 +3446,12 @@ Ext.define('Lino.GridPanel', {
           this.is_searching = false;
           if (this_.selModel.getSelectedCell){
               if (this_.getStore().getCount()) // there may be no data
-                  this_.selModel.select(0,0); 
+                  this_.selModel.select(0,0);
           } else {
               this_.selModel.selectFirstRow();
               this_.getView().focusEl.focus();
           }
-        } 
+        }
         //~ else console.log("is_searching -> no focussing");
         //~ var t = this.getTopToolbar();
         //~ var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
@@ -3626,8 +3632,8 @@ Ext.define('Lino.GridPanel', {
           //~ status.current_page || 1);
       //  Edited by HKC
       //this.getTopToolbar().changePage(status.current_page || 1);
-        var toptoolbar = this.getDockedComponent('toptoolbar');
-        //toptoolbar.changePage(status.current_page || 1);
+      //  var toptoolbar = this.getDockedComponent('toptoolbar');
+      //  toptoolbar.changePage(status.current_page || 1);
     }
     //~ this.fireEvent('resize');
     //~ this.refresh.defer(100,this); 
@@ -3942,7 +3948,8 @@ Ext.define('Lino.GridPanel', {
     }
     //~ console.log(20100811, data);
     var main = new Ext.grid.GridPanel({
-      store: new Ext.data.ArrayStore({
+      //store: new Ext.data.ArrayStore({
+        store: new Ext.data.Store({
         idIndex:0,
         fields:['name','columns','hidden_cols','filters'],
         autoDestroy:true,
