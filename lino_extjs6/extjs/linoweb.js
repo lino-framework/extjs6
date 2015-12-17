@@ -3235,9 +3235,9 @@ Lino.getRowClass = function(record, rowIndex, rowParams, store) {
 //Edited by HKC
 //Lino.GridStore = Ext.extend(Ext.data.ArrayStore,{
 Ext.define('Lino.GridStore', {
-    extend : 'Ext.data.Store',
-    //extend : 'Ext.data.ArrayStore',
-  autoLoad: true
+    //extend : 'Ext.data.Store',
+    extend : 'Ext.data.ArrayStore',
+  autoLoad: false
   ,load: function(options) {
     //~ foo.bar = baz; // 20120213
     if (!options) options = {};
@@ -3279,7 +3279,7 @@ Ext.define('Lino.GridStore', {
     //~ Lino.insert_subst_user(options.params);
     //~ console.log("20120814 GridStore.load()",options.params,this.baseParams);
     //return Lino.GridStore.superclass.load.call(this, options);
-    return this.callSuper(arguments);
+    return this.callParent(arguments);
   }
   // ,insert : function(index, records) {
   //   return Ext.data.Store.prototype.insert.call(this, index, records)
@@ -3392,7 +3392,11 @@ Ext.define('Lino.GridPanel', {
     //var proxy = {
       // 20120814 
       url: '{{extjs.build_plain_url("api")}}' + this.ls_url
-      ,method: "GET",
+      ,method: "GET"
+      //,reader: {
+      //       type: 'json',
+      //       rootProperty: 'users'
+      //   }
         //type: 'ajax',
       //~ ,url: ADMIN_URL + '/restful' + this.ls_url
       //~ ,restful: true 
@@ -3430,21 +3434,23 @@ Ext.define('Lino.GridPanel', {
     this.store.on('load', function() {
         //~ console.log('20120814 GridStore.on(load)',this_.store);
         this_.set_param_values(this_.store.reader.arrayData.param_values);
+            //console.log(this_.store.getData());
+         //this_.set_param_values(this_.store.getProxy().getReader().rawData.param_values);
         //~ this_.set_status(this_.store.reader.arrayData.status);
         //~ 20120918
         this.getView().getRowClass = Lino.getRowClass;
 
-        if (this_.store.reader.arrayData.no_data_text) {
+        if (this_.store.data.no_data_text) {
             //~ this.viewConfig.emptyText = this_.store.reader.arrayData.no_data_text;
-            this.getView().emptyText = this_.store.reader.arrayData.no_data_text;
+            this.getView().emptyText = this_.store.data.no_data_text;
             this.getView().refresh();
         }
         if (this_.containing_window)
-            this_.set_window_title(this_.store.reader.arrayData.title);
+            this_.set_window_title(this_.store.data.title);
             //~ this_.containing_window.setTitle(this_.store.reader.arrayData.title);
         if (!this.is_searching) { // disabled 20121025: quick_search_field may not lose focus
           this.is_searching = false;
-          if (this_.selModel.getSelectedCell){
+          if (this_.selModel instanceof Ext.selection.CellModel){
               if (this_.getStore().getCount()) // there may be no data
                   this_.selModel.select(0,0);
           } else {
@@ -3550,7 +3556,8 @@ Ext.define('Lino.GridPanel', {
         return this.store.getAt(0);
       };
     } else { 
-      this.selModel = new Ext.grid.RowSelectionModel() 
+      //this.selModel = new Ext.grid.RowSelectionModel();
+        this.selModel = new Ext.selection.RowModel();
       this.get_selected = function() {
         var sels = this.selModel.getSelections();
         if (sels.length == 0) sels = [this.store.getAt(0)];
@@ -3932,82 +3939,6 @@ Ext.define('Lino.GridPanel', {
         //~ p['label'] = gc.label
     //~ console.log('20100810 save_grid_config',p);
     return p;
-  },
-  
-  unused_manage_grid_configs : function() {
-    var data = [];
-    for (k in this.ls_grid_configs) {
-      var v = this.ls_grid_configs[k];
-      var i = [k,String(v.columns),String(v.hidden_cols),String(v.filters)];
-      data.push(i)
-    }
-    if (this.ls_grid_configs[this.gc_name] == undefined) {
-      var v = this.get_current_grid_config();
-      var i = [k,String(v.columns),String(v.hidden_cols),String(v.filters)];
-      data.push(i);
-    }
-    //~ console.log(20100811, data);
-    var main = new Ext.grid.GridPanel({
-      //store: new Ext.data.ArrayStore({
-        store: new Ext.data.Store({
-        idIndex:0,
-        fields:['name','columns','hidden_cols','filters'],
-        autoDestroy:true,
-        data: data}),
-      //~ autoHeight:true,
-      selModel: new Ext.grid.RowSelectionModel(),
-      listeners: { 
-        rowdblclick: function(grid,rowIndex,e) {
-          console.log('row doubleclicked',grid, rowIndex,e);
-        },
-        rowclick: function(grid,rowIndex,e) {
-          console.log('row clicked',grid, rowIndex,e);
-        }
-      },
-      columns: [ 
-        {dataIndex:'name',header:'Name'}, 
-        {dataIndex:'columns',header:'columns'}, 
-        {dataIndex:'hidden_cols',header:'hidden columns'}, 
-        {dataIndex:'filters',header:'filters'} 
-      ]
-    });
-    //  edited by HKC Ext.window -> Ext.window.Window
-    //var win = new Ext.Window({title:'GridConfigs Manager',layout:'fit',items:main,height:200});
-    var win = new Ext.window.Window({title:'GridConfigs Manager',layout:'fit',items:main,height:200});
-    win.show();
-  },
-  
-  unused_edit_grid_config : function(name) {
-    gc = this.ls_grid_configs[name];
-      //  edited by HKC Ext.window -> Ext.window.Window
-    //var win = new Ext.Window({
-    var win = new Ext.window.Window({
-      title:'Edit Grid Config',layout:'vbox', 
-      //~ layoutConfig:'stretch'
-      items:[
-        {xtype:'text', value: gc.name},
-        {xtype:'text', value: gc.columns},
-        {xtype:'text', value: gc.hidden_cols},
-        {xtype:'text', value: gc.filters}
-      ]
-    });
-    win.show();
-  },
-  
-  unused_save_grid_config : function () {
-    //~ console.log('TODO: save_grid_config',this);
-    //~ p.column_widths = Ext.pluck(this.colModel.columns,'width');
-    var a = { 
-      params:this.get_current_grid_config(), 
-      method:'PUT',
-      url:'{{extjs.build_plain_url("grid_config")}}' + this.ls_url,
-      success: Lino.action_handler(this),
-      scope: this,
-      failure: Lino.ajax_error_handler(this)
-    };
-    this.loadMask.show(); // 20120211
-    Ext.Ajax.request(a);
-    //~ Lino.do_action(this,a);
   },
   
   on_beforeedit : function(e) {
