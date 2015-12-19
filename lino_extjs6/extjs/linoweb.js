@@ -2805,7 +2805,7 @@ Ext.define('Lino.FormPanel', {
       //this.loadMask = new Ext.create('Ext.LoadM,(this.bwrap,{msg:"{{_('Please wait...')}}"}));
         this.loadMask = new Ext.LoadMask({
                                         msg    : 'Please wait...',
-                                        target : this.bwrap,
+                                        target : this,
                                     });
     },this);
     
@@ -4375,8 +4375,9 @@ Lino.ChoicesFieldElement = Ext.extend(Lino.ComboBox,{
   mode: 'local'
 });
 
-
-Lino.SimpleRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
+Ext.define('Lino.SimpleRemoteComboStore',{
+  extend:'Ext.data.JsonStore',
+//Lino.SimpleRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   // forceSelection: true,  20140206 why was this here?
   constructor: function(config){
       //Lino.SimpleRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
@@ -4396,7 +4397,9 @@ Lino.SimpleRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   }
 });
 
-Lino.ComplexRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
+Ext.define('Lino.ComplexRemoteComboStore',{
+  extend:'Ext.data.JsonStore',
+//Lino.ComplexRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   constructor: function(config){
       //Lino.ComplexRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
       //    totalProperty: 'count',
@@ -4449,7 +4452,10 @@ Thanks to Animal for posting the basic idea:
 http://www.sencha.com/forum/showthread.php?15842-2.0-SOLVED-Combobox-twintrigger-clear&p=76130&viewfull=1#post76130
 
 */
-Lino.TwinCombo = Ext.extend(Lino.RemoteComboFieldElement,{
+
+Ext.define('Lino.TwinCombo',{
+  extend:'Lino.RemoteComboFieldElement',
+//Lino.TwinCombo = Ext.extend(Lino.RemoteComboFieldElement,{
     trigger2Class : 'x-form-search-trigger',
     //~ trigger2Class : 'x-tbar-detail',
     initComponent : function() {
@@ -4560,8 +4566,8 @@ Ext.define('Lino.Window', {
     this.main_item.config_containing_window(config);
     
     // console.log('20150514 Lino.Window.constructor() 2');
-    //Lino.Window.superclass.constructor.call(this,config);
-      this.callSuper(arguments);
+        Lino.Window.superclass.constructor.call(this,config);
+      //this.callSuper(arguments);
 
     
     console.log('20120110 Lino.Window.constructor() 3');
