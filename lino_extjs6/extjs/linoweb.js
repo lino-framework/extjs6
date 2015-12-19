@@ -334,7 +334,11 @@ Lino.login_window = null;
 Lino.autorefresh = function() {
   if (Lino.current_window == null) {
       Lino.viewport.refresh();
-      Lino.autorefresh.defer({{extjs.autorefresh_seconds*1000}});
+      //HKC
+      //Lino.autorefresh.defer({{extjs.autorefresh_seconds*1000}});
+      Ext.defer(function() {
+           Lino.autorefresh();
+        },  {{extjs.autorefresh_seconds*1000}}) ;
   }
 }
 {%- endif %}
@@ -566,7 +570,8 @@ Ext.define('Lino.MainPanel',{
             var w = t.get_containing_window();
             Lino.do_when_visible(w, function() {
                 //~ p.doLayout(true); // doLayout(shallow, force)
-                w.doLayout(true); // doLayout(shallow, force)
+                //w.doLayout(true); // doLayout(shallow, force)
+                // HKC , disable doLayout function
                 //~ t.params_panel.on('afterlayout',update,t,{single:true});
             });
         };
@@ -2081,7 +2086,10 @@ Lino.do_when_visible = function(cmp,todo) {
       //~ var fn = function() {Lino.do_when_visible(cmp,todo)};
       //~ fn.defer(100);
       
-      Lino.do_when_visible.defer(50,this,[cmp,todo]);
+      //Lino.do_when_visible.defer(50,this,[cmp,todo]);
+        Ext.defer(function() {
+           Lino.do_when_visible(cmp,todo);
+        },  50) ;
       //~ Lino.do_when_visible.defer(100,this,[cmp,todo]);
       
     } else {
@@ -2468,8 +2476,8 @@ Ext.define('Lino.ActionFormPanel', {
         {text: 'OK', handler: this.on_ok, scope: this},
         {text: 'Cancel', handler: this.on_cancel, scope: this}
     ];
-    //Lino.ActionFormPanel.superclass.constructor.call(this, config);
-      this.callSuper(arguments);
+    Lino.ActionFormPanel.superclass.constructor.call(this, config);
+      //this.callSuper(arguments);
   }
   //~ ,initComponent : function(){
     //~ Lino.ActionFormPanel.superclass.initComponent.call(this);
@@ -2598,6 +2606,50 @@ Lino.fields2array = function(fields,values) {
     return pv;
 }
 
+//Edited by HKC
+//    Ext.define('Lino.PanelMixin', {
+//    extend: 'Ext.panel.Table',
+//Ext.override('Ext.form.Basic',{
+Ext.define('Lino.form.Panel', {
+    //extend : 'Ext.form.Panel',
+    override : 'Ext.form.Basic',
+    //xtype  : 'myview',
+    my_loadRecord : function(values){
+    //~ loadRecord : function(record){
+        /* Same as ExtJS's loadRecord() (setValues()), except that we
+        forward also the record to field.setValue() so that Lino.Combobox
+        can use it.
+        */
+        //~ console.log('20120918 my_loadRecord',values)
+        if(Ext.isArray(values)){
+            for(var i = 0, len = values.length; i < len; i++){
+                var v = values[i];
+                var f = this.findField(v.id);
+                if(f){
+                    f.setValue(v.value,values);
+                    if(this.trackResetOnLoad){
+                        f.originalValue = f.getValue();
+                    }
+                }
+            }
+        }else{
+            var field, id;
+            for(id in values){
+                if(!Ext.isFunction(values[id]) && (field = this.findField(id))){
+                    field.setValue(values[id],values);
+                    if(this.trackResetOnLoad){
+                        field.originalValue = field.getValue();
+                        //~ if (field.hiddenField) {
+                          //~ field.hiddenField.originalValue = field.hiddenField.value;
+                        //~ }
+                    }
+                }
+            }
+        }
+        return this;
+    }
+});
+
 // HKC
 //Lino.FormPanel = Ext.extend(Ext.form.FormPanel,Lino.MainPanel);
 //Lino.FormPanel = Ext.extend(Lino.FormPanel,Lino.PanelMixin);
@@ -2628,8 +2680,8 @@ Ext.define('Lino.FormPanel', {
       
     config.trackResetOnLoad = true;
     
-    //Lino.FormPanel.superclass.constructor.call(this, config);
-      this.callParent(arguments);
+    Lino.FormPanel.superclass.constructor.call(this, config);
+      //this.callParent(arguments);
       
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
@@ -2741,15 +2793,20 @@ Ext.define('Lino.FormPanel', {
         //~ this.set_base_params(this.master_panel.get_master_params());
     //~ }
     //  Edited by HKC
-    //Lino.FormPanel.superclass.initComponent.call(this);
-      this.callParent(arguments);
+    Lino.FormPanel.superclass.initComponent.call(this);
+      //this.callParent(arguments);
 
     // this.on('show',
     //         function(){ this.init_focus();}, 
     //         this);
     
     this.on('render',function(){
-      this.loadMask = new Ext.create('Ext.LoadMask',(this.bwrap,{msg:"{{_('Please wait...')}}"}));
+      //  HKC
+      //this.loadMask = new Ext.create('Ext.LoadM,(this.bwrap,{msg:"{{_('Please wait...')}}"}));
+        this.loadMask = new Ext.LoadMask({
+                                        msg    : 'Please wait...',
+                                        target : this.bwrap,
+                                    });
     },this);
     
     
@@ -3235,9 +3292,9 @@ Lino.getRowClass = function(record, rowIndex, rowParams, store) {
 //Edited by HKC
 //Lino.GridStore = Ext.extend(Ext.data.ArrayStore,{
 Ext.define('Lino.GridStore', {
-    extend : 'Ext.data.Store',
-    //extend : 'Ext.data.ArrayStore',
-  autoLoad: true
+    //extend : 'Ext.data.JsonStore',
+    extend : 'Ext.data.ArrayStore',
+  autoLoad: false
   ,load: function(options) {
     //~ foo.bar = baz; // 20120213
     if (!options) options = {};
@@ -3338,8 +3395,8 @@ Ext.define('Lino.GridPanel', {
 {% if settings.SITE.use_filterRow %}
     config.plugins = [new Ext.ux.grid.FilterRow()];
 {% endif %}    
-    //Lino.GridPanel.superclass.constructor.call(this,config);
-    this.callSuper(config);
+    Lino.GridPanel.superclass.constructor.call(this,config);
+    //this.callSuper(config);
     
     //~ if (this.containing_window) {
         //~ console.log("20111206 install refresh");
@@ -3392,7 +3449,11 @@ Ext.define('Lino.GridPanel', {
     //var proxy = {
       // 20120814 
       url: '{{extjs.build_plain_url("api")}}' + this.ls_url
-      ,method: "GET",
+      ,method: "GET"
+      //,reader: {
+      //       type: 'json',
+      //       rootProperty: 'users'
+      //   }
         //type: 'ajax',
       //~ ,url: ADMIN_URL + '/restful' + this.ls_url
       //~ ,restful: true 
@@ -3430,6 +3491,8 @@ Ext.define('Lino.GridPanel', {
     this.store.on('load', function() {
         //~ console.log('20120814 GridStore.on(load)',this_.store);
         this_.set_param_values(this_.store.reader.arrayData.param_values);
+            //console.log(this_.store.getData());
+         //this_.set_param_values(this_.store.first().data.rows);
         //~ this_.set_status(this_.store.reader.arrayData.status);
         //~ 20120918
         this.getView().getRowClass = Lino.getRowClass;
@@ -3444,7 +3507,7 @@ Ext.define('Lino.GridPanel', {
             //~ this_.containing_window.setTitle(this_.store.reader.arrayData.title);
         if (!this.is_searching) { // disabled 20121025: quick_search_field may not lose focus
           this.is_searching = false;
-          if (this_.selModel.getSelectedCell){
+          if (this_.selModel instanceof Ext.selection.CellModel){
               if (this_.getStore().getCount()) // there may be no data
                   this_.selModel.select(0,0);
           } else {
@@ -3550,7 +3613,8 @@ Ext.define('Lino.GridPanel', {
         return this.store.getAt(0);
       };
     } else { 
-      this.selModel = new Ext.grid.RowSelectionModel() 
+      //this.selModel = new Ext.grid.RowSelectionModel();
+        this.selModel = new Ext.selection.RowModel();
       this.get_selected = function() {
         var sels = this.selModel.getSelections();
         if (sels.length == 0) sels = [this.store.getAt(0)];
@@ -3932,82 +3996,6 @@ Ext.define('Lino.GridPanel', {
         //~ p['label'] = gc.label
     //~ console.log('20100810 save_grid_config',p);
     return p;
-  },
-  
-  unused_manage_grid_configs : function() {
-    var data = [];
-    for (k in this.ls_grid_configs) {
-      var v = this.ls_grid_configs[k];
-      var i = [k,String(v.columns),String(v.hidden_cols),String(v.filters)];
-      data.push(i)
-    }
-    if (this.ls_grid_configs[this.gc_name] == undefined) {
-      var v = this.get_current_grid_config();
-      var i = [k,String(v.columns),String(v.hidden_cols),String(v.filters)];
-      data.push(i);
-    }
-    //~ console.log(20100811, data);
-    var main = new Ext.grid.GridPanel({
-      //store: new Ext.data.ArrayStore({
-        store: new Ext.data.Store({
-        idIndex:0,
-        fields:['name','columns','hidden_cols','filters'],
-        autoDestroy:true,
-        data: data}),
-      //~ autoHeight:true,
-      selModel: new Ext.grid.RowSelectionModel(),
-      listeners: { 
-        rowdblclick: function(grid,rowIndex,e) {
-          console.log('row doubleclicked',grid, rowIndex,e);
-        },
-        rowclick: function(grid,rowIndex,e) {
-          console.log('row clicked',grid, rowIndex,e);
-        }
-      },
-      columns: [ 
-        {dataIndex:'name',header:'Name'}, 
-        {dataIndex:'columns',header:'columns'}, 
-        {dataIndex:'hidden_cols',header:'hidden columns'}, 
-        {dataIndex:'filters',header:'filters'} 
-      ]
-    });
-    //  edited by HKC Ext.window -> Ext.window.Window
-    //var win = new Ext.Window({title:'GridConfigs Manager',layout:'fit',items:main,height:200});
-    var win = new Ext.window.Window({title:'GridConfigs Manager',layout:'fit',items:main,height:200});
-    win.show();
-  },
-  
-  unused_edit_grid_config : function(name) {
-    gc = this.ls_grid_configs[name];
-      //  edited by HKC Ext.window -> Ext.window.Window
-    //var win = new Ext.Window({
-    var win = new Ext.window.Window({
-      title:'Edit Grid Config',layout:'vbox', 
-      //~ layoutConfig:'stretch'
-      items:[
-        {xtype:'text', value: gc.name},
-        {xtype:'text', value: gc.columns},
-        {xtype:'text', value: gc.hidden_cols},
-        {xtype:'text', value: gc.filters}
-      ]
-    });
-    win.show();
-  },
-  
-  unused_save_grid_config : function () {
-    //~ console.log('TODO: save_grid_config',this);
-    //~ p.column_widths = Ext.pluck(this.colModel.columns,'width');
-    var a = { 
-      params:this.get_current_grid_config(), 
-      method:'PUT',
-      url:'{{extjs.build_plain_url("grid_config")}}' + this.ls_url,
-      success: Lino.action_handler(this),
-      scope: this,
-      failure: Lino.ajax_error_handler(this)
-    };
-    this.loadMask.show(); // 20120211
-    Ext.Ajax.request(a);
-    //~ Lino.do_action(this,a);
   },
   
   on_beforeedit : function(e) {
@@ -4573,7 +4561,7 @@ Ext.define('Lino.Window', {
     
     // console.log('20150514 Lino.Window.constructor() 2');
     //Lino.Window.superclass.constructor.call(this,config);
-      this.callParent(arguments);
+      this.callSuper(arguments);
 
     
     console.log('20120110 Lino.Window.constructor() 3');
@@ -4611,48 +4599,6 @@ Ext.define('Lino.Window', {
     // console.log('20140829 Lino.Window.onRender() 3');
   }
 });
-
-//Edited by HKC
-Ext.override('Lino.form.Panel',{
-//Ext.define('Lino.form.Panel', {
-//    extend : 'Ext.form.Panel',
-    xtype  : 'myview',
-    my_loadRecord : function(values){
-    //~ loadRecord : function(record){
-        /* Same as ExtJS's loadRecord() (setValues()), except that we 
-        forward also the record to field.setValue() so that Lino.Combobox 
-        can use it. 
-        */
-        //~ console.log('20120918 my_loadRecord',values)
-        if(Ext.isArray(values)){ 
-            for(var i = 0, len = values.length; i < len; i++){
-                var v = values[i];
-                var f = this.findField(v.id);
-                if(f){
-                    f.setValue(v.value,values);
-                    if(this.trackResetOnLoad){
-                        f.originalValue = f.getValue();
-                    }
-                }
-            }
-        }else{ 
-            var field, id;
-            for(id in values){
-                if(!Ext.isFunction(values[id]) && (field = this.findField(id))){
-                    field.setValue(values[id],values);
-                    if(this.trackResetOnLoad){
-                        field.originalValue = field.getValue();
-                        //~ if (field.hiddenField) {
-                          //~ field.hiddenField.originalValue = field.hiddenField.value;
-                        //~ }
-                    }
-                }
-            }
-        }
-        return this;
-    }
-});
-
 
 
 
