@@ -3450,10 +3450,13 @@ Ext.define('Lino.GridPanel', {
       // 20120814 
       url: '{{extjs.build_plain_url("api")}}' + this.ls_url
       ,method: "GET"
-      //,reader: {
-      //       type: 'json',
-      //       rootProperty: 'users'
-      //   }
+      ,reader: {
+          type: 'json',
+          rootProperty: 'rows',
+          totalProperty: "count", 
+          idProperty: this.ls_id_property, 
+          keepRawData: true // LS 20151221
+      }
         //type: 'ajax',
       //~ ,url: ADMIN_URL + '/restful' + this.ls_url
       //~ ,restful: true 
@@ -3466,8 +3469,8 @@ Ext.define('Lino.GridPanel', {
       grid_panel: this
       ,listeners: { exception: Lino.on_store_exception }
       ,remoteSort: true
-      ,totalProperty: "count"
-      ,root: "rows"
+      // ,totalProperty: "count"
+      // ,root: "rows"
       //~ ,id: "id"
       ,proxy: proxy
       //~ autoLoad: this.containing_window ? true : false
@@ -3490,20 +3493,22 @@ Ext.define('Lino.GridPanel', {
     //~ var grid = this;
     this.store.on('load', function() {
         //~ console.log('20120814 GridStore.on(load)',this_.store);
-        this_.set_param_values(this_.store.reader.arrayData.param_values);
+        // this_.set_param_values(this_.store.reader.arrayData.param_values);
+        // console.log(20151221, this_.store.getProxy().getReader());
+        this_.set_param_values(this_.store.getProxy().getReader().rawData.param_values);
             //console.log(this_.store.getData());
          //this_.set_param_values(this_.store.first().data.rows);
         //~ this_.set_status(this_.store.reader.arrayData.status);
         //~ 20120918
         this.getView().getRowClass = Lino.getRowClass;
 
-        if (this_.store.reader.arrayData.no_data_text) {
+        if (this_.store.getProxy().getReader().rawData.no_data_text) {
             //~ this.viewConfig.emptyText = this_.store.reader.arrayData.no_data_text;
-            this.getView().emptyText = this_.store.reader.arrayData.no_data_text;
+            this.getView().emptyText = this_.store.getProxy().getReader().rawData.no_data_text;
             this.getView().refresh();
         }
         if (this_.containing_window)
-            this_.set_window_title(this_.store.reader.arrayData.title);
+            this_.set_window_title(this_.store.getProxy().getReader().rawData.title);
             //~ this_.containing_window.setTitle(this_.store.reader.arrayData.title);
         if (!this.is_searching) { // disabled 20121025: quick_search_field may not lose focus
           this.is_searching = false;
@@ -4222,7 +4227,7 @@ Ext.define('Lino.GridPanel', {
 //~ }
 
 Lino.row_context_menu = function(grid,row,col,e) {
-  console.log('20130927 rowcontextmenu',grid,row,col,e,grid.store.reader.arrayData.rows[row]);
+  console.log('20130927 rowcontextmenu',grid,row,col,e,grid.store.getProxy().getReader().rawData.rows[row]);
 }
 
 Lino.cell_context_menu = function(grid,row,col,e) {
@@ -4236,7 +4241,7 @@ Lino.cell_context_menu = function(grid,row,col,e) {
   if(!grid.cmenu.el){grid.cmenu.render(); }
   //~ if(e.record.data.disabled_fields) {
   
-  var da = grid.store.reader.arrayData.rows[row][grid.disabled_actions_index];
+  var da = grid.store.getProxy().getReader().rawData.rows[row][grid.disabled_actions_index];
   if (da) {
       this.cmenu.cascade(function(item){ 
         //~ console.log(20120531, item.itemId, da[item.itemId]);
