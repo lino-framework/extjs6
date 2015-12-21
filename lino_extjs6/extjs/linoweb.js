@@ -3863,7 +3863,11 @@ Ext.define('Lino.GridPanel', {
       Lino.insert_subst_user(this.store.baseParams);
   },
   set_base_param : function(k,v) {
-    this.store.setBaseParam(k,v);
+    //  HKC
+    //this.store.setBaseParam(k,v);
+      this.store.getProxy().setExtraParam(k, v);
+      var options = {};
+      this.store.load(options);
   },
   
   //~ get_permalink_params : function() {
@@ -3883,7 +3887,8 @@ Ext.define('Lino.GridPanel', {
     this.quick_search_text = value;
     this.set_base_param('{{constants.URL_PARAM_FILTER}}',value); 
     //~ this.getTopToolbar().changePage(1);
-    this.getTopToolbar().moveFirst();
+    //  HKC disable this.getTopToolbar()
+    //this.getTopToolbar().moveFirst();
     //~ this.refresh();
     return true;
   },
