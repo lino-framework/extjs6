@@ -811,8 +811,9 @@ class RemoteComboFieldElement(ComboFieldElement):
         if self.editable:
             url = self.layout_handle.get_choices_url(self.field, **kw)
             proxy = dict(url=url, method='GET')
+            js_proxy = py2js(proxy)[:-1] + ",'reader': { 'type': 'json', 'rootProperty': 'rows', 'totalProperty': 'count',  'idProperty': this.ls_id_property, 'keepRawData': true}}"
             kw.update(proxy=js_code("new Ext.data.HttpProxy(%s)" %
-                      py2js(proxy)))
+                      js_proxy))
         # a JsonStore without explicit proxy sometimes used method POST
         return kw
 
@@ -1140,7 +1141,7 @@ class DecimalFieldElement(NumberFieldElement):
 
 
 class QuantityFieldElement(CharFieldElement):
-    
+
     def get_column_options(self, **kw):
         #~ print 20130125, self.field.name
         kw = super(QuantityFieldElement, self).get_column_options(**kw)
@@ -2149,7 +2150,7 @@ def create_layout_element(lh, name, **kw):
         # no sense in an insert window because the master does not yet
         # exist.
         kw.update(master_panel=js_code("this"))
-        
+
         if isinstance(lh.layout, FormLayout):
             # When a table is specified in the layout of a
             # DetailWindow, then it will be rendered as a panel that
