@@ -810,10 +810,10 @@ class RemoteComboFieldElement(ComboFieldElement):
         # ~ kw.update(baseParams=js_code('this.get_base_params()')) # 20120202
         if self.editable:
             url = self.layout_handle.get_choices_url(self.field, **kw)
-            proxy = dict(url=url, method='GET')
-            js_proxy = py2js(proxy)[:-1] + ",'reader': { 'type': 'json', 'rootProperty': 'rows', 'totalProperty': 'count',  'idProperty': this.ls_id_property, 'keepRawData': true}}"
+            reader = dict(type = 'json',rootProperty ='rows', totalProperty = 'count',  idProperty = 'this.ls_id_property', keepRawData = 'true')
+            proxy = dict(url=url, method='GET',reader=reader)
             kw.update(proxy=js_code("new Ext.data.HttpProxy(%s)" %
-                      js_proxy))
+                      py2js(proxy)))
         # a JsonStore without explicit proxy sometimes used method POST
         return kw
 
