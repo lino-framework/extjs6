@@ -1,5 +1,6 @@
 from lino.projects.std.settings import Site
 
+
 class Site(Site):
 
     default_ui = 'extjs'

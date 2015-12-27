@@ -2,13 +2,7 @@
 # Copyright 2009-2015 Luc Saffre
 # License: BSD (see file COPYING for details)
 
-"""Adds the default Lino user interface based on ExtJS.
-
-It is being automatically included by every Lino application unless
-you disable it (e.g. by overriding your :meth:`get_apps_modifiers
-<lino.core.site.Site.get_apps_modifiers>` or your
-:meth:`get_installed_apps <lino.core.site.Site.get_installed_apps>`
-method).
+"""The Lino user interface based on ExtJS 6.
 
 When your Lino application uses the ExtJS user interface, then you may
 need a `commercial license from Sencha
