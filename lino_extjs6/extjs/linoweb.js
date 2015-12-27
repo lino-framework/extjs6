@@ -15,6 +15,62 @@ String.prototype.toCamel = function(){
       return p1 + p2.toLowerCase();});
 };
 
+/**
+ * Ext.form.field.ComboBox crashes unexpectedly when more than one combo with paging presented on the
+ * same physical page in the browser:
+ * Ext.ComponentManager.register(): Registering duplicate component id "undefined-paging-toolbar"
+ *
+ * Solution: just comment nonexistent pickerId when component boundlist creates. Since this pickerId is
+ * nowhere used this should be okay and Ext.Component will make sure about unique identifier by itself.
+ *
+ * Discussion: https://www.sencha.com/forum/showthread.php?303101
+ */
+
+Ext.define('Jarvus.hotfixes.form.field.ComboBoxPickerId', {
+    override: 'Ext.form.field.ComboBox',
+
+    createPicker: function() {
+        var me = this,
+            picker,
+            pickerCfg = Ext.apply({
+                xtype: 'boundlist',
+                pickerField: me,
+                selectionModel: me.pickerSelectionModel,
+                floating: true,
+                hidden: true,
+                store: me.getPickerStore(),
+                displayField: me.displayField,
+                preserveScrollOnRefresh: true,
+                pageSize: me.pageSize,
+                tpl: me.tpl
+            }, me.listConfig, me.defaultListConfig);
+
+        picker = me.picker = Ext.widget(pickerCfg);
+        if (me.pageSize) {
+            picker.pagingToolbar.on('beforechange', me.onPageChange, me);
+        }
+
+        // We limit the height of the picker to fit in the space above
+        // or below this field unless the picker has its own ideas about that.
+        if (!picker.initialConfig.maxHeight) {
+            picker.on({
+                beforeshow: me.onBeforePickerShow,
+                scope: me
+            });
+        }
+        picker.getSelectionModel().on({
+            beforeselect: me.onBeforeSelect,
+            beforedeselect: me.onBeforeDeselect,
+            focuschange: me.onFocusChange,
+            scope: me
+        });
+
+        picker.getNavigationModel().navigateOnSpace = false;
+
+        return picker;
+    },
+});
+
 
 
 /* Ext.form.field.Month: thanks to Igor Semin @ sencha forum
@@ -461,6 +517,12 @@ Lino.window_history = Array();
     
 Lino.chars2width = function(cols) {  return cols * 9; }
 Lino.rows2height = function(cols) {  return cols * 20; }
+Lino.perc2width = function(perc) {
+    // var w = Math.max(document.documentElement.clientWidth, window.innerWidth);
+    // console.log("20151226", document, window, w);
+    var w = Lino.viewport.getWidth();
+    return w * perc / 100;
+}
 
 
 // HKC
@@ -471,21 +533,21 @@ Ext.define('Lino.MainPanel',{
   setting_param_values : false,
   config_containing_window : function(wincfg) { }
   ,init_containing_window : function(win) { }
-  ,is_loading : function() { 
+  ,is_loading : function() {
       if (!this.rendered) return true;
       //~ return (Ext.select('.x-loading-msg').elements.length > 0);
-      return true; 
-    } 
+      return true;
+    }
   ,do_when_clean : function(auto_save,todo) { todo() }
   ,get_master_params : function() {
     var p = {}
-    p['{{constants.URL_PARAM_MASTER_TYPE}}'] = this.content_type; 
+    p['{{constants.URL_PARAM_MASTER_TYPE}}'] = this.content_type;
     rec = this.get_current_record()
     if (rec) {
       if (rec.phantom) {
-          p['{{constants.URL_PARAM_MASTER_PK}}'] = undefined; 
+          p['{{constants.URL_PARAM_MASTER_PK}}'] = undefined;
       }else{
-          p['{{constants.URL_PARAM_MASTER_PK}}'] = rec.id; 
+          p['{{constants.URL_PARAM_MASTER_PK}}'] = rec.id;
       }
     } else {
       p['mk'] = undefined;
@@ -497,23 +559,23 @@ Ext.define('Lino.MainPanel',{
     var p = Ext.apply({}, this.get_base_params());
     delete p.fmt;
     Ext.apply(p, this.get_permalink_params());
-    
+
     if (this.toggle_params_panel_btn) {
         p.{{constants.URL_PARAM_SHOW_PARAMS_PANEL}} = this.toggle_params_panel_btn.pressed;
         //~ if (this.toggle_params_panel_btn.pressed == this.params_panel_hidden) {
           //~ p.{{constants.URL_PARAM_SHOW_PARAMS_PANEL}} = true;
         //~ }
     }
-    
+
     //~ Lino.insert_subst_user(p);
      //~ p.fmt = 'html';
     //~ console.log('get_permalink',p,this.get_permalink_params());
     if (this.is_home_page)
         //~ var url = '';
         var url = '{{extjs.build_plain_url()}}';
-    else 
+    else
         var url = this.get_permalink_url();
-    if (p.{{constants.URL_PARAM_SUBST_USER}} == null) 
+    if (p.{{constants.URL_PARAM_SUBST_USER}} == null)
         delete p.{{constants.URL_PARAM_SUBST_USER}};
     if (Ext.urlEncode(p)) url = url + "?" + Ext.urlEncode(p);
     return url;
@@ -584,18 +646,18 @@ Ext.define('Lino.MainPanel',{
         //~ this.params_panel.on('bodyresize',update,this,{single:true});
         //~ this.params_panel.on('resize',update,this,{single:true});
         //~ this.params_panel.on('render',update,this,{single:true});
-        
+
         // this.params_panel.on('render',
         //~ this.params_panel.on('afterlayout',update,this,{single:true,delay:200});
         //~ this.params_panel.on('bodyresize',update,this,{single:true,delay:200});
-        this.toggle_params_panel_btn = new Ext.Button({ scope:this, 
+        this.toggle_params_panel_btn = new Ext.Button({ scope:this,
           //~ text: "$_("[parameters]")", // gear
           iconCls: 'x-tbar-database_gear',
           tooltip:"{{_('Show or hide the table parameters panel')}}",
           enableToggle: true,
           //~ pressed: ! this.params_panel.hidden,
           pressed: ! this.params_panel_hidden,
-          toggleHandler: function(btn,state) { 
+          toggleHandler: function(btn,state) {
             //~ console.log("20120210 add_params_panel",state,this.params_panel);
             if (state) {
                 this.params_panel.show();
@@ -609,11 +671,11 @@ Ext.define('Lino.MainPanel',{
                 //~ t.get_containing_window().doLayout(); // doLayout(shallow, force)
             //~ },this,{single:true});
           }
-        }); 
+        });
         tbar = tbar.concat([this.toggle_params_panel_btn]);
         var refresh = function() {
             if (!t.setting_param_values) {
-                t._force_dirty = true; 
+                t._force_dirty = true;
                 t.refresh();
             }
         }
@@ -628,7 +690,7 @@ Ext.define('Lino.MainPanel',{
               //~ f.on('change',refresh);
               //~ f.on('valid',refresh);
           } else {
-              if (! f.on) 
+              if (! f.on)
                   console.log("20121010 no method 'on'",f);
               else
                   f.on('change',refresh);
@@ -639,22 +701,22 @@ Ext.define('Lino.MainPanel',{
   }
   ,add_param_values : function (p,force_dirty) {
     if (this.params_panel) {
-      /* 
-      * 20120918 add param_values to the request string 
+      /*
+      * 20120918 add param_values to the request string
       * *only if the params_form is dirty*.
       * Otherwise Actor.default_params() would never be used.
       *
-      * 20121023 But IntegClients.params_default has non-empty default values. 
+      * 20121023 But IntegClients.params_default has non-empty default values.
       * Users must have the possibility to make them empty.
-      * 
-      * 20130605 : added `force_dirty` parameter because Checkbox fields don't 
+      *
+      * 20130605 : added `force_dirty` parameter because Checkbox fields don't
       * mark their form as dirty when check is fired.
-      * 
-      * 20130721 : `force_dirty` not as a parameter but as 
+      *
+      * 20130721 : `force_dirty` not as a parameter but as
       * `this._force_dirty` because
-      * 
+      *
       * 20130915 : both _force_dirty and force_dirty parameter are needed.
-      * 
+      *
       */
       if (force_dirty || this._force_dirty || this.params_panel.form.isDirty()) {
       //~ if (this._force_dirty || this.params_panel.form.isDirty()) {
@@ -663,7 +725,7 @@ Ext.define('Lino.MainPanel',{
         //~ console.log("20130923 form is dirty",p);
       }else{
         //~ console.log("20130923 form not dirty:",this.params_panel.form);
-        if (this.status_param_values) 
+        if (this.status_param_values)
           p.{{constants.URL_PARAM_PARAM_VALUES}} = Lino.fields2array(
             this.params_panel.fields,this.status_param_values);
       }
@@ -681,13 +743,13 @@ Ext.define('Lino.MainPanel',{
       this.status_param_values = pv;
       //~ this.params_panel.form.suspendEvents(false);
       this.setting_param_values = true;
-      if (pv) { 
+      if (pv) {
           this.params_panel.form.my_loadRecord(pv);
-      } else { 
-        this.params_panel.form.reset(); 
+      } else {
+        this.params_panel.form.reset();
       }
       this.setting_param_values = false;
-      this._force_dirty = false; 
+      this._force_dirty = false;
       //~ this.params_panel.form.resumeEvents();
     }
   }
@@ -1562,8 +1624,8 @@ Lino.action_handler = function (panel, on_success, on_confirm) {
               panel = Lino.current_window.main_item;
           else panel = Lino.viewport;
       }
-      
-    if (panel.loadMask) panel.loadMask.hide(); // 20120211
+    //  Disabled by HCK
+    //if (panel.loadMask) panel.loadMask.hide(); // 20120211
     if (!response.responseText) return ;
     var result = Ext.decode(response.responseText);
     Lino.handle_action_result(panel, result, on_success, on_confirm);
@@ -2031,7 +2093,7 @@ Lino.build_buttons = function(panel,actions) {
       if (a.panel_btn_handler) {
           //Edited by HKC
           //var h = a.panel_btn_handler.createCallback(panel);
-          var h = Ext.callback(a.panel_btn_handler,this, [panel]);
+          var h = Ext.callback(a.panel_btn_handler,panel, [panel]);
           if (a.auto_save == true) {
               //Edited by HKC
               //h = panel.do_when_clean.createDelegate(panel,[true,h]);
@@ -2147,8 +2209,8 @@ Lino.call_ajax_action = function(
   }
   
   // console.log("20140516 Lino.call_ajax_action", p, actionName, step);
-  
-  if (panel.loadMask) panel.loadMask.show(); 
+  // Disabled by HKC
+  //if (panel.loadMask) panel.loadMask.show();
     
   Ext.Ajax.request({
     method: method
@@ -2298,14 +2360,22 @@ Lino.show_insert = function(panel,btn) {
 
 {% if settings.SITE.use_gridfilters %}
 
-if (Ext.ux.grid !== undefined) {
-    Lino.GridFilters = Ext.extend(Ext.ux.grid.GridFilters,{
+
+//if (Ext.ux.grid !== undefined) {
+if (Ext.grid.filters.Filters !== undefined) {
+    //HKC
+    //Lino.GridFilters = Ext.extend(Ext.ux.grid.GridFilters,{
+    Ext.define('Lino.GridFilters', {
+    extend: 'Ext.grid.filters.Filters',
       encode:true,
       local:false
     });
 } else {
     Lino.GridFilters = function() {}; // dummy
-    Ext.override(Lino.GridFilters,{
+    // HKC
+    //Ext.override(Lino.GridFilters,{
+    Ext.define('MyLino.GridFilters', {
+    override: 'Lino.GridFilters',
       init : function() {}
     });
 };
@@ -2447,8 +2517,9 @@ Ext.define('Lino.HtmlBoxPanel', {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
         }
       };
-
-      Lino.do_when_visible(box, todo.createDelegate(this));
+      //  HKC
+      //Lino.do_when_visible(box, todo.createDelegate(this));
+      Lino.do_when_visible(box, Ext.bind(todo,this));
   }
 });
 //~ Ext.override(Lino.HtmlBoxPanel,Lino.FieldBoxMixin);
@@ -2612,7 +2683,7 @@ Lino.fields2array = function(fields,values) {
 //Ext.override('Ext.form.Basic',{
 Ext.define('Lino.form.Panel', {
     //extend : 'Ext.form.Panel',
-    override : 'Ext.form.Basic',
+    override : 'Ext.form.BasicForm',
     //xtype  : 'myview',
     my_loadRecord : function(values){
     //~ loadRecord : function(record){
@@ -2664,7 +2735,7 @@ Ext.define('Lino.FormPanel', {
      ],
 
   params_panel_hidden : false,
-  save_action_name : null, 
+  save_action_name : null,
   //~ base_params : {},
   //~ trackResetOnLoad : true,
   //~ query_params : {},
@@ -2677,18 +2748,18 @@ Ext.define('Lino.FormPanel', {
     //~ console.log('FormPanel.constructor() 1',config)
     //~ Ext.applyIf(config,{base_params:{}});
     //~ console.log('FormPanel.constructor() 2',config)
-      
+
     config.trackResetOnLoad = true;
-    
+
     Lino.FormPanel.superclass.constructor.call(this, config);
       //this.callParent(arguments);
-      
+
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
-      
+
   },
   initComponent : function(){
-    
+
     this.containing_panel = this;
 
     //~ console.log("20111201 containing_window",this.containing_window,this);
@@ -2703,15 +2774,15 @@ Ext.define('Lino.FormPanel', {
     //~ Ext.apply(config,Lino.build_buttons(this,config.ls_bbar_actions));
     //~ config.bbar = Lino.build_buttons(this,config.ls_bbar_actions);
     //~ var config = this;
-    
+
     //~ if (this.containing_window instanceof Lino.DetailWrapper) {
-    
+
     //~ console.log('20120121 initComponent', this.action_name);
     //~ if (this.action_name == 'detail' | this.action_name == 'show') {
     //~ if (this.action_name != 'insert') {
     if (! this.hide_top_toolbar) {
       this.tbar = [];
-      // 20111015    
+      // 20111015
       if (! this.hide_navigator) {
         this.record_selector = new Lino.RemoteComboFieldElement({
           store: new Lino.ComplexRemoteComboStore({
@@ -2724,8 +2795,8 @@ Ext.define('Lino.FormPanel', {
             })
           }),
           pageSize:25,
-          listeners: { 
-            scope:this, 
+          listeners: {
+            scope:this,
             select:function(combo,record,index) {
               //~ console.log('jumpto_select',arguments);
               this.goto_record_id(record.id);
@@ -2734,9 +2805,9 @@ Ext.define('Lino.FormPanel', {
           emptyText: "{{_('Go to record')}}"
         })
         this.tbar = this.tbar.concat([this.record_selector]);
-        
+
         this.tbar = this.tbar.concat([
-          this.first = new Ext.toolbar.Button({
+          this.first = new Ext.toolbar.Toolbar({
               tooltip:"{{_('First')}}",disabled:true,
               handler:this.moveFirst,scope:this,iconCls:'x-tbar-page-first'}),
           this.prev = new Ext.toolbar.Toolbar({
@@ -2751,17 +2822,19 @@ Ext.define('Lino.FormPanel', {
         ]);
       }
       this.tbar = this.add_params_panel(this.tbar);
-      
+
       //~ console.log(20101117,this.containing_window.refresh);
       this.tbar = this.tbar.concat([
         {
           //~ text:'Refresh',
-          handler:function(){ this.do_when_clean(false,this.refresh.createDelegate(this)) },
+          //HKC
+          //handler:function(){ this.do_when_clean(false,this.refresh.createDelegate(this)) },
+            handler:function(){ this.do_when_clean(false,Ext.bind(refresh,this)) },
           iconCls: 'x-tbar-loading',
           tooltip:"{{_('Reload current record')}}",
           scope:this}
       ]);
-          
+
       if (this.bbar) { // since 20121016
         if (this.tbar) {
             this.tbar = this.tbar.concat(['-']) ;
@@ -2771,12 +2844,12 @@ Ext.define('Lino.FormPanel', {
         this.tbar = this.tbar.concat(this.bbar) ;
         this.bbar = undefined;
       }
-    
+
       this.tbar = this.tbar.concat([
           '->',
           this.displayItem = Ext.create('Ext.Toolbar.TextItem',{})
       ]);
-          
+
     }
     //~ if (this.content_type && this.action_name != 'insert') {
       //~ this.bbar = this.bbar.concat([
@@ -2788,7 +2861,7 @@ Ext.define('Lino.FormPanel', {
       //~ ])
     //~ }
     //~ this.before_row_edit = config.before_row_edit.createDelegate(this);
-      
+
     //~ if (this.master_panel) {
         //~ this.set_base_params(this.master_panel.get_master_params());
     //~ }
@@ -2797,9 +2870,9 @@ Ext.define('Lino.FormPanel', {
       //this.callParent(arguments);
 
     // this.on('show',
-    //         function(){ this.init_focus();}, 
+    //         function(){ this.init_focus();},
     //         this);
-    
+
     this.on('render',function(){
       //  HKC
       //this.loadMask = new Ext.create('Ext.LoadM,(this.bwrap,{msg:"{{_('Please wait...')}}"}));
@@ -2808,8 +2881,8 @@ Ext.define('Lino.FormPanel', {
                                         target : this,
                                     });
     },this);
-    
-    
+
+
     if (this.action_name == 'insert') {
       this.cascade(function(cmp){
         // console.log('20110613 cascade',cmp);
@@ -2818,17 +2891,17 @@ Ext.define('Lino.FormPanel', {
             cmp.hide();
         }
       });
-      
+
     }
-    
+
   },
-  
-  unused_init_focus : function(){ 
+
+  unused_init_focus : function(){
     // set focus to the first field
     console.log("20140205 Lino.FormPanel.init_focus");
     // Lino.FormPanel.superclass.focus.call(this);
     this.getForm().items.each(function(f){
-        if(f.isFormField && f.rendered){ 
+        if(f.isFormField && f.rendered){
             f.focus();
             console.log("20140205 focus", f);
             return false;
@@ -2846,7 +2919,7 @@ Ext.define('Lino.FormPanel', {
       // 20140917 : get_status must not store the whole data_record
       // because that would prevent the form to actually reload
       // when set_status is called after a child window closed.
-      
+
       var tp = this.items.get(0);
       if (tp instanceof Ext.TabPanel) {
         st.active_tab = tp.getActiveTab();
@@ -2861,7 +2934,7 @@ Ext.define('Lino.FormPanel', {
     // console.log('20140917 FormPanel.set_status()', status);
     this.clear_base_params();
     if (status == undefined) status = {};
-    //~ if (status.param_values) 
+    //~ if (status.param_values)
     this.set_param_values(status.param_values);
     if (status.base_params) this.set_base_params(status.base_params);
     var tp = this.containing_window.items.get(0);
@@ -2877,7 +2950,7 @@ Ext.define('Lino.FormPanel', {
         }
       }
     }
-    
+
     if (status.data_record) {
       /* defer because set_window_title() didn't work otherwise */
       // 20140421 removed defer for bughunting to simplify side effects
@@ -2885,8 +2958,8 @@ Ext.define('Lino.FormPanel', {
       //     this, [status.data_record]).defer(100);
       this.set_current_record(status.data_record);
       //~ return;
-    } else if (status.record_id != undefined) { 
-      /* possible values include 0 and null, 0 being a valid record id, 
+    } else if (status.record_id != undefined) {
+      /* possible values include 0 and null, 0 being a valid record id,
       null the equivalent of undefined
       */
       this.load_record_id(status.record_id);
@@ -2924,7 +2997,7 @@ Ext.define('Lino.FormPanel', {
       this.moveNext();
     else if (this.current_record.navinfo.prev)
       this.movePrev();
-    else 
+    else
       this.abandon();
   }
   ,moveFirst : function() {this.goto_record_id(
@@ -2935,12 +3008,12 @@ Ext.define('Lino.FormPanel', {
       this.current_record.navinfo.next)}
   ,moveLast : function() {this.goto_record_id(
       this.current_record.navinfo.last)}
-  
-  ,refresh : function(unused) { 
+
+  ,refresh : function(unused) {
       this.refresh_with_after();
   }
   /* FormPanel */
-  ,refresh_with_after : function(after) { 
+  ,refresh_with_after : function(after) {
     // console.log('20140917 Lino.FormPanel.refresh_with_after()',this);
     if (this.current_record) {
         this.load_record_id(this.current_record.id, after);
@@ -2948,7 +3021,7 @@ Ext.define('Lino.FormPanel', {
         this.set_current_record(undefined, after);
     }
   }
-  
+
   ,do_when_clean : function(auto_save, todo) {
     var this_ = this;
     if (this.form.isDirty()) {
@@ -2966,7 +3039,7 @@ Ext.define('Lino.FormPanel', {
                 //~ Lino.submit_detail(this_,undefined,todo);
                 //~ this_.containing_window.save(todo);
                 this_.save(todo);
-            } else if (buttonId == "no") { 
+            } else if (buttonId == "no") {
               todo();
             }
           }
@@ -2977,15 +3050,17 @@ Ext.define('Lino.FormPanel', {
       todo();
     }
   }
-  
+
   ,goto_record_id : function(record_id) {
     // console.log('20140917 Lino.FormPanel.goto_record_id()',record_id);
     //~ var this_ = this;
     //~ this.do_when_clean(function() { this_.load_record_id(record_id) }
     this.do_when_clean(
-        true, this.load_record_id.createDelegate(this, [record_id]));
+        // HKC
+        //true, this.load_record_id.createDelegate(this, [record_id]));
+        true, Ext.bind(load_record_id,this,[record_id]));
   }
-  
+
   ,load_record_id : function(record_id, after) {
     var this_ = this;
     var p = Ext.apply({}, this.get_base_params());
@@ -2995,14 +3070,14 @@ Ext.define('Lino.FormPanel', {
     p.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
     this.add_param_values(p);
     if (this.loadMask) this.loadMask.show();
-    Ext.Ajax.request({ 
+    Ext.Ajax.request({
       waitMsg: 'Loading record...',
       method: 'GET',
       params: p,
       scope: this,
       url: this.get_record_url(record_id),
-      success: function(response) {   
-        // todo: convert to Lino.action_handler.... but result 
+      success: function(response) {
+        // todo: convert to Lino.action_handler.... but result
         if (this.loadMask) this.loadMask.hide();
         if (response.responseText) {
           var rec = Ext.decode(response.responseText);
@@ -3020,7 +3095,7 @@ Ext.define('Lino.FormPanel', {
       "{{_('No more records to display. Detail window has been closed.')}}");
     Lino.close_window();
   }
-  
+
   ,set_current_record : function(record, after) {
       // console.log('20150905 set_current_record', record);
     if (this.record_selector) {
@@ -3031,7 +3106,6 @@ Ext.define('Lino.FormPanel', {
     if (record && record.data) {
       this.enable();
       this.form.my_loadRecord(record.data);
-        console.log("HKC disable form");
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
         console.log("HKC disable getBottomToolbar");
@@ -3056,12 +3130,12 @@ if (this.disable_editing | record.data.disable_editing) {
             if (record.data.disabled_fields[cmp.name]) cmp.disable();
             else cmp.enable();
           },this);
-        
+
           //~ if (record.data.disabled_fields) {
               //~ for (i = 0; i < record.data.disabled_fields.length; i++) {
                   //~ var flds = this.find('name',record.data.disabled_fields[i]);
-                  //~ if (flds.length == 1) { 
-                    //~ flds[0].disable(); 
+                  //~ if (flds.length == 1) {
+                    //~ flds[0].disable();
                   //~ }
               //~ }
           //~ }
@@ -3081,7 +3155,7 @@ if (this.disable_editing | record.data.disable_editing) {
         }
       }
     } else {
-      if (this.form.rendered) 
+      if (this.form.rendered)
         this.form.reset(); /* FileUploadField would fail when resetting a non-rendered form */
       //~ this.disable();
       //~ this.getBottomToolbar().disable();
@@ -3102,28 +3176,28 @@ if (this.disable_editing | record.data.disable_editing) {
     // console.log('20140917 gonna call after', after);
     if (after) after();
   },
-  
+
   /* FormPanel */
   before_row_edit : function(record) {},
   search_change : function(field,oldValue,newValue) {
     //~ console.log('search_change',field.getValue(),oldValue,newValue)
-    this.set_base_param('{{constants.URL_PARAM_FILTER}}',field.getValue()); 
+    this.set_base_param('{{constants.URL_PARAM_FILTER}}',field.getValue());
     this.refresh();
   },
-  
+
   get_selected : function() { return [ this.current_record ] },
-  get_current_record : function() {  
+  get_current_record : function() {
     //~ console.log(20100714,this.current_record);
-    return this.current_record 
+    return this.current_record
   },
-  
+
   get_permalink_url : function() {
       var rec = this.get_current_record();
       if (rec && ! rec.phantom && rec.id != -99998)
-          return '{{extjs.build_plain_url("api")}}' 
+          return '{{extjs.build_plain_url("api")}}'
               + this.ls_url + '/' + rec.id;
       return '{{extjs.build_plain_url("api")}}' + this.ls_url;
-    
+
   },
   add_param_tab : function(p) {
     var main = this.items.get(0);
@@ -3144,7 +3218,7 @@ if (this.disable_editing | record.data.disable_editing) {
     this.add_param_values(p)
     return p;
   }
-  
+
   ,validate_form : function() {  // not used. see actions.ValidateForm
       // var ov = {};
       // this.form.items.each(function(f){
@@ -3152,7 +3226,7 @@ if (this.disable_editing | record.data.disable_editing) {
       // });
 
       // console.log('20140509 FormPanel.validate_form', ov);
-      // var after = function() { 
+      // var after = function() {
       //     this.form.items.each(function(f){
       //         f.originalValue = ov[f.name];
       //     });
@@ -3164,7 +3238,7 @@ if (this.disable_editing | record.data.disable_editing) {
   /* Lino.FormPanel */
   ,save : function(after) {
     var action_name = this.save_action_name;
-    if (!action_name) 
+    if (!action_name)
         action_name = this.action_name;
     // console.log('20140503 FormPanel.save', action_name);
     this.save2(after, action_name);
@@ -3172,9 +3246,9 @@ if (this.disable_editing | record.data.disable_editing) {
 
   ,save2 : function(after, action_name) {
     var rec = this.get_current_record();
-    if (!rec) { 
-        Lino.notify("Sorry, no current record."); 
-        return; 
+    if (!rec) {
+        Lino.notify("Sorry, no current record.");
+        return;
     }
     var panel = this;
     if (this.has_file_upload) this.form.fileUpload = true;
@@ -3186,14 +3260,14 @@ if (this.disable_editing | record.data.disable_editing) {
     this.add_param_tab(p)
     // console.log('20150216 FormPanel.save()', rec, this.form);
     var submit_config = {
-        params: p, 
+        params: p,
         scope: this,
         success: function(form, action) {
           this.loadMask.hide();
           Lino.notify(action.result.message);
           Lino.handle_action_result(this, action.result, after);
         },
-        failure: function(form,action) { 
+        failure: function(form,action) {
           this.loadMask.hide();
           Lino.on_submit_failure(form, action);
         },
@@ -3208,23 +3282,23 @@ if (this.disable_editing | record.data.disable_editing) {
       // temporarily disabled. See 20151002
     } else {  // submit on existing row
       Ext.apply(submit_config, {
-        url: '{{extjs.build_plain_url("api")}}' 
+        url: '{{extjs.build_plain_url("api")}}'
               + this.ls_url + '/' + rec.id,
         method: 'PUT'
       })
     }
     this.form.submit(submit_config);
   }
-  
-  ,on_cancel : function() { 
+
+  ,on_cancel : function() {
     this.get_containing_window().close();
   }
-  ,on_ok : function() { 
+  ,on_ok : function() {
       // console.log("20140424");
       // this.save(null, true, this.save_action_name);
       this.save();
   }
-  ,config_containing_window : function(wincfg) { 
+  ,config_containing_window : function(wincfg) {
 
       // Note that defaultButton means: which component should receive
       // focus when Window is focussed.  If no defaultButton set,
@@ -3261,10 +3335,10 @@ if (this.disable_editing | record.data.disable_editing) {
           key : Ext.String.escape,
           handler: this.on_cancel, scope:this });
       wincfg.keys.push({
-          key: 's', ctrl: true, 
+          key: 's', ctrl: true,
              stopEvent: true, handler: this.on_ok, scope:this });
   }
-  
+
 });
 
 
@@ -3292,8 +3366,8 @@ Lino.getRowClass = function(record, rowIndex, rowParams, store) {
 //Edited by HKC
 //Lino.GridStore = Ext.extend(Ext.data.ArrayStore,{
 Ext.define('Lino.GridStore', {
-    //extend : 'Ext.data.JsonStore',
-    extend : 'Ext.data.ArrayStore',
+    extend : 'Ext.data.JsonStore',
+    //extend : 'Ext.data.ArrayStore',
   autoLoad: false
   ,load: function(options) {
     //~ foo.bar = baz; // 20120213
@@ -3312,7 +3386,7 @@ Ext.define('Lino.GridStore', {
         }
     } else {
         //var ps = this.grid_panel.calculatePageSize();
-        var ps = 100;
+        var ps = 15;
         if (!ps) {
           // console.log("GridStore.load() failed to calculate pagesize");
           return false;
@@ -3363,7 +3437,7 @@ Lino.auto_height_cell_template = new Ext.Template(
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, {
 Ext.define('Lino.GridPanel', {
-    extend : 'Ext.grid.Panel',
+    extend : 'Ext.grid.GridPanel',
      mixins: [
          //'Ext.grid.plugin.CellEditing',
          'Lino.MainPanel',
@@ -3390,7 +3464,8 @@ Ext.define('Lino.GridPanel', {
   
   constructor : function(config){
 {% if settings.SITE.use_gridfilters %}
-    config.plugins = [new Lino.GridFilters()];
+    //config.plugins = [new Lino.GridFilters()];
+    config.plugins = [Ext.create('Lino.GridFilters',{})];
 {% endif %}    
 {% if settings.SITE.use_filterRow %}
     config.plugins = [new Ext.ux.grid.FilterRow()];
@@ -3526,6 +3601,9 @@ Ext.define('Lino.GridPanel', {
         //~ this.quick_search_field.focus(); // 20121024
       }, this
     );
+
+
+
     //var actions = Lino.build_buttons(this, this.ls_bbar_actions);
     var actions;
     //~ Ext.apply(config,Lino.build_buttons(this,config.ls_bbar_actions));
@@ -3633,9 +3711,7 @@ Ext.define('Lino.GridPanel', {
     };
     this.columns  = this.apply_grid_config(this.gc_name,this.ls_grid_configs,this.ls_columns);
     
-    //Lino.GridPanel.superclass.initComponent.call(this);
-      this.callSuper();
-    
+
     this.on('resize', function(){
       //~ console.log("20120213 resize",arguments)
       this.refresh();
@@ -3654,6 +3730,8 @@ Ext.define('Lino.GridPanel', {
         this.on('rowcontextmenu', Lino.row_context_menu, this);
     }
     //~ this.on('contextmenu', Lino.grid_context_menu, this);
+      Lino.GridPanel.superclass.initComponent.call(this);
+      //this.callSuper();
     
     delete this.cell_edit;
     
@@ -3973,19 +4051,24 @@ Ext.define('Lino.GridPanel', {
   },
   
   get_current_grid_config : function () {
-      var cm= this.getColumns();
-    var cm = this.getColumnModel();
-      //var f = this.getColumns();
+      //var cm= this.getColumns();
+    //var cm = this.getColumnModel();
+    //  var f = this.getColumns();
     //var cm  = this.grid.getView().getHeaderCt().getGridColumns();
-    var widths = Array(cm.config.length);
-    var hiddens = Array(cm.config.length);
+    //  var cm  = this.getView().getHeaderCt().getGridColumns();
+      var cm = this.getView().getHeaderCt().getGridColumns();
+    //var widths = Array(cm.config.length);
+    //var hiddens = Array(cm.config.length);
+      var widths = Array(cm.length);
+    var hiddens = Array(cm.length);
     //~ var hiddens = Array(cm.config.length);
-    var columns = Array(cm.config.length);
+    var columns = Array(cm.length);
     //~ var columns = Array(cm.config.length);
     //~ var hidden_cols = [];
     //~ var filters = this.filters.getFilterValues();
-    var p = this.filters.buildQuery(this.filters.getFilterData())
-    for (var i = 0; i < cm.config.length; i++) {
+    //var p = this.filters.buildQuery(this.filters.getFilterData());
+      var p = undefined ;
+    for (var i = 0; i < cm.length; i++) {
       var col = cm.config[i];
       columns[i] = col.dataIndex;
       //~ hiddens[i] = col.hidden;
@@ -3994,13 +4077,13 @@ Ext.define('Lino.GridPanel', {
       //~ if (col.hidden) hidden_cols.push(col.dataIndex);
     }
     //~ p['hidden_cols'] = hidden_cols;
-    p.{{constants.URL_PARAM_WIDTHS}} = widths;
-    p.{{constants.URL_PARAM_HIDDENS}} = hiddens;
-    p.{{constants.URL_PARAM_COLUMNS}} = columns;
+    //p.{{constants.URL_PARAM_WIDTHS}} = widths;
+    //p.{{constants.URL_PARAM_HIDDENS}} = hiddens;
+    //p.{{constants.URL_PARAM_COLUMNS}} = columns;
     //~ p['widths'] = widths;
     //~ p['hiddens'] = hiddens;
     //~ p['columns'] = columns;
-    p['name'] = this.gc_name;
+    //p['name'] = this.gc_name;
     //~ var gc = this.ls_grid_configs[this.gc_name];
     //~ if (gc !== undefined) 
         //~ p['label'] = gc.label
@@ -4209,7 +4292,9 @@ Ext.define('Lino.GridPanel', {
           //~ this.getStore().load(); 
       //~ }
     };
-    Lino.do_when_visible(this,todo.createDelegate(this));
+    //  HKC
+    //Lino.do_when_visible(this,todo.createDelegate(this));
+      Lino.do_when_visible(this,Ext.bind(todo,this));
   },
   load_record_id : function(record_id,after) {
       Lino.run_detail_handler(this,record_id)
@@ -4237,7 +4322,9 @@ Lino.row_context_menu = function(grid,row,col,e) {
 
 Lino.cell_context_menu = function(grid,row,col,e) {
   //~ console.log('20120531 cellcontextmenu',grid,row,col,e,grid.store.reader.arrayData.rows[row]);
-  e.stopEvent();
+  //  HKC
+  //  e.stopPropagation();
+  //e.stopEvent();
   //~ grid.getView().focusCell(row,col);
   grid.getSelectionModel().select(row,col);
   //~ console.log(grid.store.getAt(row));
@@ -4312,7 +4399,9 @@ Ext.define('Lino.ComboBox', {
           // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
           if(this.mode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
               //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
-              this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
+              // HKC
+              //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
+              this.store.on('load', Ext.bind (this.setValue,this,[arguments]), null, {single: true});
               if(this.store.lastOptions === null || this.lastQuery === null){
                   var params;
                   if(this.valueParam){
@@ -4350,8 +4439,8 @@ Ext.define('Lino.ComboBox', {
           //~ this.hiddenField.originalValue = v;
           this.hiddenField.value = v;
       }
-      //Ext.form.ComboBox.superclass.setValue.call(this, text);
-      this.callSuper(text);
+      Ext.form.ComboBox.superclass.setValue.call(this, text);
+      //this.callSuper(text);
       this.value = v; // needed for grid.afteredit
   },
   
@@ -4411,20 +4500,20 @@ Ext.define('Lino.ComplexRemoteComboStore',{
   extend:'Ext.data.JsonStore',
 //Lino.ComplexRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   constructor: function(config){
-      //Lino.ComplexRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
-      //    totalProperty: 'count',
-      //    root: 'rows',
-      //    id: 'value', // constants.CHOICES_VALUE_FIELD
-      //    fields: ['value','text'], // constants.CHOICES_VALUE_FIELD, // constants.CHOICES_TEXT_FIELD
-      //    listeners: { exception: Lino.on_store_exception }
-      //}));
-      this.callSuper(Ext.apply(config, {
+      Lino.ComplexRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
           totalProperty: 'count',
           root: 'rows',
           id: 'value', // constants.CHOICES_VALUE_FIELD
           fields: ['value','text'], // constants.CHOICES_VALUE_FIELD, // constants.CHOICES_TEXT_FIELD
           listeners: { exception: Lino.on_store_exception }
       }));
+      //this.callSuper(Ext.apply(config, {
+      //    totalProperty: 'count',
+      //    root: 'rows',
+      //    id: 'value', // constants.CHOICES_VALUE_FIELD
+      //    fields: ['value','text'], // constants.CHOICES_VALUE_FIELD, // constants.CHOICES_TEXT_FIELD
+      //    listeners: { exception: Lino.on_store_exception }
+      //}));
   }
 });
 
@@ -4439,8 +4528,8 @@ Ext.define('Lino.RemoteComboFieldElement',{
   //~ selectOnFocus: true, // select any existing text in the field immediately on focus.
   resizable: true
   ,initList : function() {
-      //Lino.RemoteComboFieldElement.superclass.initList.call(this);
-         this.callSuper();
+      Lino.RemoteComboFieldElement.superclass.initList.call(this);
+         //this.callSuper();
       if (this.pageTb) {
           
           var me = this;
@@ -4524,8 +4613,12 @@ Ext.define('Lino.Window', {
         config.layout = 'fit';
         config.items = config.main_item;
     }
-    this.main_item = config.main_item; 
-    
+    this.main_item = config.main_item;
+
+    if (typeof config.width == "string" && config.width.slice(-1) == "%") {
+        config.width = Lino.perc2width(parseInt(config.width.slice(0, -1)));
+    }
+
     delete config.main_item;
     //~ delete config.params_item;
     
