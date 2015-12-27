@@ -93,10 +93,10 @@ pygments_style = 'sphinx'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = u"Lino Così"
+html_title = u"Lino ExtJS6"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-# html_short_title = u"Lino Così"
+# html_short_title = u"Lino ExtJS6"
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
