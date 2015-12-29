@@ -558,6 +558,8 @@ class FieldElement(LayoutElement):
                             '</span>')
 
                 kw.update(fieldLabel=label)
+                # HKC
+                kw.update(valueField=self.field.name)
         if self.editable:
             if not self.field.blank:
                 kw.update(allowBlank=False)

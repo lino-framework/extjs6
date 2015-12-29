@@ -71,6 +71,12 @@ Ext.define('Jarvus.hotfixes.form.field.ComboBoxPickerId', {
     },
 });
 
+//init: function () {
+// https://docs.sencha.com/extjs/6.0/wh...de.html#Button
+//    https://www.sencha.com/forum/showthread.php?303936-Button-issue-with-WAI-ARIA
+//Ext.enableAriaButtons = false;
+//Ext.enableAriaPanels = false;
+//};
 
 
 /* Ext.form.field.Month: thanks to Igor Semin @ sencha forum
@@ -933,8 +939,9 @@ Lino.calling_window = function() {
     //~ this.mainItemClass = mainItemClass;
 //};
 
+//Ext.define('Lino.WindowAction', {
 Ext.define('Lino.WindowAction', {
-    //extend: 'Lino.WindowAction',
+    //extend: 'Ext.Component',
 //Lino.WindowAction = Ext.extend(Lino.WindowAction,{
     window : null,
     //~ mainItemClass: null,
@@ -964,7 +971,7 @@ Ext.define('Lino.WindowAction', {
 // HKC
 //Lino.PanelMixin = {
 Ext.define('Lino.PanelMixin', {
-    extend: 'Ext.panel.Table',
+    //extend: 'Ext.panel.Table',
   get_containing_window : function (){
       if (this.containing_window) return this.containing_window;
       return this.containing_panel.get_containing_window();
@@ -1651,14 +1658,15 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
     if (result.xcallback) {
         //~ var config = {title:"{{_('Confirmation')}}"};
         var config = {title:result.xcallback.title};
-        //~ config.buttons = Ext.MessageBox.YESNOCANCEL;
+        config.buttons = Ext.MessageBox.YESNOCANCEL;
         //~ config.buttons = Ext.MessageBox.YESNO;
         var p = {};
         Lino.insert_subst_user(p);
-        config.buttons = result.xcallback.buttons;
+        //config.buttons = result.xcallback.buttons;
         config.msg = result.message;
         config.fn = function(buttonId, text, opt) {
-          panel.loadMask.show(); 
+          //  Disable by HKC
+          //panel.loadMask.show();
           //~ Lino.insert_subst_user(p);
           Ext.Ajax.request({
             method: 'GET',
@@ -1922,7 +1930,8 @@ Lino.permalink_handler = function (ww) {
 Lino.ajax_error_handler = function(panel) {
   return function(response,options) {
     console.log('Ajax failure:', response, options);
-    if (panel.loadMask) panel.loadMask.hide();
+    //  Disable by HKC
+    //if (panel.loadMask) panel.loadMask.hide();
     if (response.responseText) {
       var lines = response.responseText.split('\n');
       if (lines.length > 10) {
@@ -2081,7 +2090,7 @@ Lino.build_buttons = function(panel,actions) {
     var buttons = Array(actions.length);
     var cmenu = Array(actions.length);
     var keyhandlers = {};
-    for (var i=0; i < actions.length; i++) { 
+    for (var i=1; i < actions.length; i++) {
       var a = actions[i];
       if (a.menu) a.menu = Lino.build_buttons(panel,a.menu).bbar;
       buttons[i] = a;
@@ -2093,7 +2102,9 @@ Lino.build_buttons = function(panel,actions) {
       if (a.panel_btn_handler) {
           //Edited by HKC
           //var h = a.panel_btn_handler.createCallback(panel);
-          var h = Ext.callback(a.panel_btn_handler,panel, [panel]);
+          //var h = Ext.callback(a.panel_btn_handler,a, [panel]);
+          var h = Ext.Function.pass(a.panel_btn_handler, [panel]);
+          //callback = Ext.Function.pass(originalFunction, ['Hello', 'World']);
           if (a.auto_save == true) {
               //Edited by HKC
               //h = panel.do_when_clean.createDelegate(panel,[true,h]);
@@ -2791,7 +2802,7 @@ Ext.define('Lino.FormPanel', {
             //~ value: this.containing_window.config.base_params.query,
             proxy: new Ext.data.HttpProxy({
               url: '{{extjs.build_plain_url("choices")}}' + this.ls_url,
-              method:'GET'
+              method:'GET',
             })
           }),
           pageSize:25,
@@ -3604,8 +3615,8 @@ Ext.define('Lino.GridPanel', {
 
 
 
-    //var actions = Lino.build_buttons(this, this.ls_bbar_actions);
-    var actions;
+    var actions = Lino.build_buttons(this, this.ls_bbar_actions);
+    //var actions;
     //~ Ext.apply(config,Lino.build_buttons(this,config.ls_bbar_actions));
     //~ config.bbar, this.cmenu = Lino.build_buttons(this,config.ls_bbar_actions);
     //~ this.cmenu = new Ext.menu.Menu({items: config.bbar});
@@ -3730,8 +3741,8 @@ Ext.define('Lino.GridPanel', {
         this.on('rowcontextmenu', Lino.row_context_menu, this);
     }
     //~ this.on('contextmenu', Lino.grid_context_menu, this);
-      Lino.GridPanel.superclass.initComponent.call(this);
-      //this.callSuper();
+    //  Lino.GridPanel.superclass.initComponent.call(this);
+      this.callSuper();
     
     delete this.cell_edit;
     
@@ -4051,23 +4062,16 @@ Ext.define('Lino.GridPanel', {
   },
   
   get_current_grid_config : function () {
-      //var cm= this.getColumns();
-    //var cm = this.getColumnModel();
-    //  var f = this.getColumns();
-    //var cm  = this.grid.getView().getHeaderCt().getGridColumns();
-    //  var cm  = this.getView().getHeaderCt().getGridColumns();
-      var cm = this.getView().getHeaderCt().getGridColumns();
-    //var widths = Array(cm.config.length);
-    //var hiddens = Array(cm.config.length);
-      var widths = Array(cm.length);
+    //var cm = this.getColumns();
+    var cm = this.getView().getHeaderCt().getGridColumns();
+    var widths = Array(cm.length);
     var hiddens = Array(cm.length);
     //~ var hiddens = Array(cm.config.length);
     var columns = Array(cm.length);
     //~ var columns = Array(cm.config.length);
     //~ var hidden_cols = [];
     //~ var filters = this.filters.getFilterValues();
-    //var p = this.filters.buildQuery(this.filters.getFilterData());
-      var p = undefined ;
+    var p = this.filters.buildQuery(this.filters.getFilterData())
     for (var i = 0; i < cm.length; i++) {
       var col = cm.config[i];
       columns[i] = col.dataIndex;
@@ -4077,13 +4081,13 @@ Ext.define('Lino.GridPanel', {
       //~ if (col.hidden) hidden_cols.push(col.dataIndex);
     }
     //~ p['hidden_cols'] = hidden_cols;
-    //p.{{constants.URL_PARAM_WIDTHS}} = widths;
-    //p.{{constants.URL_PARAM_HIDDENS}} = hiddens;
-    //p.{{constants.URL_PARAM_COLUMNS}} = columns;
+    p.{{constants.URL_PARAM_WIDTHS}} = widths;
+    p.{{constants.URL_PARAM_HIDDENS}} = hiddens;
+    p.{{constants.URL_PARAM_COLUMNS}} = columns;
     //~ p['widths'] = widths;
     //~ p['hiddens'] = hiddens;
     //~ p['columns'] = columns;
-    //p['name'] = this.gc_name;
+    p['name'] = this.gc_name;
     //~ var gc = this.ls_grid_configs[this.gc_name];
     //~ if (gc !== undefined) 
         //~ p['label'] = gc.label
@@ -4479,20 +4483,20 @@ Ext.define('Lino.SimpleRemoteComboStore',{
 //Lino.SimpleRemoteComboStore = Ext.extend(Ext.data.JsonStore,{
   // forceSelection: true,  20140206 why was this here?
   constructor: function(config){
-      //Lino.SimpleRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
-      //    totalProperty: 'count',
-      //    root: 'rows',
-      //    id: '{{constants.CHOICES_VALUE_FIELD}}', // 'value'
-      //    fields: ['{{constants.CHOICES_VALUE_FIELD}}' ],
-      //    listeners: { exception: Lino.on_store_exception }
-      //}));
-      this.callSuper(Ext.apply(config, {
+      Lino.SimpleRemoteComboStore.superclass.constructor.call(this, Ext.apply(config, {
           totalProperty: 'count',
           root: 'rows',
           id: '{{constants.CHOICES_VALUE_FIELD}}', // 'value'
           fields: ['{{constants.CHOICES_VALUE_FIELD}}' ],
           listeners: { exception: Lino.on_store_exception }
       }));
+      //this.callSuper(Ext.apply(config, {
+      //    totalProperty: 'count',
+      //    root: 'rows',
+      //    id: '{{constants.CHOICES_VALUE_FIELD}}', // 'value'
+      //    fields: ['{{constants.CHOICES_VALUE_FIELD}}' ],
+      //    listeners: { exception: Lino.on_store_exception }
+      //}));
   }
 });
 
@@ -4589,11 +4593,11 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
 
 // Edit by HKC Ext.window  ->  Ext.window.Window
 Ext.define('Lino.Window', {
-    extend: 'Ext.window.Window',
+    extend: 'Ext.Window',
 //Lino.Window = Ext.extend(Ext.window.Window,{
-  //~ layout: "fit", 
+  //~ layout: "fit",
   closeAction : 'hide',
-  renderTo: 'main_area', 
+  renderTo: 'main_area',
   constrain: true,
   maximized: true,
   draggable: false,
@@ -4669,8 +4673,8 @@ Ext.define('Lino.Window', {
     this.main_item.config_containing_window(config);
     
     // console.log('20150514 Lino.Window.constructor() 2');
-        Lino.Window.superclass.constructor.call(this,config);
-      //this.callSuper(arguments);
+    Lino.Window.superclass.constructor.call(this,config);
+    //  this.callSuper(config);
 
     
     console.log('20120110 Lino.Window.constructor() 3');
@@ -4678,8 +4682,8 @@ Ext.define('Lino.Window', {
   },
   initComponent : function() {
     this.main_item.init_containing_window(this);
-    //Lino.Window.superclass.initComponent.call(this);
-    this.callParent(arguments);
+    Lino.Window.superclass.initComponent.call(this);
+    //this.callSuper(arguments);
   
   },
   hide : function() { 
