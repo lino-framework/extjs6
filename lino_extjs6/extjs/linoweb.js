@@ -166,7 +166,8 @@ Ext.onReady(function() {
     //    renderTo: Ext.getBody()
     //});
 });
-//Ext.preg('monthPickerPlugin', Ext.ux.MonthPickerPlugin);
+
+//Ext.preg('monthPickerPlugin', Ext.form.field.Month);
 
 
 /**
@@ -2090,7 +2091,7 @@ Lino.build_buttons = function(panel,actions) {
     var buttons = Array(actions.length);
     var cmenu = Array(actions.length);
     var keyhandlers = {};
-    for (var i=1; i < actions.length; i++) {
+    for (var i=0; i < actions.length; i++) {
       var a = actions[i];
       if (a.menu) a.menu = Lino.build_buttons(panel,a.menu).bbar;
       buttons[i] = a;
@@ -2656,7 +2657,10 @@ Ext.define('Lino.ActionFormPanel', {
   ,config_containing_window : function(wincfg) { 
       wincfg.title = this.window_title;
       wincfg.keys = [
-        { key: Ext.EventObject.ENTER, fn: this.on_ok }
+        {   // HKC
+            //key: Ext.EventObject.ENTER,
+            key : Ext.event.Event.ENTER,
+            fn: this.on_ok }
       ]
       
       if (!wincfg.defaultButton) this.getForm().items.each(function(f){
@@ -3132,15 +3136,17 @@ Ext.define('Lino.FormPanel', {
       };
 if (this.disable_editing | record.data.disable_editing) {
           //~ console.log("20120202 disable_editing",record.title);
-          this.form.items.each(function(cmp){
-            if (!cmp.always_enabled) cmp.disable();
-          },this);
+        //  HKC
+          //this.form.items.each(function(cmp){
+          //  if (!cmp.always_enabled) cmp.disable();
+          //},this);
       } else {
-          this.form.items.each(function(cmp){
+            //  HKC
+          //this.form.items.each(function(cmp){
             //~ console.log("20120202",cmp);
-            if (record.data.disabled_fields[cmp.name]) cmp.disable();
-            else cmp.enable();
-          },this);
+            //if (record.data.disabled_fields[cmp.name]) cmp.disable();
+            //else cmp.enable();
+          //},this);
 
           //~ if (record.data.disabled_fields) {
               //~ for (i = 0; i < record.data.disabled_fields.length; i++) {
@@ -3170,9 +3176,10 @@ if (this.disable_editing | record.data.disable_editing) {
         this.form.reset(); /* FileUploadField would fail when resetting a non-rendered form */
       //~ this.disable();
       //~ this.getBottomToolbar().disable();
-      this.form.items.each(function(cmp){
-        cmp.disable();
-      },this);
+        //  HKC
+      //this.form.items.each(function(cmp){
+      //  cmp.disable();
+      //},this);
       this.set_window_title(this.empty_title);
       //~ this.containing_window.window.setTitle(this.empty_title);
       if (!this.hide_navigator) {
@@ -4330,11 +4337,15 @@ Lino.cell_context_menu = function(grid,row,col,e) {
   //  e.stopPropagation();
   //e.stopEvent();
   //~ grid.getView().focusCell(row,col);
-  grid.getSelectionModel().select(row,col);
+  //  HKC
+  //grid.getSelectionModel().select(row,col);
+    this.getSelectionModel().select(row,col);
   //~ console.log(grid.store.getAt(row));
   //~ grid.getView().focusRow(row);
   //~ return;
-  if(!grid.cmenu.el){grid.cmenu.render(); }
+  //  HKC
+  //if(!grid.cmenu.el){grid.cmenu.render(); }
+  //if(!this.cmenu.el){this.cmenu.render(); }
   //~ if(e.record.data.disabled_fields) {
   
   var da = grid.store.getProxy().getReader().rawData.rows[row][grid.disabled_actions_index];
@@ -4594,6 +4605,7 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
 // Edit by HKC Ext.window  ->  Ext.window.Window
 Ext.define('Lino.Window', {
     extend: 'Ext.Window',
+    mixins: ['Ext.Component'],
 //Lino.Window = Ext.extend(Ext.window.Window,{
   //~ layout: "fit",
   closeAction : 'hide',
