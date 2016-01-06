@@ -36,7 +36,7 @@ import lino_extjs6
 
 # General information about the project.
 project = settings.SITE.title
-copyright = '2015, Luc Saffre & Hamza Khchine'
+copyright = '2015-2016, Luc Saffre & Hamza Khchine'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
