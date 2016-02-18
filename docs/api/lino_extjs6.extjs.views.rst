@@ -9,16 +9,10 @@ lino_extjs6.extjs.views
 
    .. autosummary::
    
-      action_request
       choices_for_field
       choices_response
       delete_element
       elem2rec_empty
-      force_unicode
-      isiterable
-      json_response
-      json_response_kw
-      requested_actor
    
    
 
@@ -33,7 +27,6 @@ lino_extjs6.extjs.views
       ApiElement
       ApiList
       Authenticate
-      BaseRequest
       Callbacks
       Choices
       EidAppletService
@@ -42,7 +35,6 @@ lino_extjs6.extjs.views
       MainHtml
       Restful
       RunJasmine
-      View
    
    
 

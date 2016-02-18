@@ -11,23 +11,16 @@ lino_extjs6.extjs.elems
    
       action_name
       add_help_text
-      constrain
       create_field_element
       create_layout_element
       create_layout_panel
       create_meth_element
       create_vurt_element
-      escape
       field2elem
       form_field_name
       has_fk_renderer
-      html2xhtml
       is_hidden_babel_field
-      join_elems
       py2html
-      py2js
-      qs2summary
-      string_concat
    
    
 
@@ -37,11 +30,8 @@ lino_extjs6.extjs.elems
 
    .. autosummary::
    
-      ActionParamsLayout
       ActionParamsPanel
       AutoFieldElement
-      BabelCharField
-      BabelTextField
       BooleanDisplayElement
       BooleanFieldElement
       BooleanMixin
@@ -49,7 +39,6 @@ lino_extjs6.extjs.elems
       CharFieldElement
       ChoiceListFieldElement
       ChoicesFieldElement
-      ColumnsLayout
       ComboBox
       ComboFieldElement
       ComplexRemoteComboFieldElement
@@ -61,14 +50,10 @@ lino_extjs6.extjs.elems
       DecimalFieldElement
       DetailMainPanel
       DisplayElement
-      DummyPanel
       ExtPanel
       FieldElement
       FileFieldElement
       ForeignKeyElement
-      ForeignRelatedObjectsDescriptor
-      FormLayout
-      GenericForeignKey
       GenericForeignKeyElement
       GridColumn
       GridElement
@@ -77,24 +62,17 @@ lino_extjs6.extjs.elems
       IntegerFieldElement
       LayoutElement
       ManyRelatedObjectElement
-      ManyRelatedObjectsDescriptor
       ManyToManyElement
-      ManyToManyRel
-      ManyToOneRel
       MonthFieldElement
-      NOT_PROVIDED
       NumberFieldElement
       Panel
-      ParamsLayout
       ParamsPanel
       PasswordFieldElement
-      Permittable
       QuantityFieldElement
       RecurrenceElement
       RemoteComboFieldElement
       RequestFieldElement
       SimpleRemoteComboFieldElement
-      SingleRelatedObjectDescriptor
       SingleRelatedObjectElement
       SlaveSummaryPanel
       Spacer
@@ -103,9 +81,7 @@ lino_extjs6.extjs.elems
       TimeFieldElement
       Toolbar
       URLFieldElement
-      VisibleComponent
       Wrapper
-      js_code
    
    
 
