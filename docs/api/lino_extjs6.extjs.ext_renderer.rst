@@ -9,10 +9,8 @@ lino_extjs6.extjs.ext_renderer
 
    .. autosummary::
    
-      force_unicode
       jscompress
       prepare_label
-      py2js
    
    
 
@@ -22,21 +20,7 @@ lino_extjs6.extjs.ext_renderer
 
    .. autosummary::
    
-      AttrDict
-      ContentType
       ExtRenderer
-      GridEdit
-      HtmlRenderer
-      InsertRow
-      Plugin
-      ShowDetailAction
-      ShowEmptyTable
-      SiteUser
-      SubmitDetail
-      SubmitInsert
-      Supervisor
-      UserProfiles
-      js_code
    
    
 
