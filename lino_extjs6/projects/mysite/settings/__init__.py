@@ -39,5 +39,5 @@ class Site(Site):
         yield 'lino.modlib.system'
         yield 'lino.modlib.users'
         yield 'lino.modlib.contacts'
-        yield 'lino.modlib.cal'
+        yield 'lino_xl.lib.cal'
         yield 'lino.modlib.export_excel'

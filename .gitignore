@@ -19,7 +19,7 @@ lino/sandbox/*/media
 */test.db
 docs/media
 docs/dl/*
-lino.egg-info
+*.egg-info
 .build
 htmlcov
 warnings_linkcheck.txt
