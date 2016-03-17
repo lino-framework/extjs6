@@ -77,6 +77,35 @@ Ext.define('Jarvus.hotfixes.form.field.ComboBoxPickerId', {
 //Ext.enableAriaButtons = false;
 //Ext.enableAriaPanels = false;
 //};
+Ext.define('AppsBoard.Application', {
+    extend: 'Ext.app.Application',
+
+    name: 'AppsBoard',
+
+    stores: [
+        // TODO: add global / shared stores here
+    ],
+
+    launch: function () {
+        // TODO - Launch the application
+    },
+    init: function () {
+    // https://docs.sencha.com/extjs/6.0/wh...de.html#Button
+      //  https://www.sencha.com/forum/showthread.php?303936-Button-issue-with-WAI-ARIA
+        Ext.enableAriaButtons = false;
+        Ext.enableAriaPanels = false;
+    },
+
+    onAppUpdate: function () {
+        Ext.Msg.confirm('Application Update', 'This application has an update, reload?',
+            function (choice) {
+                if (choice === 'yes') {
+                    window.location.reload();
+                }
+            }
+        );
+    }
+});
 
 
 /* Ext.form.field.Month: thanks to Igor Semin @ sencha forum
@@ -1617,7 +1646,8 @@ Lino.save_wc_handler = function(ww) {
 Lino.show_in_own_window_button = function(handler) {
   return {
     qtip: "{{_("Show this panel in own window")}}", 
-    id: "up",
+    //id: "up",
+    option: "up",
     handler: function(event,toolEl,panel, tc) {
       //~ console.log('20111206 report_window_button',panel,handler);
       handler.run(null,{base_params:panel.containing_panel.get_master_params()});
@@ -2844,7 +2874,7 @@ Ext.define('Lino.FormPanel', {
           //~ text:'Refresh',
           //HKC
           //handler:function(){ this.do_when_clean(false,this.refresh.createDelegate(this)) },
-            handler:function(){ this.do_when_clean(false,Ext.bind(refresh,this)) },
+            handler:function(){ this.do_when_clean(false,Ext.bind(this.refresh,this)) },
           iconCls: 'x-tbar-loading',
           tooltip:"{{_('Reload current record')}}",
           scope:this}
@@ -2995,7 +3025,8 @@ Ext.define('Lino.FormPanel', {
     Ext.apply(this.base_params,p);
     if (this.record_selector) {
         var store = this.record_selector.getStore();
-        for (k in p) store.setBaseParam(k,p[k]);
+        //for (k in p) store.setBaseParam(k,p[k]);
+        for (k in p) store.getProxy().setExtraParam(k,p[k]);
         delete this.record_selector.lastQuery;
         //~ console.log("20120725 record_selector.setBaseParam",p)
     }
@@ -3123,13 +3154,14 @@ Ext.define('Lino.FormPanel', {
       this.form.my_loadRecord(record.data);
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
-        console.log("HKC disable getBottomToolbar");
+      //  console.log("HKC disable getBottomToolbar");
       var da = record.data.disabled_actions;
       if (da) {
           //~ console.log('20120528 disabled_actions =',da,this.getBottomToolbar());
           //~ 20121016 this.getBottomToolbar().items.each(function(item,index,length){
           //var tb = this.getTopToolbar();
-          if (this.containing_window) this.containing_window.items.each(function(item,index,length){
+          var tb = this.getDockedItems()[0];
+          if (tb) tb.items.each(function(item,index,length){
               //~ console.log('20120528 ',item.itemId,'-->',da[item.itemId]);
               if (da[item.itemId]) item.disable(); else item.enable();
           });
@@ -3163,7 +3195,8 @@ if (this.disable_editing | record.data.disable_editing) {
           this.prev.setDisabled(!record.navinfo.prev);
           this.next.setDisabled(!record.navinfo.next);
           this.last.setDisabled(!record.navinfo.last);
-          this.displayItem.setText(record.navinfo.message);
+          //this.displayItem.setText(record.navinfo.message);
+          this.displayItem.text = record.navinfo.message;
         } else {
           this.first.setDisabled(true);
           this.prev.setDisabled(true);
@@ -3823,7 +3856,7 @@ Ext.define('Lino.GridPanel', {
         //~ Ext.apply(options.params,this.containing_panel.get_master_params());
         this.set_base_params(this.containing_panel.get_master_params());
         // 20130911
-        if (!this.store.baseParams.{{constants.URL_PARAM_MASTER_PK}}) {  
+        if (!this.store.getProxy().extraParams.{{constants.URL_PARAM_MASTER_PK}}) {
             return;
         }
     }
@@ -3947,7 +3980,8 @@ Ext.define('Lino.GridPanel', {
   },
   set_base_params : function(p) {
     //~ console.log('20130911 GridPanel.set_base_params',p)
-    for (k in p) this.store.setBaseParam(k,p[k]);
+    //for (k in p) this.store.setBaseParam(k,p[k]);
+    for (k in p) this.store.getProxy().setExtraParam(k,p[k]);
     //~ this.store.baseParams = p;
     if (this.quick_search_field)
       this.quick_search_field.setValue(p.query || "");
@@ -4336,6 +4370,7 @@ Lino.cell_context_menu = function(grid,row,col,e) {
   //  HKC
   //  e.stopPropagation();
   //e.stopEvent();
+    e.cancelBubble = true;
   //~ grid.getView().focusCell(row,col);
   //  HKC
   //grid.getSelectionModel().select(row,col);
@@ -4345,10 +4380,10 @@ Lino.cell_context_menu = function(grid,row,col,e) {
   //~ return;
   //  HKC
   //if(!grid.cmenu.el){grid.cmenu.render(); }
-  //if(!this.cmenu.el){this.cmenu.render(); }
+  if(!this.cmenu.el){this.cmenu.render(); }
   //~ if(e.record.data.disabled_fields) {
   
-  var da = grid.store.getProxy().getReader().rawData.rows[row][grid.disabled_actions_index];
+  var da = this.store.getProxy().getReader().rawData.rows[row][grid.disabled_actions_index];
   if (da) {
       this.cmenu.cascade(function(item){ 
         //~ console.log(20120531, item.itemId, da[item.itemId]);
@@ -4425,7 +4460,8 @@ Ext.define('Lino.ComboBox', {
                   }else{
                       var q = this.allQuery;
                       this.lastQuery = q;
-                      this.store.setBaseParam(this.queryParam, q);
+                      //this.store.setBaseParam(this.queryParam, q);
+                      this.store.getProxy().setExtraParam(this.queryParam, q);
                       params = this.getParams(q);
                   }
                   //~ if (this.name == 'birth_country') 
