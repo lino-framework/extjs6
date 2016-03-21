@@ -1513,7 +1513,7 @@ Ext.define('Lino.selection.CellModel', {
 
             case e.ENTER:
                 e.stopEvent();
-                g.onCellDblClick(r,c);
+                g.on_celldblclick(r,c);
                 break;
 
             default:
@@ -2166,7 +2166,8 @@ Lino.build_buttons = function(panel,actions) {
     }
     return {
         bbar:buttons, 
-        cmenu:new Ext.menu.Menu(cmenu),
+        //cmenu:new Ext.menu.Menu(cmenu),
+        cmenu:Ext.create('Ext.menu.Menu', {renderTo: Ext.getBody(),items:cmenu}),
         keyhandlers: keyhandlers
     };
   }
@@ -3660,7 +3661,7 @@ Ext.define('Lino.GridPanel', {
     //~ Ext.apply(config,Lino.build_buttons(this,config.ls_bbar_actions));
     //~ config.bbar, this.cmenu = Lino.build_buttons(this,config.ls_bbar_actions);
     //~ this.cmenu = new Ext.menu.Menu({items: config.bbar});
-    delete this.ls_bbar_actions
+    delete this.ls_bbar_actions;
     if (actions) {
         this.cmenu = actions.cmenu;
         this.keyhandlers = actions.keyhandlers;
@@ -3687,6 +3688,7 @@ Ext.define('Lino.GridPanel', {
           //~ listeners: { keypress: this.search_keypress }, 
           //~ id: "seachString" 
       })];
+
       tbar = this.add_params_panel(tbar);
       var menu = [];
       var set_gc = function(index) {
@@ -3777,9 +3779,14 @@ Ext.define('Lino.GridPanel', {
     this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
     if (this.cell_edit) {
         this.on('cellcontextmenu', Lino.cell_context_menu, this);
+        //this.on({
+        //    scope : this,
+        //    cellcontextmenu : Lino.cell_context_menu,
+        //});
     } else {
         this.on('rowcontextmenu', Lino.row_context_menu, this);
     }
+    this.on('celldblclick' , this.on_celldblclick , this);
     //~ this.on('contextmenu', Lino.grid_context_menu, this);
     //  Lino.GridPanel.superclass.initComponent.call(this);
       this.callSuper();
@@ -3961,16 +3968,17 @@ Ext.define('Lino.GridPanel', {
     //~ }
     //~ return this.calculatePageSize.defer(500,this,[true]);
   },
-  
-  onCellDblClick : function(grid, row, col){
-      //~ console.log("20120307 onCellDblClick",this,grid, row, col);
+
+  //on_celldblclick : function(grid, row, col){
+  on_celldblclick : function(view, td, cellIndex, record, tr, rowIndex, e, eOpts ){
+      //~ console.log("20120307 on_celldblclick",this,grid, row, col);
       if (this.ls_detail_handler) {
           //~ Lino.notify('show detail');
           Lino.show_detail(this);
           return false;
       }else{
         //~ console.log('startEditing');
-        this.startEditing(row,col);
+        this.startEditing(rowIndex,cellIndex);
       }
   }
   ,get_base_params : function() {  /* Lino.GridPanel */
@@ -4365,25 +4373,31 @@ Lino.row_context_menu = function(grid,row,col,e) {
   console.log('20130927 rowcontextmenu',grid,row,col,e,grid.store.getProxy().getReader().rawData.rows[row]);
 }
 
-Lino.cell_context_menu = function(grid,row,col,e) {
+//Lino.cell_context_menu = function(_this, _grid,row,col,_e,a, e) {
+Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, eOpts){
   //~ console.log('20120531 cellcontextmenu',grid,row,col,e,grid.store.reader.arrayData.rows[row]);
   //  HKC
   //  e.stopPropagation();
-  //e.stopEvent();
-    e.cancelBubble = true;
+    grid = this;
+    e.stopEvent();
+    //e.cancelBubble = true;
   //~ grid.getView().focusCell(row,col);
   //  HKC
   //grid.getSelectionModel().select(row,col);
-    this.getSelectionModel().select(row,col);
+  grid.getSelectionModel().select(rowIndex,cellIndex);
+    //this.getSelectionModel().select(row,col);
   //~ console.log(grid.store.getAt(row));
   //~ grid.getView().focusRow(row);
   //~ return;
   //  HKC
-  //if(!grid.cmenu.el){grid.cmenu.render(); }
-  if(!this.cmenu.el){this.cmenu.render(); }
+  if(!grid.cmenu.el){
+      //grid.cmenu.el.render();
+      grid.cmenu.render();
+      //grid.cmenu.showAt(e.getXY());
+  }
   //~ if(e.record.data.disabled_fields) {
   
-  var da = this.store.getProxy().getReader().rawData.rows[row][grid.disabled_actions_index];
+  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
   if (da) {
       this.cmenu.cascade(function(item){ 
         //~ console.log(20120531, item.itemId, da[item.itemId]);
@@ -4392,9 +4406,9 @@ Lino.cell_context_menu = function(grid,row,col,e) {
   };
   
   var xy = e.getXY();
-  xy[1] -= grid.cmenu.el.getHeight();
+  //xy[1] -= grid.cmenu.el.getHeight();
   grid.cmenu.showAt(xy);
-}
+};
 
 
 Lino.chooser_handler = function(combo,name) {
@@ -4509,9 +4523,9 @@ Ext.define('Lino.ComboBox', {
   },
   setContextValue : function(name,value) {
     //~ console.log('setContextValue',this,this.name,':',name,'=',value);
-    //~ if (this.contextValues === undefined) {
-        //~ this.contextValues = Array(); // this.contextParams.length);
-    //~ }
+     if (this.contextParams === undefined) {
+         this.contextParams = Array(); // this.contextParams.length);
+     }
     if (this.contextParams[name] != value) {
       //~ console.log('setContextValue 1',this.contextParams);
       this.contextParams[name] = value;
@@ -4579,8 +4593,8 @@ Ext.define('Lino.RemoteComboFieldElement',{
   //~ selectOnFocus: true, // select any existing text in the field immediately on focus.
   resizable: true
   ,initList : function() {
-      Lino.RemoteComboFieldElement.superclass.initList.call(this);
-         //this.callSuper();
+      //Lino.RemoteComboFieldElement.superclass.initList.call(this);
+         this.callSuper();
       if (this.pageTb) {
           
           var me = this;
@@ -4610,8 +4624,9 @@ Ext.define('Lino.TwinCombo',{
     //~ trigger2Class : 'x-tbar-detail',
     initComponent : function() {
         //~ Lino.TwinCombo.superclass.initComponent.call(this);
-        Lino.ComboBox.prototype.initComponent.call(this);
-        Ext.form.TwinTriggerField.prototype.initComponent.call(this);
+        this.callSuper();
+        //Lino.ComboBox.prototype.initComponent.call(this);
+        //Ext.form.TwinTriggerField.prototype.initComponent.call(this);
     },
     onTrigger2Click : function() {
         //~ console.log('onTrigger2Click',this,arguments);

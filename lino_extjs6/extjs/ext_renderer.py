@@ -1135,9 +1135,9 @@ class ExtRenderer(HtmlRenderer):
             yield "    this.onRender = function(ct, position) {"
             for ln in on_render:
                 yield "      " + ln
-            # yield "      Lino.%s.superclass.onRender.call(this, ct, position);" % \
-            #     dh.layout._formpanel_name
-            yield "      this.callSuper(ct, position);"
+            yield "      Lino.%s.superclass.onRender.call(this, ct, position);" % \
+                dh.layout._formpanel_name
+            # yield "      this.callSuper(ct, position);"
             yield "    }"
 
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
