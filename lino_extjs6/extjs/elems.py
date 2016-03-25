@@ -123,7 +123,7 @@ class GridColumn(jsgen.Component):
                     kw.update(clearFilter=True)
                 #~ else:
                     #~ print index, "is not 1"
-                kw.update(filterInput=js_code('new Ext.form.TextField()'))
+                kw.update(filterInput=js_code("Ext.create('Ext.form.TextField',{})"))
                 kw.update(filterOptions=[
                     #~ dict(value='startwith', text='Start With'),
                     #~ dict(value='endwith', text='End With'),
@@ -198,21 +198,21 @@ class GridColumn(jsgen.Component):
 
 
 class Toolbar(jsgen.Component):
-    value_template = "new Ext.Toolbar(%s)"
+    value_template = "Ext.create('Ext.Toolbar',%s)"
 
 
 class ComboBox(jsgen.Component):
-    value_template = 'new Ext.form.ComboBox(%s)'
+    value_template = "Ext.create('Ext.form.ComboBox',%s)"
 
 # todo: rename this to Panel, and Panel to PanelElement or sth else
 
 
 class ExtPanel(jsgen.Component):
-    value_template = "new Ext.Panel(%s)"
+    value_template = "Ext.create('Ext.Panel',%s)"
 
 
 class Calendar(jsgen.Component):
-    value_template = "new Lino.CalendarPanel(%s)"
+    value_template = "Ext.create('Lino.CalendarPanel',%s)"
 
 
 from lino.utils.jsgen import VisibleComponent
@@ -380,7 +380,7 @@ class ConstantElement(LayoutElement):
 class Spacer(LayoutElement):
     declare_type = jsgen.DECLARE_INLINE
     #xtype = 'label'
-    value_template = "new Ext.Spacer(%s)"
+    value_template = "Ext.create('Ext.Spacer',%s)"
 
 
 def add_help_text(kw, help_text, title, datasource, fieldname):
@@ -625,7 +625,7 @@ class TextFieldElement(FieldElement):
     filter_type = 'string'
     gridfilters_settings = dict(type='string')
     vflex = True
-    value_template = "new Ext.form.TextArea(%s)"
+    value_template = "Ext.create('Ext.form.TextArea',%s)"
     xtype = None
     #width = 60
     preferred_width = 60
@@ -640,7 +640,7 @@ class TextFieldElement(FieldElement):
             or settings.SITE.textfield_format
         if self.format == 'html':
             if settings.SITE.is_installed('tinymce'):
-                self.value_template = "new Lino.RichTextPanel(%s)"
+                self.value_template = "Ext.create('Lino.RichTextPanel',%s)"
                 self.active_child = True
                 #~ if self.label:
                     #~ kw.update(title=unicode(self.label))
@@ -656,7 +656,7 @@ class TextFieldElement(FieldElement):
                 return LayoutElement.__init__(
                     self, layout_handle, field.name, **kw)
             else:
-                self.value_template = "new Ext.form.HtmlEditor(%s)"
+                self.value_template = "Ext.create('Ext.form.HtmlEditor',%s)"
                 if settings.SITE.use_vinylfox:
                     kw.update(plugins=js_code('Lino.VinylFoxPlugins()'))
         elif self.format == 'plain':
@@ -694,7 +694,7 @@ class TextFieldElement(FieldElement):
 class CharFieldElement(FieldElement):
     filter_type = 'string'
     gridfilters_settings = dict(type='string')
-    value_template = "new Ext.form.TextField(%s)"
+    value_template = "Ext.create('Ext.form.TextField',%s)"
     sortable = True
     xtype = None
 
@@ -772,7 +772,7 @@ class ComboFieldElement(FieldElement):
 
 
 class ChoicesFieldElement(ComboFieldElement):
-    value_template = "new Lino.ChoicesFieldElement(%s)"
+    value_template = "Ext.create('Lino.ChoicesFieldElement',%s)"
 
     def get_field_options(self, **kw):
         kw = ComboFieldElement.get_field_options(self, **kw)
@@ -806,7 +806,7 @@ class ChoiceListFieldElement(ChoicesFieldElement):
 
 
 class RemoteComboFieldElement(ComboFieldElement):
-    value_template = "new Lino.RemoteComboFieldElement(%s)"
+    value_template = "Ext.create('Lino.RemoteComboFieldElement',%s)"
 
     def store_options(self, **kw):
         # ~ kw.update(baseParams=js_code('this.get_base_params()')) # 20120202
@@ -814,7 +814,7 @@ class RemoteComboFieldElement(ComboFieldElement):
             url = self.layout_handle.get_choices_url(self.field, **kw)
             reader = dict(type = 'json',rootProperty ='rows', totalProperty = 'count',  idProperty = 'this.ls_id_property', keepRawData = 'true')
             proxy = dict(url=url, method='GET',reader=reader)
-            kw.update(proxy=js_code("new Ext.data.HttpProxy(%s)" %
+            kw.update(proxy=js_code("Ext.create('Ext.data.HttpProxy',%s)" %
                       py2js(proxy)))
         # a JsonStore without explicit proxy sometimes used method POST
         return kw
@@ -823,13 +823,13 @@ class RemoteComboFieldElement(ComboFieldElement):
         kw = ComboFieldElement.get_field_options(self, **kw)
         sto = self.store_options()
         # print repr(sto)
-        kw.update(store=js_code("new Lino.ComplexRemoteComboStore(%s)" %
+        kw.update(store=js_code("Ext.create('Lino.ComplexRemoteComboStore',%s)" %
                   py2js(sto)))
         return kw
 
 
 class SimpleRemoteComboFieldElement(RemoteComboFieldElement):
-    value_template = "new Lino.SimpleRemoteComboFieldElement(%s)"
+    value_template = "Ext.create('Lino.SimpleRemoteComboFieldElement',%s)"
     #~ def get_field_options(self,**kw):
         #~ todo : store
         # ~ # Do never add a hiddenName
@@ -871,7 +871,7 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
             a1 = actor.detail_action
             a2 = actor.insert_action
             if a1 is not None or a2 is not None:
-                self.value_template = "new Lino.TwinCombo(%s)"
+                self.value_template = "Ext.create('Lino.TwinCombo',%s)"
                 js = "function(e){ Lino.show_fk_detail(this,%s,%s)}" % (
                     action_name(a1), action_name(a2))
                 kw.update(onTrigger2Click=js_code(js))
@@ -893,7 +893,7 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
 
 
 class TimeFieldElement(FieldElement):
-    value_template = "new Lino.TimeField(%s)"
+    value_template = "Ext.create('Lino.TimeField',%s)"
     #~ xtype = 'timefield'
     # ~ data_type = 'time' # for store column
     sortable = True
@@ -903,7 +903,7 @@ class TimeFieldElement(FieldElement):
 
 class DateTimeFieldElement(FieldElement):
     #~ value_template = "new Lino.DateTimeField(%s)"
-    value_template = "new Ext.form.DisplayField(%s)"
+    value_template = "Ext.create('Ext.form.DisplayField',%s)"
     # ~ data_type = 'date' # for store column
     sortable = True
     preferred_width = 16
@@ -911,14 +911,14 @@ class DateTimeFieldElement(FieldElement):
 
     def __init__(self, layout_handle, field, **kw):
         if self.editable:
-            self.value_template = "new Lino.DateTimeField(%s)"
+            self.value_template = "Ext.create('Lino.DateTimeField',%s)"
         else:
             kw.update(value="<br>")
         FieldElement.__init__(self, layout_handle, field, **kw)
 
 
 class DatePickerFieldElement(FieldElement):
-    value_template = "new Lino.DatePickerField(%s)"
+    value_template = "Ext.create('Lino.DatePickerField',%s)"
 
     def get_column_options(self, **kw):
         raise Exception("not allowed in grid")
@@ -927,9 +927,9 @@ class DatePickerFieldElement(FieldElement):
 class DateFieldElement(FieldElement):
     if settings.SITE.use_spinner:
         raise Exception("20130114")
-        value_template = "new Lino.SpinnerDateField(%s)"
+        value_template = "Ext.create('Lino.SpinnerDateField',%s)"
     else:
-        value_template = "new Lino.DateField(%s)"
+        value_template = "Ext.create('Lino.DateField',%s)"
         #~ value_template = "new Lino.DatePickerField(%s)"
     #~ xtype = 'datefield'
     # ~ data_type = 'date' # for store column
@@ -973,7 +973,7 @@ class MonthFieldElement(DateFieldElement):
 class URLFieldElement(CharFieldElement):
     sortable = True
     preferred_width = 40
-    value_template = "new Lino.URLField(%s)"
+    value_template = "Ext.create('Lino.URLField',%s)"
 
     #~ def get_field_options(self,**kw):
         #~ kw = FieldElement.get_field_options(self,**kw)
@@ -987,7 +987,7 @@ class IncompleteDateFieldElement(CharFieldElement):
     Widget for :class:`lino.core.fields.IncompleteDate` fields.
     """
     preferred_width = 10
-    value_template = "new Lino.IncompleteDateField(%s)"
+    value_template = "Ext.create('Lino.IncompleteDateField',%s)"
 
     #~ def __init__(self,*args,**kw):
         #~ FieldElement.__init__(self,*args,**kw)
@@ -1007,9 +1007,9 @@ class NumberFieldElement(FieldElement):
     """
     filter_type = 'numeric'
     gridfilters_settings = dict(type='numeric')
-    value_template = "new Ext.form.NumberField(%s)"
+    value_template = "Ext.create('Ext.form.NumberField',%s)"
     sortable = True
-    grid_column_template = "new Lino.NullNumberColumn(%s)"
+    grid_column_template = "Ext.create('Lino.NullNumberColumn',%s)"
     number_format = '0'
 
     def apply_cell_format(self, e):
@@ -1167,7 +1167,7 @@ class DisplayElement(FieldElement):
     ext_suffix = "_disp"
     #~ declare_type = jsgen.DECLARE_THIS
     declare_type = jsgen.DECLARE_VAR
-    value_template = "new Ext.form.DisplayField(%s)"
+    value_template = "Ext.create('Ext.form.DisplayField',%s)"
 
     def __init__(self, *args, **kw):
         kw.setdefault('value', '<br/>')  # see blog/2012/0527
@@ -1219,7 +1219,7 @@ class BooleanDisplayElement(BooleanMixin, DisplayElement):
 
 class BooleanFieldElement(BooleanMixin, FieldElement):
 
-    value_template = "new Ext.form.Checkbox(%s)"
+    value_template = "Ext.create('Ext.form.Checkbox',%s)"
     #~ xtype = 'checkbox'
     #~ data_type = 'boolean'
     filter_type = 'boolean'
@@ -1334,7 +1334,7 @@ class GenericForeignKeyElement(DisplayElement):
 
 
 class RecurrenceElement(DisplayElement):
-    value_template = "new Ext.ensible.cal.RecurrenceField(%s)"
+    value_template = "Ext.create('Ext.ensible.cal.RecurrenceField',%s)"
 
 
 class HtmlBoxElement(DisplayElement):
@@ -1342,7 +1342,7 @@ class HtmlBoxElement(DisplayElement):
 
     """
     ext_suffix = "_htmlbox"
-    value_template = "new Lino.HtmlBoxPanel(%s)"
+    value_template = "Ext.create('Lino.HtmlBoxPanel',%s)"
     preferred_height = 5
     vflex = True
     filter_type = 'string'
@@ -1364,7 +1364,7 @@ class HtmlBoxElement(DisplayElement):
 
         # ~ if self.field.drop_zone: # testing with drop_zone 'FooBar'
             #~ kw.update(listeners=dict(render=js_code('initialize%sDropZone' % self.field.drop_zone)))
-        kw.update(items=js_code("new Ext.BoxComponent({autoScroll:true})"))
+        kw.update(items=js_code("Ext.create('Ext.BoxComponent,{autoScroll:true})"))
         if self.label:
             kw.update(title=self.label)
         return kw
@@ -1425,7 +1425,7 @@ class Container(LayoutElement):
     vertical = False
     hpad = 1
     is_fieldset = False
-    value_template = "new Ext.Container(%s)"
+    value_template = "Ext.create('Ext.Container',%s)"
     hideCheckBoxLabels = True
     label_align = layouts.LABEL_ALIGN_TOP
 
@@ -1590,7 +1590,7 @@ class Panel(Container):
     """
     ext_suffix = "_panel"
     active_child = False
-    value_template = "new Ext.Panel(%s)"
+    value_template = "Ext.create('Ext.Panel',%s)"
 
     def __init__(self, layout_handle, name, vertical, *elements, **kw):
         self.vertical = vertical
@@ -1707,7 +1707,7 @@ class Panel(Container):
                     vflex_count += 1
             if vflex_count >= 2 and len(self.elements) <= 3:
                 self.remove('layout', 'layoutConfig')
-                self.value_template = 'new Lino.VBorderPanel(%s)'
+                self.value_template = 'Lino.VBorderPanel(%s)'
                 for e in self.elements:
                     if e.vflex:
                         e.update(flex=e.height or e.preferred_height)
@@ -1741,7 +1741,7 @@ class Panel(Container):
         if self.label:
             if not isinstance(self.parent, TabPanel):
                 self.update(title=self.label)
-                self.value_template = "new Ext.form.FieldSet(%s)"
+                self.value_template = "Ext.create('Ext.form.FieldSet',%s)"
                 self.update(frame=False)
                 self.update(bodyBorder=True)
                 self.update(border=True)
@@ -1780,7 +1780,7 @@ class GridElement(Container):
     #~ declare_type = jsgen.DECLARE_THIS
     #value_template = "new Ext.grid.EditorGridPanel(%s)"
     #~ value_template = "new Ext.grid.GridPanel(%s)"
-    value_template = "new Lino.GridPanel(%s)"
+    value_template = "Ext.create('Lino.GridPanel',%s)"
     ext_suffix = "_grid"
     vflex = True
     xtype = None
@@ -1793,7 +1793,7 @@ class GridElement(Container):
         :param rpt: the table being displayed (:class:`lino.core.tables.AbstractTable`)
         """
         #~ assert isinstance(rpt,dd.AbstractTable), "%r is not a Table!" % rpt
-        self.value_template = "new Lino.%s.GridPanel(%%s)" % rpt
+        self.value_template = "Ext.create('Lino.%s.GridPanel',%%s)" % rpt
         self.actor = rpt
         if len(columns) == 0:
             self.rh = rpt.get_handle()
@@ -1873,7 +1873,7 @@ class GridElement(Container):
 
 class DetailMainPanel(Panel):
     xtype = None
-    value_template = "new Ext.Panel(%s)"
+    value_template = "Ext.create('Ext.Panel',%s)"
 
     def __init__(self, layout_handle, name, vertical, *elements, **kw):
         kw.update(autoScroll=True)
@@ -1903,11 +1903,11 @@ class ActionParamsPanel(Panel):
     The optional Panel for `parameters` of an Action.
     """
     xtype = None
-    value_template = "new Lino.ActionParamsPanel(%s)"
+    value_template = "Ext.create('Lino.ActionParamsPanel',%s)"
 
 
 class TabPanel(Panel):
-    value_template = "new Ext.TabPanel(%s)"
+    value_template = "Ext.create('Ext.TabPanel',%s)"
 
     def __init__(self, layout_handle, name, *elems, **kw):
         kw.update(autoScroll=True)
