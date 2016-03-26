@@ -1689,13 +1689,15 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
     if (result.xcallback) {
         //~ var config = {title:"{{_('Confirmation')}}"};
         var config = {title:result.xcallback.title};
-        config.buttons = Ext.MessageBox.YESNOCANCEL;
+        //config.buttons = Ext.MessageBox.YESNOCANCEL;
+        config.buttons = Ext.Msg.YESNOCANCEL;
+        config.icon = Ext.Msg.QUESTION;
         //~ config.buttons = Ext.MessageBox.YESNO;
         var p = {};
         Lino.insert_subst_user(p);
         //config.buttons = result.xcallback.buttons;
-        config.msg = result.message;
-        config.fn = function(buttonId, text, opt) {
+        config.message = result.message;
+        config.fn = function(buttonId) {
           //  Disable by HKC
           //panel.loadMask.show();
           //~ Lino.insert_subst_user(p);
@@ -1706,7 +1708,7 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
             params: p,
             success: Lino.action_handler(panel, on_success, on_confirm)
           });
-        }
+        };
         Ext.MessageBox.show(config);
         return;
     }
@@ -3088,9 +3090,11 @@ Ext.define('Lino.FormPanel', {
         } else {
           //~ console.log('20111217 do_when_clean() form is dirty',this.form);
           var config = {title:"{{_('Confirmation')}}"};
-          config.buttons = Ext.MessageBox.YESNOCANCEL;
-          config.msg = "{{_('Save changes to current record ?')}}";
-          config.fn = function(buttonId,text,opt) {
+          //config.buttons = Ext.MessageBox.YESNOCANCEL;
+          config.buttons = Ext.Msg.YESNOCANCEL;
+          config.icon = Ext.Msg.QUESTION;
+          config.message = "{{_('Save changes to current record ?')}}";
+          config.fn = function(buttonId) {
             //~ console.log('do_when_clean',buttonId)
             if (buttonId == "yes") {
                 //~ Lino.submit_detail(this_,undefined,todo);
@@ -4449,8 +4453,8 @@ Ext.define('Lino.ComboBox', {
   initComponent : function(){
       this.contextParams = {};
       //~ Ext.form.ComboBox.initComponent(this);
-      //Lino.ComboBox.superclass.initComponent.call(this);
-      this.callSuper();
+      Lino.ComboBox.superclass.initComponent.call(this);
+      //this.callSuper();
   },
   setValue : function(v,record_data){
       /*
