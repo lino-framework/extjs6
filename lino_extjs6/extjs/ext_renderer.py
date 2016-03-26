@@ -1382,7 +1382,7 @@ class ExtRenderer(HtmlRenderer):
                     raise ValueError("height")
                 #~ print 20120629, action, windowConfig
 
-        yield "Lino.%s = new Lino.WindowAction(%s, function(){" % (
+        yield "Lino.%s = Ext.create('Lino.WindowAction',%s, function(){" % (
             ba.full_name(), py2js(windowConfig))
         #~ yield "  console.log('20120625 fn');"
         if ba.action.extjs_main_panel:
@@ -1400,12 +1400,12 @@ class ExtRenderer(HtmlRenderer):
             yield "  var p = %s;" % py2js(p)
             if params_panel:
                 if ba.action.parameters:
-                    yield "  return new Lino.%s({});" % wl._formpanel_name
+                    yield "  return Ext.create('Lino.%s',{});" % wl._formpanel_name
                 else:
-                    yield "  p.params_panel = new Lino.%s({});" % params_panel.layout._formpanel_name
-                    yield "  return new %s(p);" % mainPanelClass
+                    yield "  p.params_panel = Ext.create('Lino.%s',{});" % params_panel.layout._formpanel_name
+                    yield "  return Ext.create('%s',{p});" % mainPanelClass
             else:
-                yield "  return new %s(p);" % mainPanelClass
+                yield "  return Ext.create('%s',{p});" % mainPanelClass
         yield "});"
 
     def linolib_intro(self):
