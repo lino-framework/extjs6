@@ -1421,8 +1421,8 @@ class ExtRenderer(HtmlRenderer):
                 jsgen.get_user_profile())
             # lino.__version__)
             #~ // $site.title ($lino.welcome_text())
-            yield "Ext.BLANK_IMAGE_URL = '%s';" % extjs.build_lib_url(
-                'resources/images/default/s.gif')
+            # yield "Ext.BLANK_IMAGE_URL = '%s';" % extjs.build_lib_url(
+            #     'resources/images/default/s.gif')
             yield "LANGUAGE_CHOICES = %s;" % py2js(
                 list(settings.SITE.LANGUAGE_CHOICES))
             yield "MEDIA_URL = %s;" % py2js(settings.SITE.build_media_url())
