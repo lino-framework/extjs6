@@ -2788,7 +2788,6 @@ Ext.define('Lino.FormPanel', {
         anchor: '100%'
     },
   //~ base_params : {},
-  //~ trackResetOnLoad : true,
   //~ query_params : {},
   //~ 20110119b quick_search_text : '',
   constructor : function(config,params){
@@ -2803,7 +2802,7 @@ Ext.define('Lino.FormPanel', {
     config.trackResetOnLoad = true;
 
     //Lino.FormPanel.superclass.constructor.call(this, config);
-      this.callSuper(config);
+      this.callSuper(arguments);
 
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
@@ -3160,7 +3159,8 @@ Ext.define('Lino.FormPanel', {
   ,set_current_record : function(record, after) {
       // console.log('20150905 set_current_record', record);
     if (this.record_selector) {
-        this.record_selector.clearValue();
+        // HKC: disable this line to avoid getting "Save or not the record" when closing and IsDirty() is True
+        //this.record_selector.clearValue();
         // e.g. InsertWrapper FormPanel doesn't have a record_selector
     }
     this.current_record = record;
@@ -4454,7 +4454,7 @@ Ext.define('Lino.ComboBox', {
       this.contextParams = {};
       //~ Ext.form.ComboBox.initComponent(this);
       Lino.ComboBox.superclass.initComponent.call(this);
-      //this.callSuper();
+      //this.callSuper(arguments);
   },
   setValue : function(v,record_data){
       /*
@@ -4521,7 +4521,7 @@ Ext.define('Lino.ComboBox', {
           this.hiddenField.value = v;
       }
       Ext.form.ComboBox.superclass.setValue.call(this, text);
-      //this.callSuper(v);
+      //this.callSuper(arguments);
       //this.callParent(text);
       this.value = v; // needed for grid.afteredit
   },
@@ -4650,9 +4650,9 @@ Ext.define('Lino.TwinCombo',{
     }
   });
 //~ Lino.TwinCombo.prototype.initComponent = Ext.form.TwinTriggerField.prototype.initComponent;
-Lino.TwinCombo.prototype.getTrigger = Ext.form.TwinTriggerField.prototype.getTrigger;
-Lino.TwinCombo.prototype.getOuterSize = Ext.form.TwinTriggerField.prototype.getOuterSize;
-Lino.TwinCombo.prototype.initTrigger = Ext.form.TwinTriggerField.prototype.initTrigger;
+Lino.TwinCombo.prototype.getTrigger = Ext.form.field.Text.prototype.getTrigger;
+Lino.TwinCombo.prototype.getOuterSize = Ext.form.field.Text.prototype.getOuterSize;
+Lino.TwinCombo.prototype.initTrigger = Ext.form.field.Text.prototype.initTrigger;
 Lino.TwinCombo.prototype.onTrigger1Click = Ext.form.ComboBox.prototype.onTriggerClick;
 //~ Lino.TwinCombo.prototype.onTrigger2Click = function() {
     //~ console.log('onTrigger2Click',arguments);

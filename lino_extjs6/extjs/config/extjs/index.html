@@ -36,12 +36,12 @@
             {%- if site.use_filterRow -%}
                 {{ stylesheet(site.build_static_url("filterRow/filterRow.css")) }}
             {%- endif -%}
-            {%- if site.use_gridfilters -%}
-                {{ stylesheet(extjs.build_lib_url("examples/ux/statusbar/css/statusbar.css")) }}
-                {{ stylesheet(extjs.build_lib_url("examples/ux/gridfilters/css/GridFilters.css")) }}
-                {{ stylesheet(extjs.build_lib_url("examples/ux/gridfilters/css/RangeMenu.css")) }}
-            {%- endif -%}
-            {{ stylesheet(extjs.build_lib_url("examples/ux/fileuploadfield/css/fileuploadfield.css")) }}
+            <!--{%- if site.use_gridfilters -%}-->
+                <!--{{ stylesheet(extjs.build_lib_url("examples/ux/statusbar/css/statusbar.css")) }}-->
+                <!--{{ stylesheet(extjs.build_lib_url("examples/ux/gridfilters/css/GridFilters.css")) }}-->
+                <!--{{ stylesheet(extjs.build_lib_url("examples/ux/gridfilters/css/RangeMenu.css")) }}-->
+            <!--{%- endif -%}-->
+            <!--{{ stylesheet(extjs.build_lib_url("examples/ux/fileuploadfield/css/fileuploadfield.css")) }}-->
             {{ stylesheet(site.build_static_url("extjs/lino.css")) }}
             {%- if site.use_awesome_uploader -%}
                 {{ stylesheet(site.build_static_url("AwesomeUploader/AwesomeUploader.css"))}}
@@ -52,17 +52,17 @@
     {# ###### JavaScript files ###### #}
     {%- block js -%}
         {%- if settings.DEBUG -%}
-            {{ javascript(extjs.build_lib_url('adapter/ext/ext-base-debug.js'))}}
+            <!--{{ javascript(extjs.build_lib_url('adapter/ext/ext-base-debug.js'))}}-->
             {{ javascript(extjs.build_lib_url('ext-all-debug.js')) }}
         {%- else -%}
-            {{ javascript(extjs.build_lib_url('adapter/ext/ext-base.js')) }}
+            <!--{{ javascript(extjs.build_lib_url('adapter/ext/ext-base.js')) }}-->
             {{ javascript(extjs.build_lib_url('ext-all.js')) }}
         {%- endif -%}
     {%- endblock js -%}
     {%- if not language.startswith('en') -%}
         {{ javascript(extjs.build_lib_url('src/locale/ext-lang-' + language + '.js')) }}
     {%- endif -%}
-    {{ javascript(extjs.build_lib_url('examples/ux/statusbar/StatusBar.js')) }}
+    <!--{{ javascript(extjs.build_lib_url('examples/ux/statusbar/StatusBar.js')) }}-->
     {%- if site.use_spinner -%}
         {{ javascript(extjs.build_lib_url('examples/ux/Spinner.js')) }}
     {%- endif -%}
@@ -79,19 +79,19 @@
             {%- endfor -%}
         {%- endif -%}
     {%- endfor -%}
-    {%- if site.use_gridfilters -%}
-        {%- set p = extjs.build_lib_url('examples/ux/gridfilters') -%}
-        {{ javascript(p + "/menu/RangeMenu.js") }}
-        {{ javascript(p + "/menu/ListMenu.js") }}
-        {{ javascript(p + "/GridFilters.js") }}
-        {{ javascript(p + "/filter/Filter.js") }}
-        {{ javascript(p + "/filter/StringFilter.js") }}
-        {{ javascript(p + "/filter/DateFilter.js") }}
-        {{ javascript(p + "/filter/ListFilter.js") }}
-        {{ javascript(p + "/filter/NumericFilter.js") }}
-        {{ javascript(p + "/filter/BooleanFilter.js") }}
-    {%- endif -%}
-    {{ javascript(extjs.build_lib_url("examples/ux/fileuploadfield/FileUploadField.js")) }}
+    <!--{%- if site.use_gridfilters -%}-->
+        <!--{%- set p = extjs.build_lib_url('examples/ux/gridfilters') -%}-->
+        <!--{{ javascript(p + "/menu/RangeMenu.js") }}-->
+        <!--{{ javascript(p + "/menu/ListMenu.js") }}-->
+        <!--{{ javascript(p + "/GridFilters.js") }}-->
+        <!--{{ javascript(p + "/filter/Filter.js") }}-->
+        <!--{{ javascript(p + "/filter/StringFilter.js") }}-->
+        <!--{{ javascript(p + "/filter/DateFilter.js") }}-->
+        <!--{{ javascript(p + "/filter/ListFilter.js") }}-->
+        <!--{{ javascript(p + "/filter/NumericFilter.js") }}-->
+        <!--{{ javascript(p + "/filter/BooleanFilter.js") }}-->
+    <!--{%- endif -%}-->
+    <!--{{ javascript(extjs.build_lib_url("examples/ux/fileuploadfield/FileUploadField.js")) }}-->
 
     {%- if site.use_filterRow -%}
         {%- set p = site.build_static_url('filterRow') -%}
