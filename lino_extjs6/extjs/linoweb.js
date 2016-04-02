@@ -2141,11 +2141,11 @@ Lino.build_buttons = function(panel,actions) {
           if (a.auto_save == true) {
               //Edited by HKC
               //h = panel.do_when_clean.createDelegate(panel,[true,h]);
-              h = Ext.bind(panel.do_when_clean,panel,[true,h]);
+              h = panel.do_when_clean.bind(panel,true,h);
           } else if (a.auto_save == null) {
               //Edited by HKC
               //h = panel.do_when_clean.createDelegate(panel,[false,h]);
-              h = Ext.bind(panel.do_when_clean,panel,[false,h]);
+              h = panel.do_when_clean.bind(panel,false,h);
           } else if (a.auto_save == false) {
               // h = h;
           } else {
@@ -2564,7 +2564,7 @@ Ext.define('Lino.HtmlBoxPanel', {
       };
       //  HKC
       //Lino.do_when_visible(box, todo.createDelegate(this));
-      Lino.do_when_visible(box, Ext.bind(todo,this));
+      Lino.do_when_visible(box, todo.bind(this));
   }
 });
 //~ Ext.override(Lino.HtmlBoxPanel,Lino.FieldBoxMixin);
@@ -2886,7 +2886,7 @@ Ext.define('Lino.FormPanel', {
           //~ text:'Refresh',
           //HKC
           //handler:function(){ this.do_when_clean(false,this.refresh.createDelegate(this)) },
-            handler:function(){ this.do_when_clean(false,Ext.bind(this.refresh,this)) },
+            handler:function(){ this.do_when_clean(false,this.refresh.bind(this)) },
           iconCls: 'x-tbar-loading',
           tooltip:"{{_('Reload current record')}}",
           scope:this}
@@ -3118,7 +3118,7 @@ Ext.define('Lino.FormPanel', {
     this.do_when_clean(
         // HKC
         //true, this.load_record_id.createDelegate(this, [record_id]));
-        true, Ext.bind(this.load_record_id,this,[record_id]));
+        true, this.load_record_id.bind(this,[record_id]));
   }
 
   ,load_record_id : function(record_id, after) {
@@ -4363,7 +4363,7 @@ Ext.define('Lino.GridPanel', {
     };
     //  HKC
     //Lino.do_when_visible(this,todo.createDelegate(this));
-      Lino.do_when_visible(this,Ext.bind(todo,this));
+      Lino.do_when_visible(this,todo.bind(this));
   },
   load_record_id : function(record_id,after) {
       Lino.run_detail_handler(this,record_id)
@@ -4448,7 +4448,12 @@ Ext.define('Lino.ComboBox', {
   submitValue: true,
   displayField: '{{constants.CHOICES_TEXT_FIELD}}', // 'text', 
   valueField: '{{constants.CHOICES_VALUE_FIELD}}', // 'value',
-  
+  listeners:{
+         scope: this,
+         change:function(_this, newValue, oldValue, eOpts ) {
+              //_this.setValue(newValue,oldValue);
+            }
+    },
   //~ initComponent : Ext.form.ComboBox.prototype.initComponent.createSequence(function() {
   initComponent : function(){
       this.contextParams = {};
@@ -4456,32 +4461,33 @@ Ext.define('Lino.ComboBox', {
       Lino.ComboBox.superclass.initComponent.call(this);
       //this.callSuper(arguments);
   },
+
   setValue : function(v,record_data){
       /*
       Based on feature request developed in http://extjs.net/forum/showthread.php?t=75751
       */
       /* `record_data` is used to get the text corresponding to this value */
-      //~ if(this.name == 'city') 
+      //~ if(this.name == 'city')
       //~ console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
       var text = v;
       if(this.valueField){
-        if(v == null || v == '') { 
-            //~ if (this.name == 'birth_country') 
+        if(v == null || v == '') {
+            //~ if (this.name == 'birth_country')
                 //~ console.log(this.name,'.setValue',v,'no lookup needed, value is empty');
             //~ v = undefined;
             v = '';
             //~ text = '';
         } else if (Ext.isDefined(record_data)) {
           text = record_data[this.name];
-          //~ if (this.name == 'birth_country') 
+          //~ if (this.name == 'birth_country')
             //~ console.log(this.name,'.setValue',v,'got text ',text,' from record ',record);
         } else {
           // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
-          if(this.mode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
+          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
               //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
               // HKC
               //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
-              this.store.on('load', Ext.bind (this.setValue,this,[arguments]), null, {single: true});
+              this.store.on('load', this.setValue.bind(this,[arguments]), null, {single: true});
               if(this.store.lastOptions === null || this.lastQuery === null){
                   var params;
                   if(this.valueParam){
@@ -4494,16 +4500,16 @@ Ext.define('Lino.ComboBox', {
                       this.store.getProxy().setExtraParam(this.queryParam, q);
                       params = this.getParams(q);
                   }
-                  //~ if (this.name == 'birth_country') 
+                  //~ if (this.name == 'birth_country')
                     //~ console.log(this.name,'.setValue',v,' : call load() with params ',params);
                   this.store.load({params: params});
               //~ }else{
-                  //~ if (this.name == 'birth_country') 
+                  //~ if (this.name == 'birth_country')
                     //~ console.log(this.name,'.setValue',v,' : but store is loading',this.store.lastOptions);
               }
               return;
           //~ }else{
-              //~ if (this.name == 'birth_country') 
+              //~ if (this.name == 'birth_country')
                 //~ console.log(this.name,'.setValue',v,' : store is loaded, lastQuery is "',this.lastQuery,'"');
           }
           var r = this.findRecord(this.valueField, v);
@@ -4520,10 +4526,10 @@ Ext.define('Lino.ComboBox', {
           //~ this.hiddenField.originalValue = v;
           this.hiddenField.value = v;
       }
-      Ext.form.ComboBox.superclass.setValue.call(this, text);
-      //this.callSuper(arguments);
-      //this.callParent(text);
       this.value = v; // needed for grid.afteredit
+      Ext.form.ComboBox.superclass.setValue.call(this, text);
+      //this.callSuper(text);
+      //this.callParent(text);
   },
   
   getParams : function(q){
@@ -4602,6 +4608,7 @@ Ext.define('Lino.ComplexRemoteComboStore',{
 Ext.define('Lino.RemoteComboFieldElement',{
   extend:'Lino.ComboBox',
   mode: 'remote',
+  queryMode : 'remote',
   //~ forceSelection:false,
   minChars: 2, // default 4 is too much
   queryDelay: 300, // default 500 is maybe slow
