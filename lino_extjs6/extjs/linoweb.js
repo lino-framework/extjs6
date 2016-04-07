@@ -4691,7 +4691,7 @@ Ext.define('Lino.Window', {
 //Lino.Window = Ext.extend(Ext.window.Window,{
   //~ layout: "fit",
   closeAction : 'hide',
-  renderTo: 'main_area',
+  //renderTo: 'main_area',
   constrain: true,
   maximized: true,
   draggable: false,
@@ -4699,6 +4699,7 @@ Ext.define('Lino.Window', {
   height: 500,
   maximizable: false,
   constructor : function (config) {
+    config.renderTo =  Ext.getBody() ;
     if (config.main_item.params_panel) {
         config.layout = 'border';
         config.main_item.region = 'center';
@@ -4792,7 +4793,8 @@ Ext.define('Lino.Window', {
     // console.log('20140829 Lino.Window.onRender() 1');
     //Lino.Window.superclass.onRender.call(this, ct, position);
     this.callSuper(arguments);
-    var main_area = Ext.getCmp('main_area')
+    //var main_area = Ext.getCmp('main_area');
+    var main_area = Ext.getBody();
     //~ console.log('20120110 Lino.Window.onRender() 2');
   
     this.on('show', function(win) {
