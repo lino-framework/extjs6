@@ -1098,7 +1098,7 @@ class ExtRenderer(HtmlRenderer):
                 tbl, tbl.required_roles)
             #~ raise Exception(msg)
             logger.warning(msg)
-            print 20150717, msg
+            print(20150717, msg)
             return
 
         yield ""

@@ -3323,7 +3323,7 @@ if (this.disable_editing | record.data.disable_editing) {
     Ext.apply(p, this.get_base_params());
     p.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.getId();
     p.{{constants.URL_PARAM_ACTION_NAME}} = action_name;
-    this.add_param_tab(p)
+    this.add_param_tab(p);
     // console.log('20150216 FormPanel.save()', rec, this.form);
     var submit_config = {
         params: p,
@@ -3354,6 +3354,12 @@ if (this.disable_editing | record.data.disable_editing) {
       })
     }
     var form = this.getForm();
+    for (i = 0; i < form.getFields().length ; i++){
+        field = form.getFields().items[i];
+        if (field.hiddenvalue_tosubmit && field.changed){
+            submit_config['params'][field.hiddenName] = field.hiddenvalue_tosubmit;
+        }
+    }
     form.submit(submit_config);
     //this.form.submit(submit_config);
   }
@@ -4455,12 +4461,9 @@ Ext.define('Lino.ComboBox', {
   submitValue: true,
   displayField: '{{constants.CHOICES_TEXT_FIELD}}', // 'text', 
   valueField: '{{constants.CHOICES_VALUE_FIELD}}', // 'value',
-  listeners:{
-         scope: this,
-         change:function(_this, newValue, oldValue, eOpts ) {
-              //_this.setValue(newValue,oldValue);
-            }
-    },
+  changed : false,
+  queryMode : 'remote',
+  hiddenvalue_tosubmit: "",
   //~ initComponent : Ext.form.ComboBox.prototype.initComponent.createSequence(function() {
   initComponent : function(){
       this.contextParams = {};
@@ -4469,7 +4472,51 @@ Ext.define('Lino.ComboBox', {
       //this.callSuper(arguments);
   },
 
-  setValue : function(v,record_data){
+    updateValue: function() {
+        var me = this,
+            selectedRecords = me.valueCollection.getRange(),
+            len = selectedRecords.length,
+            valueArray = [],
+            displayTplData = me.displayTplData || (me.displayTplData = []),
+            inputEl = me.inputEl,
+            i, record;
+        // Loop through values, matching each from the Store, and collecting matched records
+        displayTplData.length = 0;
+        for (i = 0; i < len; i++) {
+            record = selectedRecords[i];
+            displayTplData.push(me.getRecordDisplayData(record));
+            // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
+            if (record !== me.valueNotFoundRecord) {
+                // valueArray.push(record.get(me.valueField)); original code
+                if (me instanceof Lino.ChoicesFieldElement){
+                    selector = me.valueField;
+                }
+                if (me instanceof Lino.RemoteComboFieldElement){
+                    selector = '{{constants.CHOICES_VALUE_FIELD}}';
+                }
+                valueArray.push(record.get(selector));
+                me.hiddenvalue_tosubmit = record.get(selector);
+                me.changed = true;
+                console.log("field :",me.name," -> val",record.get(selector));
+            }
+        }
+        // Set the value of this field. If we are multiselecting, then that is an array.
+        me.setHiddenValue(valueArray);
+        me.value = me.multiSelect ? valueArray : valueArray[0];
+        if (!Ext.isDefined(me.value)) {
+            me.value = undefined;
+        }
+        me.displayTplData = displayTplData;
+        //store for getDisplayValue method
+        if (inputEl && me.emptyText && !Ext.isEmpty(me.value)) {
+            inputEl.removeCls(me.emptyCls);
+        }
+        // Calculate raw value from the collection of Model data
+        me.setRawValue(me.getDisplayValue());
+        me.checkChange();
+        me.applyEmptyText();
+    },
+    setValue : function(v,record_data){
       /*
       Based on feature request developed in http://extjs.net/forum/showthread.php?t=75751
       */
