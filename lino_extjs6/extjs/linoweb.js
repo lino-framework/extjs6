@@ -2783,10 +2783,10 @@ Ext.define('Lino.FormPanel', {
 
   params_panel_hidden : false,
   save_action_name : null,
-  layout: 'anchor',
-    defaults: {
-        anchor: '100%'
-    },
+  // layout: 'anchor',
+  //   defaults: {
+  //       anchor: '100%'
+  //   },
   //~ base_params : {},
   //~ query_params : {},
   //~ 20110119b quick_search_text : '',
@@ -4497,7 +4497,7 @@ Ext.define('Lino.ComboBox', {
                 valueArray.push(record.get(selector));
                 me.hiddenvalue_tosubmit = record.get(selector);
                 me.changed = true;
-                console.log("field :",me.name," -> val",record.get(selector));
+                // console.log("field :",me.name," -> val",record.get(selector));
             }
         }
         // Set the value of this field. If we are multiselecting, then that is an array.
@@ -4738,7 +4738,7 @@ Ext.define('Lino.Window', {
 //Lino.Window = Ext.extend(Ext.window.Window,{
   //~ layout: "fit",
   closeAction : 'hide',
-  //renderTo: 'main_area',
+  renderTo: 'main_area',
   constrain: true,
   maximized: true,
   draggable: false,
@@ -4819,7 +4819,7 @@ Ext.define('Lino.Window', {
     //  this.callSuper(config);
 
     
-    console.log('20120110 Lino.Window.constructor() 3');
+    // console.log('20120110 Lino.Window.constructor() 3');
     
   },
   initComponent : function() {
@@ -4838,7 +4838,7 @@ Ext.define('Lino.Window', {
   },
   onRender : function(ct, position){
     // console.log('20140829 Lino.Window.onRender() 1');
-    //Lino.Window.superclass.onRender.call(this, ct, position);
+    // Lino.Window.superclass.onRender.call(this, ct, position);
     this.callSuper(arguments);
     //var main_area = Ext.getCmp('main_area');
     var main_area = Ext.getBody();
