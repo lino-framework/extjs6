@@ -426,7 +426,7 @@ class FieldElement(LayoutElement):
     declare_type = jsgen.DECLARE_VAR
     stored = True
     filter_type = None  # 'auto'
-    active_change_event = 'change'
+    # active_change_event = 'change'
     # declaration_order = 3
     # ~ ext_suffix = "_field"
     zero = 0
@@ -1219,7 +1219,12 @@ class BooleanFieldElement(BooleanMixin, FieldElement):
     # ~ grid_column_template = "new Ext.grid.BooleanColumn(%s)"
     # ~ def __init__(self,*args,**kw):
     # ~ FieldElement.__init__(self,*args,**kw)
-    # ~ active_change_event = 'check'
+
+    # checkboxes did not emit a change event when they
+    # are changed:
+    # http://www.sencha.com/forum/showthread.php?43350-2.1-gt-2.2-OPEN-Checkbox-missing-the-change-event
+
+    # active_change_event = 'check'
 
     def set_parent(self, parent):
         FieldElement.set_parent(self, parent)

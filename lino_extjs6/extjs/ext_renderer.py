@@ -1144,13 +1144,11 @@ class ExtRenderer(HtmlRenderer):
         #     dh.layout._formpanel_name
         yield "  this.callSuper();"
 
-        # Seems that checkboxes don't emit a change event
-        # when they are changed:
-        # http://www.sencha.com/forum/showthread.php?43350-2.1-gt-2.2-OPEN-Checkbox-missing-the-change-event
-
+        # Add a change listener to active fields. This which will
+        # cause automatic form submit when some actiove field is
+        # changed.
         if dh.layout._formpanel_name.endswith('.DetailFormPanel'):
-            # this hack is not any more needed with Extjs6
-            if tbl.active_fields and False:
+            if tbl.active_fields:
                 yield '    // active_fields:'
                 for name in tbl.active_fields:
                     e = dh.main.find_by_name(name)
@@ -1159,8 +1157,8 @@ class ExtRenderer(HtmlRenderer):
                             f = 'function(){ this.save() }'
                         else:
                             f = 'function(){ this.validate_form() }'
-                        yield '    %s.on("%s", %s, this);' % (
-                            py2js(e), e.active_change_event, f)
+                        yield '    %s.on("%s", "change", this);' % (
+                            py2js(e), f)
         yield "  }"
         yield "});"
         yield ""
