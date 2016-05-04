@@ -1149,7 +1149,8 @@ class ExtRenderer(HtmlRenderer):
         # http://www.sencha.com/forum/showthread.php?43350-2.1-gt-2.2-OPEN-Checkbox-missing-the-change-event
 
         if dh.layout._formpanel_name.endswith('.DetailFormPanel'):
-            if tbl.active_fields:
+            # this hack is not any more needed with Extjs6
+            if tbl.active_fields and False:
                 yield '    // active_fields:'
                 for name in tbl.active_fields:
                     e = dh.main.find_by_name(name)
