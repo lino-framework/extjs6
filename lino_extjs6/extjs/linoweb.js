@@ -4473,6 +4473,11 @@ Ext.define('Lino.ComboBox', {
   },
 
     updateValue: function() {
+        // modified copy of the original ComboBox.updateValue defined
+        // in `ext-all-debug.js`. We additionally store the selected
+        // value to `hiddenvalue_tosubmit` and set the `changed`
+        // flag. Note that this hack breaks when multiple choices are
+        // selected
         var me = this,
             selectedRecords = me.valueCollection.getRange(),
             len = selectedRecords.length,
@@ -4488,16 +4493,14 @@ Ext.define('Lino.ComboBox', {
             // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
             if (record !== me.valueNotFoundRecord) {
                 // valueArray.push(record.get(me.valueField)); original code
-                if (me instanceof Lino.ChoicesFieldElement){
-                    selector = me.valueField;
-                }
+                var selector = me.valueField;
                 if (me instanceof Lino.RemoteComboFieldElement){
                     selector = '{{constants.CHOICES_VALUE_FIELD}}';
                 }
                 valueArray.push(record.get(selector));
                 me.hiddenvalue_tosubmit = record.get(selector);
                 me.changed = true;
-                // console.log("field :",me.name," -> val",record.get(selector));
+                // console.log("20160504 field :",me.name," -> val",record.get(selector));
             }
         }
         // Set the value of this field. If we are multiselecting, then that is an array.
