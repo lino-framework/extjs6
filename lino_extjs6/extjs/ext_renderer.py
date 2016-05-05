@@ -1157,7 +1157,7 @@ class ExtRenderer(HtmlRenderer):
                             f = 'function(){ this.save() }'
                         else:
                             f = 'function(){ this.validate_form() }'
-                        yield '    %s.on("%s", "change", this);' % (
+                        yield '    %s.on("change", %s, this);' % (
                             py2js(e), f)
         yield "  }"
         yield "});"
