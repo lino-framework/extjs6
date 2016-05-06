@@ -3,7 +3,7 @@ from lino.projects.std.settings import Site
 
 class Site(Site):
 
-    default_ui = 'extjs'
+    default_ui = 'lino_extjs6.extjs'
     project_name = "extjs6_mysite"
     title = "Lino ExtJS 6 demo"
 
