@@ -3357,11 +3357,17 @@ if (this.disable_editing | record.data.disable_editing) {
     for (i = 0; i < form.getFields().length ; i++){
         field = form.getFields().items[i];
         if (field.hiddenvalue_tosubmit && field.changed){
-            submit_config['params'][field.hiddenName] = field.hiddenvalue_tosubmit;
+            if (field.hiddenvalue_tosubmit == "Mynull"){
+                hiddenvalue_tosubmit = null;
+            }
+            else {
+                hiddenvalue_tosubmit = field.hiddenvalue_tosubmit;
+            }
+            submit_config['params'][field.hiddenName] = hiddenvalue_tosubmit;
+            field.changed = false;
         }
     }
     form.submit(submit_config);
-    //this.form.submit(submit_config);
   }
 
   ,on_cancel : function() {
@@ -4487,6 +4493,10 @@ Ext.define('Lino.ComboBox', {
             i, record;
         // Loop through values, matching each from the Store, and collecting matched records
         displayTplData.length = 0;
+        if (len == 0){
+            me.hiddenvalue_tosubmit = "Mynull";
+            me.changed = true;
+        }
         for (i = 0; i < len; i++) {
             record = selectedRecords[i];
             displayTplData.push(me.getRecordDisplayData(record));
@@ -4592,7 +4602,12 @@ Ext.define('Lino.ComboBox', {
   getParams : function(q){
     // p = Ext.form.ComboBox.superclass.getParams.call(this, q);
     // causes "Ext.form.ComboBox.superclass.getParams is undefined"
-    var p = {};
+    // var p = {};
+    var p = {},
+            param = this.queryParam;
+    if (param) {
+        p[param] = q;
+    }
     if(this.pageSize){
         p['{{constants.URL_PARAM_START}}'] = 0;
         p['{{constants.URL_PARAM_LIMIT}}'] = this.pageSize;
