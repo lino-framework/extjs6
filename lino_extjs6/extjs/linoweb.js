@@ -4692,7 +4692,7 @@ Ext.define('Lino.RemoteComboFieldElement',{
   queryParam: '{{constants.URL_PARAM_FILTER}}', 
   //~ typeAhead: true,
   //~ selectOnFocus: true, // select any existing text in the field immediately on focus.
-  resizable: true
+  resizable: false
   ,initList : function() {
       //Lino.RemoteComboFieldElement.superclass.initList.call(this);
          this.callSuper();
