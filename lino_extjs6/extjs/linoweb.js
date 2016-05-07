@@ -4468,7 +4468,7 @@ Ext.define('Lino.ComboBox', {
   triggerAction: 'all',
   minListWidth:280, // 20131022
   autoSelect: false,
-  selectOnFocus: true, // select any existing text in the field immediately on focus.
+  selectOnFocus: false, // select any existing text in the field immediately on focus.
   submitValue: true,
   displayField: '{{constants.CHOICES_TEXT_FIELD}}', // 'text', 
   valueField: '{{constants.CHOICES_VALUE_FIELD}}', // 'value',
