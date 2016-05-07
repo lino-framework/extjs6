@@ -2856,7 +2856,8 @@ Ext.define('Lino.FormPanel', {
             scope:this,
             select:function(combo,record,index) {
               //~ console.log('jumpto_select',arguments);
-              this.goto_record_id(record.id);
+              // this.goto_record_id(record.id);
+                this.goto_record_id(record.data.value);
             }
           },
           emptyText: "{{_('Go to record')}}"
@@ -3117,7 +3118,8 @@ Ext.define('Lino.FormPanel', {
     //~ this.do_when_clean(function() { this_.load_record_id(record_id) }
     this.do_when_clean(
         // HKC
-        //true, this.load_record_id.createDelegate(this, [record_id]));
+        // true, this.load_record_id.createDelegate(this, [record_id]));
+        // true, this.load_record_id.bind(record_id));
         true, this.load_record_id.bind(this,[record_id]));
   }
 
@@ -3240,7 +3242,10 @@ if (this.disable_editing | record.data.disable_editing) {
     // console.log('20140917 gonna call before_row_edit', record);
     this.before_row_edit(record);
     // console.log('20140917 gonna call after', after);
-    if (after) after();
+    // if (after) after();
+    if (after && Ext.isFunction(after)){
+        after();
+    }
   },
 
   /* FormPanel */
