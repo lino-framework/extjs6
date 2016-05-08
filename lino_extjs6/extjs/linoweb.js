@@ -2783,10 +2783,10 @@ Ext.define('Lino.FormPanel', {
 
   params_panel_hidden : false,
   save_action_name : null,
-  // layout: 'anchor',
-  //   defaults: {
-  //       anchor: '100%'
-  //   },
+  layout: 'anchor',
+    defaults: {
+        anchor: '100%'
+    },
   //~ base_params : {},
   //~ query_params : {},
   //~ 20110119b quick_search_text : '',
@@ -3551,12 +3551,17 @@ Ext.define('Lino.GridPanel', {
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
     config.plugins = [Ext.create('Lino.GridFilters',{})];
-{% endif %}    
+      // config.plugins = 'gridfilters';
+{% endif %}
 {% if settings.SITE.use_filterRow %}
     config.plugins = [Ext.create('Ext.ux.grid.FilterRow',{})];
-{% endif %}    
+{% endif %}
+      if (config.p){
+          config.is_main_window = config.p.is_main_window;
+          config.params_panel = config.p.params_panel;
+          }
     Lino.GridPanel.superclass.constructor.call(this,config);
-    //this.callSuper(config);
+    // this.callSuper(config);
     
     //~ if (this.containing_window) {
         //~ console.log("20111206 install refresh");
@@ -4769,7 +4774,7 @@ Ext.define('Lino.Window', {
   height: 500,
   maximizable: false,
   constructor : function (config) {
-    config.renderTo =  Ext.getBody() ;
+    // config.renderTo =  Ext.getBody() ;
     if (config.main_item.params_panel) {
         config.layout = 'border';
         config.main_item.region = 'center';
