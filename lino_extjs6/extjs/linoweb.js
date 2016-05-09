@@ -2419,7 +2419,7 @@ if (Ext.grid.filters.Filters !== undefined) {
     Lino.GridFilters = function() {}; // dummy
     // HKC
     //Ext.override(Lino.GridFilters,{
-    Ext.define('MyLino.GridFilters', {
+    Ext.define('Lino.GridFilters', {
     override: 'Lino.GridFilters',
       init : function() {}
     });
@@ -3550,8 +3550,8 @@ Ext.define('Lino.GridPanel', {
   constructor : function(config){
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
-    config.plugins = [Ext.create('Lino.GridFilters',{})];
-      // config.plugins = 'gridfilters';
+    // config.plugins = [Ext.create('Lino.GridFilters',{})];
+      config.plugins = ['gridfilters'];
 {% endif %}
 {% if settings.SITE.use_filterRow %}
     config.plugins = [Ext.create('Ext.ux.grid.FilterRow',{})];
@@ -4165,9 +4165,10 @@ Ext.define('Lino.GridPanel', {
     //~ var columns = Array(cm.config.length);
     //~ var hidden_cols = [];
     //~ var filters = this.filters.getFilterValues();
-    var p = this.filters.buildQuery(this.filters.getFilterData())
+    // var p = this.filters.buildQuery(this.filters.getFilterData())
+      var p = this.filters.store.filters.filterBy(this.filters.store.filters);
     for (var i = 0; i < cm.length; i++) {
-      var col = cm.config[i];
+      var col = cm[i];
       columns[i] = col.dataIndex;
       //~ hiddens[i] = col.hidden;
       widths[i] = col.width;
