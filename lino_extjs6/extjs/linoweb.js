@@ -1045,7 +1045,7 @@ Lino.VinylFoxPlugins = function(){
         //~ new Ext.ux.form.HtmlEditor.Image(),
         //~ new Ext.ux.form.HtmlEditor.Table(),
         Ext.create('Ext.ux.form.HtmlEditor.HR',{}),
-        Ext.create('Ext.ux.form.HtmlEditor.SpecialCharacters'{}),
+        Ext.create('Ext.ux.form.HtmlEditor.SpecialCharacters',{}),
         Ext.create('Ext.ux.form.HtmlEditor.HeadingMenu',{}),
         Ext.create('Ext.ux.form.HtmlEditor.IndentOutdent',{}),
         Ext.create('Ext.ux.form.HtmlEditor.SubSuperScript',{}),
@@ -1648,9 +1648,8 @@ Lino.show_in_own_window_button = function(handler) {
     qtip: "{{_("Show this panel in own window")}}", 
     //id: "up",
     option: "up",
-    handler: function(event,toolEl,panel, tc) {
-      //~ console.log('20111206 report_window_button',panel,handler);
-      handler.run(null,{base_params:panel.containing_panel.get_master_params()});
+      callback : function(panel, tool, event) {
+          handler.run(null,{base_params:panel.containing_panel.get_master_params()});
     }
   }
 }
@@ -2419,7 +2418,7 @@ if (Ext.grid.filters.Filters !== undefined) {
     Lino.GridFilters = function() {}; // dummy
     // HKC
     //Ext.override(Lino.GridFilters,{
-    Ext.define('MyLino.GridFilters', {
+    Ext.define('Lino.GridFilters', {
     override: 'Lino.GridFilters',
       init : function() {}
     });
@@ -3397,9 +3396,9 @@ if (this.disable_editing | record.data.disable_editing) {
           //}
       //});
 
-      wincfg.keys = [];
+      wincfg.keyHandlers = [];
 {% if settings.SITE.plugins.extjs.enter_submits_form %}
-      wincfg.keys.push({
+      wincfg.keyHandlers.push({
               //key: Ext.EventObject.ENTER,
                 key : Ext.String.escape,
               scope:this,
@@ -3415,11 +3414,11 @@ if (this.disable_editing | record.data.disable_editing) {
               }
           });
 {% endif %}
-      wincfg.keys.push({
+      wincfg.keyHandlers.push({
           //key: Ext.EventObject.ESCAPE,
           key : Ext.String.escape,
           handler: this.on_cancel, scope:this });
-      wincfg.keys.push({
+      wincfg.keyHandlers.push({
           key: 's', ctrl: true,
              stopEvent: true, handler: this.on_ok, scope:this });
   }
@@ -3550,8 +3549,8 @@ Ext.define('Lino.GridPanel', {
   constructor : function(config){
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
-    config.plugins = [Ext.create('Lino.GridFilters',{})];
-      // config.plugins = 'gridfilters';
+    // config.plugins = [Ext.create('Lino.GridFilters',{})];
+      config.plugins = ['gridfilters'];
 {% endif %}
 {% if settings.SITE.use_filterRow %}
     config.plugins = [Ext.create('Ext.ux.grid.FilterRow',{})];
@@ -4165,9 +4164,10 @@ Ext.define('Lino.GridPanel', {
     //~ var columns = Array(cm.config.length);
     //~ var hidden_cols = [];
     //~ var filters = this.filters.getFilterValues();
-    var p = this.filters.buildQuery(this.filters.getFilterData())
+    // var p = this.filters.buildQuery(this.filters.getFilterData())
+      var p = this.filters.store.filters.filterBy(this.filters.store.filters);
     for (var i = 0; i < cm.length; i++) {
-      var col = cm.config[i];
+      var col = cm[i];
       columns[i] = col.dataIndex;
       //~ hiddens[i] = col.hidden;
       widths[i] = col.width;
