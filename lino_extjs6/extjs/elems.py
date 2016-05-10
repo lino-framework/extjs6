@@ -906,6 +906,7 @@ class DateTimeFieldElement(FieldElement):
     # ~ data_type = 'date' # for store column
     sortable = True
     preferred_width = 16
+
     # ~ filter_type = 'date'
 
     def __init__(self, layout_handle, field, **kw):
@@ -938,6 +939,7 @@ class DateFieldElement(FieldElement):
     filter_type = 'date'
     gridfilters_settings = dict(
         type='date', dateFormat=settings.SITE.date_format_extjs)
+
     # todo: DateFieldElement.preferred_width should be computed from Report.date_format
     # ~ grid_column_template = "new Ext.grid.DateColumn(%s)"
 
@@ -1057,6 +1059,7 @@ class IntegerFieldElement(NumberFieldElement):
 
 class AutoFieldElement(NumberFieldElement):
     preferred_width = 5
+
     # ~ data_type = 'int'
 
     def value2num(self, v):
@@ -1105,6 +1108,7 @@ class RequestFieldElement(IntegerFieldElement):
 
 class DecimalFieldElement(NumberFieldElement):
     zero = decimal.Decimal(0)
+
     # ~ value_template = "new Ext.form.NumberField(%s)"
     # ~ filter_type = 'numeric'
     # ~ gridfilters_settings = dict(type='numeric')
@@ -1216,6 +1220,7 @@ class BooleanFieldElement(BooleanMixin, FieldElement):
     # ~ data_type = 'boolean'
     filter_type = 'boolean'
     gridfilters_settings = dict(type='boolean')
+
     # ~ grid_column_template = "new Ext.grid.BooleanColumn(%s)"
     # ~ def __init__(self,*args,**kw):
     # ~ FieldElement.__init__(self,*args,**kw)
@@ -1527,6 +1532,7 @@ class Container(LayoutElement):
 class Wrapper(VisibleComponent):
     """
     """
+
     # ~ label = None
 
     def __init__(self, e, **kw):
@@ -1651,7 +1657,8 @@ class Panel(Container):
                 # ~ d.update(layout='form')
                 if self.vflex:
                     # d.update(layout='vbox', layoutConfig=dict(align='stretch'))
-                    d.update(layout='anchor', layoutConfig=dict(align='stretch'), defaults=dict(anchor='100%'))
+                    # d.update(layout='anchor', layoutConfig=dict(align='stretch'), defaults=dict(anchor='100%'))
+                    d.update(layout=dict(type='vbox', align='stretch'))
                 else:
                     # 20100921b
                     # ~ d.update(layout='form')
@@ -1754,7 +1761,7 @@ class Panel(Container):
             Panels which are usually not vertical but still want a frame
             since they are the main panel.
             """
-            d.update(frame=True)
+            d.update(frame=False)
             d.update(bodyBorder=False)
             d.update(border=False)
             # d.update(style=dict(padding='0px'),color='green')

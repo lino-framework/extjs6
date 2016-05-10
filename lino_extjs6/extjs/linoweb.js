@@ -551,8 +551,8 @@ Lino.set_subst_user = function(id, name) {
 Lino.current_window = null;
 Lino.window_history = Array();
     
-Lino.chars2width = function(cols) {  return cols * 9; }
-Lino.rows2height = function(cols) {  return cols * 20; }
+Lino.chars2width = function(cols) {  return cols * 9; };
+Lino.rows2height = function(cols) {  return cols * 20; };
 Lino.perc2width = function(perc) {
     // var w = Math.max(document.documentElement.clientWidth, window.innerWidth);
     // console.log("20151226", document, window, w);
@@ -576,9 +576,9 @@ Ext.define('Lino.MainPanel',{
     }
   ,do_when_clean : function(auto_save,todo) { todo() }
   ,get_master_params : function() {
-    var p = {}
+    var p = {};
     p['{{constants.URL_PARAM_MASTER_TYPE}}'] = this.content_type;
-    rec = this.get_current_record()
+    rec = this.get_current_record();
     if (rec) {
       if (rec.phantom) {
           p['{{constants.URL_PARAM_MASTER_PK}}'] = undefined;
@@ -1647,7 +1647,7 @@ Lino.show_in_own_window_button = function(handler) {
   return {
     qtip: "{{_("Show this panel in own window")}}", 
     //id: "up",
-    option: "up",
+    type: "up",
       callback : function(panel, tool, event) {
           handler.run(null,{base_params:panel.containing_panel.get_master_params()});
     }
@@ -2475,7 +2475,7 @@ Ext.define('Lino.HtmlBoxPanel', {
      mixins: [
          //'Ext.panel.Table',
          'Lino.PanelMixin',
-         'Lino.FieldBoxMixin',
+         'Lino.FieldBoxMixin'
      ],
 
   disabled_in_insert_window : true,
@@ -3526,7 +3526,7 @@ Ext.define('Lino.GridPanel', {
      mixins: [
          //'Ext.grid.plugin.CellEditing',
          'Lino.MainPanel',
-         'Lino.PanelMixin',
+         'Lino.PanelMixin'
      ],
 
   quick_search_text : '',
@@ -3537,7 +3537,7 @@ Ext.define('Lino.GridPanel', {
   enableColLock: false,
   autoHeight: false,
   params_panel_hidden : false,
-  preview_limit : undefined, 
+  preview_limit : undefined,
   //~ loadMask: true,
   //~ viewConfig: {
           //~ getRowClass: Lino.getRowClass,
@@ -4773,7 +4773,7 @@ Ext.define('Lino.Window', {
   draggable: false,
   width: 700,
   height: 500,
-  maximizable: false,
+  // maximizable: false,
   constructor : function (config) {
     // config.renderTo =  Ext.getBody() ;
     if (config.main_item.params_panel) {
