@@ -2481,6 +2481,7 @@ Ext.define('Lino.HtmlBoxPanel', {
   disabled_in_insert_window : true,
   constructor : function(config,params) {
     this.before_init(config,params);
+      config.viewType = 'tableview';
     //Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
       this.callSuper(arguments);
   },
