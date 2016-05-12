@@ -1291,7 +1291,12 @@ Lino.file_field_handler = function(panel,config) {
       //~ return new Lino.URLField(config);
       return new Lino.FileField(config);
   }
-}
+};
+Ext.define('Lino_Panel', {
+    override : 'Ext.panel.Panel',
+
+    bodyStyle: 'padding:0px;width:0px;'
+});
 
 Lino.VBorderPanel = Ext.extend(Ext.Panel,{
     constructor : function(config) {
@@ -4757,7 +4762,6 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
   valueField: null,
   forceSelection: false
 });
-
 
 
 // Edit by HKC Ext.window  ->  Ext.window.Window

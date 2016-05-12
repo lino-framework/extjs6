@@ -1761,7 +1761,7 @@ class Panel(Container):
             Panels which are usually not vertical but still want a frame
             since they are the main panel.
             """
-            d.update(frame=False)
+            d.update(frame=True)
             d.update(bodyBorder=False)
             d.update(border=False)
             # d.update(style=dict(padding='0px'),color='green')
