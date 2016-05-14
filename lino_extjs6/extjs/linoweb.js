@@ -4779,7 +4779,7 @@ Ext.define('Lino.Window', {
   height: 500,
   // maximizable: false,
   constructor : function (config) {
-    // config.renderTo =  Ext.getBody() ;
+    config.renderTo =  Ext.getBody() ;
     if (config.main_item.params_panel) {
         config.layout = 'border';
         config.main_item.region = 'center';
