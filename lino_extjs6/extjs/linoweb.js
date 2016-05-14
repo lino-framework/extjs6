@@ -1152,7 +1152,7 @@ Lino.TimeField = Ext.extend(Ext.form.TimeField,{
 Lino.DateField = Ext.extend(Ext.form.DateField,{
   //~ boxMinWidth: Lino.chars2width(15), // 20131005 changed from 11 to 15
   format: '{{settings.SITE.date_format_extjs}}',
-  altFormats: '{{settings.SITE.alt_date_formats_extjs}}'
+  altFormats: '{{settings.SITE.alt_date_formats_extjs}}',
   });
 Lino.DatePickerField = Ext.extend(Ext.DatePicker,{
   //~ boxMinWidth: Lino.chars2width(11),
@@ -2783,7 +2783,7 @@ Ext.define('Lino.FormPanel', {
     extend : 'Ext.form.FormPanel',
      mixins: [
          'Lino.PanelMixin',
-         'Lino.MainPanel',
+         'Lino.MainPanel'
      ],
 
   params_panel_hidden : false,

@@ -561,6 +561,7 @@ class FieldElement(LayoutElement):
                 kw.update(fieldLabel=label)
                 # HKC
                 kw.update(valueField=self.field.name)
+                kw.update(labelAlign='top')
         if self.editable:
             if not self.field.blank:
                 kw.update(allowBlank=False)
@@ -1536,7 +1537,8 @@ class Wrapper(VisibleComponent):
     # ~ label = None
 
     def __init__(self, e, **kw):
-        kw.update(layout='form')
+        # HKC : remove this config to get labelAlign top works
+        # kw.update(layout='form')
         if not isinstance(e, TextFieldElement):
             kw.update(autoHeight=True)
         kw.update(labelAlign=e.parent.label_align)
