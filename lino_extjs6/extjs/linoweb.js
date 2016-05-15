@@ -551,8 +551,8 @@ Lino.set_subst_user = function(id, name) {
 Lino.current_window = null;
 Lino.window_history = Array();
     
-Lino.chars2width = function(cols) {  return cols * 9; }
-Lino.rows2height = function(cols) {  return cols * 20; }
+Lino.chars2width = function(cols) {  return cols * 9; };
+Lino.rows2height = function(cols) {  return cols * 20; };
 Lino.perc2width = function(perc) {
     // var w = Math.max(document.documentElement.clientWidth, window.innerWidth);
     // console.log("20151226", document, window, w);
@@ -576,9 +576,9 @@ Ext.define('Lino.MainPanel',{
     }
   ,do_when_clean : function(auto_save,todo) { todo() }
   ,get_master_params : function() {
-    var p = {}
+    var p = {};
     p['{{constants.URL_PARAM_MASTER_TYPE}}'] = this.content_type;
-    rec = this.get_current_record()
+    rec = this.get_current_record();
     if (rec) {
       if (rec.phantom) {
           p['{{constants.URL_PARAM_MASTER_PK}}'] = undefined;
@@ -1152,7 +1152,7 @@ Lino.TimeField = Ext.extend(Ext.form.TimeField,{
 Lino.DateField = Ext.extend(Ext.form.DateField,{
   //~ boxMinWidth: Lino.chars2width(15), // 20131005 changed from 11 to 15
   format: '{{settings.SITE.date_format_extjs}}',
-  altFormats: '{{settings.SITE.alt_date_formats_extjs}}'
+  altFormats: '{{settings.SITE.alt_date_formats_extjs}}',
   });
 Lino.DatePickerField = Ext.extend(Ext.DatePicker,{
   //~ boxMinWidth: Lino.chars2width(11),
@@ -1291,7 +1291,12 @@ Lino.file_field_handler = function(panel,config) {
       //~ return new Lino.URLField(config);
       return new Lino.FileField(config);
   }
-}
+};
+Ext.define('Lino_Panel', {
+    override : 'Ext.panel.Panel',
+
+    bodyStyle: 'padding:0px;width:0px;'
+});
 
 Lino.VBorderPanel = Ext.extend(Ext.Panel,{
     constructor : function(config) {
@@ -1647,7 +1652,7 @@ Lino.show_in_own_window_button = function(handler) {
   return {
     qtip: "{{_("Show this panel in own window")}}", 
     //id: "up",
-    option: "up",
+    type: "up",
       callback : function(panel, tool, event) {
           handler.run(null,{base_params:panel.containing_panel.get_master_params()});
     }
@@ -2475,7 +2480,7 @@ Ext.define('Lino.HtmlBoxPanel', {
      mixins: [
          //'Ext.panel.Table',
          'Lino.PanelMixin',
-         'Lino.FieldBoxMixin',
+         'Lino.FieldBoxMixin'
      ],
 
   disabled_in_insert_window : true,
@@ -2778,7 +2783,7 @@ Ext.define('Lino.FormPanel', {
     extend : 'Ext.form.FormPanel',
      mixins: [
          'Lino.PanelMixin',
-         'Lino.MainPanel',
+         'Lino.MainPanel'
      ],
 
   params_panel_hidden : false,
@@ -3526,7 +3531,7 @@ Ext.define('Lino.GridPanel', {
      mixins: [
          //'Ext.grid.plugin.CellEditing',
          'Lino.MainPanel',
-         'Lino.PanelMixin',
+         'Lino.PanelMixin'
      ],
 
   quick_search_text : '',
@@ -3537,7 +3542,7 @@ Ext.define('Lino.GridPanel', {
   enableColLock: false,
   autoHeight: false,
   params_panel_hidden : false,
-  preview_limit : undefined, 
+  preview_limit : undefined,
   //~ loadMask: true,
   //~ viewConfig: {
           //~ getRowClass: Lino.getRowClass,
@@ -4759,7 +4764,6 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
 });
 
 
-
 // Edit by HKC Ext.window  ->  Ext.window.Window
 Ext.define('Lino.Window', {
     extend: 'Ext.Window',
@@ -4773,9 +4777,9 @@ Ext.define('Lino.Window', {
   draggable: false,
   width: 700,
   height: 500,
-  maximizable: false,
+  // maximizable: false,
   constructor : function (config) {
-    // config.renderTo =  Ext.getBody() ;
+    config.renderTo =  Ext.getBody() ;
     if (config.main_item.params_panel) {
         config.layout = 'border';
         config.main_item.region = 'center';
