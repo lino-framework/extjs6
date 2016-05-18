@@ -13,8 +13,8 @@
      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title id="title">{{ site.title or site.verbose_name }}</title>
     {# ###### CSS files ###### #}
-    {{ stylesheet(extjs.build_lib_url('classic/theme-neptune/resources/theme-neptune-all_1.css')) }}
-    {{ stylesheet(extjs.build_lib_url('classic/theme-neptune/resources/theme-neptune-all_2.css')) }}
+    {{ stylesheet(extjs.build_lib_url('classic/theme-neptune/resources/theme-neptune-all.css')) }}
+    {{ stylesheet(extjs.build_lib_url('classic/theme-neptune/resources/theme-neptune-all-rtl.css')) }}
     {%- block css -%}
         {# CSS files from plugins #}
         {%- block css_plugins -%}
@@ -54,13 +54,15 @@
         {%- if settings.DEBUG -%}
             <!--{{ javascript(extjs.build_lib_url('adapter/ext/ext-base-debug.js'))}}-->
             {{ javascript(extjs.build_lib_url('ext-all-debug.js')) }}
+            {{ javascript(extjs.build_lib_url('classic/theme-neptune/theme-neptune.js')) }}
         {%- else -%}
             <!--{{ javascript(extjs.build_lib_url('adapter/ext/ext-base.js')) }}-->
             {{ javascript(extjs.build_lib_url('ext-all.js')) }}
+            {{ javascript(extjs.build_lib_url('classic/theme-neptune/theme-neptune-debug.js')) }}
         {%- endif -%}
     {%- endblock js -%}
     {%- if not language.startswith('en') -%}
-        {{ javascript(extjs.build_lib_url('src/locale/ext-lang-' + language + '.js')) }}
+        {{ javascript(extjs.build_lib_url('classic/locale/locale-' + language + '.js')) }}
     {%- endif -%}
     <!--{{ javascript(extjs.build_lib_url('examples/ux/statusbar/StatusBar.js')) }}-->
     {%- if site.use_spinner -%}
@@ -130,7 +132,6 @@
     {# Main Lino js code #}
     {{ javascript(site.build_media_url(*ext_renderer.lino_js_parts())) }}
     {# javascript(site.buildurl('linolib.js')) #}
-    {{ javascript(extjs.build_lib_url('classic/theme-neptune/theme-neptune.js')) }}
     {# ###### OnReady JS code ###### #}
     <script type="text/javascript">
     Ext.onReady(function() {
