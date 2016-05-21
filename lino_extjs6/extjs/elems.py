@@ -567,8 +567,8 @@ class FieldElement(LayoutElement):
                 kw.update(allowBlank=False)
             kw.update(selectOnFocus=True)
         else:
-            kw.update(disabled=True)
-            # ~ kw.update(readOnly=True)
+            # kw.update(disabled=True)
+            kw.update(readOnly=True)
         return kw
 
     def ext_options(self, **kw):
