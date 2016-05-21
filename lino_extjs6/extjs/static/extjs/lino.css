@@ -299,3 +299,13 @@ http://www.sencha.com/forum/showthread.php?70195-NumberField-and-Right-Alignment
 .x-form-num-field {
     text-align: right;
 }
+
+.x-message-box .x-window-body {
+	width: 288px;
+    height: 52px;
+}
+
+.x-toolbar-default{
+	padding: 0px 0 0px 0px;
+	/*background-color: #48acff;*/
+}
