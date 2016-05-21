@@ -661,6 +661,7 @@ class TextFieldElement(FieldElement):
                 self.value_template = "Ext.create('Ext.form.HtmlEditor',%s)"
                 if settings.SITE.use_vinylfox:
                     kw.update(plugins=js_code('Lino.VinylFoxPlugins()'))
+                kw.update(enableFont=False)
         elif self.format == 'plain':
             kw.update(
                 growMax=2000,
