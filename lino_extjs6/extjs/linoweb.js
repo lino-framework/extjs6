@@ -481,6 +481,7 @@ Lino.show_login_window = function(on_login,username, password ) {
         frame:true, 
         defaultType:'textfield',
         monitorValid:true,
+        resizable: false,
         items:[{ 
             fieldLabel:"{{_('Username')}}", 
             id: 'username',
