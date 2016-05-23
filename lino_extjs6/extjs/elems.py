@@ -567,8 +567,8 @@ class FieldElement(LayoutElement):
                 kw.update(allowBlank=False)
             kw.update(selectOnFocus=True)
         else:
-            kw.update(disabled=True)
-            # ~ kw.update(readOnly=True)
+            # kw.update(disabled=True)
+            kw.update(readOnly=True)
         return kw
 
     def ext_options(self, **kw):
@@ -661,6 +661,7 @@ class TextFieldElement(FieldElement):
                 self.value_template = "Ext.create('Ext.form.HtmlEditor',%s)"
                 if settings.SITE.use_vinylfox:
                     kw.update(plugins=js_code('Lino.VinylFoxPlugins()'))
+                kw.update(enableFont=False)
         elif self.format == 'plain':
             kw.update(
                 growMax=2000,
@@ -1366,7 +1367,8 @@ class HtmlBoxElement(DisplayElement):
 
         # ~ if self.field.drop_zone: # testing with drop_zone 'FooBar'
         # ~ kw.update(listeners=dict(render=js_code('initialize%sDropZone' % self.field.drop_zone)))
-        kw.update(items=js_code("Ext.create('Ext.Component',{autoScroll:true})"))
+        # kw.update(items=js_code("Ext.create('Ext.Component',{autoScroll:true})"))
+        kw.update(items=js_code("Ext.create('Ext.Component',{scrollable:true})"))
         if self.label:
             kw.update(title=self.label)
         return kw
@@ -1753,7 +1755,8 @@ class Panel(Container):
         d = Container.ext_options(self, **d)
 
         # hide scrollbars
-        d.update(autoScroll=False)
+        # d.update(autoScroll=False)
+        d.update(scrollable=False)
 
         if self.is_fieldset:
             d.update(labelWidth=self.label_width * EXT_CHAR_WIDTH)
@@ -1880,7 +1883,8 @@ class DetailMainPanel(Panel):
     value_template = "Ext.create('Ext.Panel',%s)"
 
     def __init__(self, layout_handle, name, vertical, *elements, **kw):
-        kw.update(autoScroll=True)
+        # kw.update(autoScroll=True)
+        kw.update(scrollable=True)
         Panel.__init__(self, layout_handle, name, vertical, *elements, **kw)
 
     def ext_options(self, **kw):
@@ -1912,7 +1916,8 @@ class TabPanel(Panel):
     value_template = "Ext.create('Ext.TabPanel',%s)"
 
     def __init__(self, layout_handle, name, *elems, **kw):
-        kw.update(autoScroll=True)
+        # kw.update(autoScroll=True)
+        kw.update(scrollable=True)
         kw.update(
             split=True,
             activeTab=0,
