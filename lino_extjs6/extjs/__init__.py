@@ -66,7 +66,7 @@ class Plugin(Plugin):
 
     url_prefix = "ext"
 
-    media_name = 'ext-6.0.0'
+    media_name = 'ext-6.0.1'
 
     # media_base_url = "http://extjs-public.googlecode.com/" + \
     #                  "svn/tags/extjs-6.0.0/release/"
