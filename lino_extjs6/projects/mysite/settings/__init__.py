@@ -3,7 +3,7 @@ from lino.projects.std.settings import Site
 
 class Site(Site):
 
-    default_ui = 'lino_extjs6.extjs'
+    default_ui = 'lino_extjs6.extjs6'
     project_name = "extjs6_mysite"
     title = "Lino ExtJS 6 demo"
 
@@ -30,7 +30,7 @@ class Site(Site):
 
         # for a in super(Site, self).get_installed_apps():
         #     yield a
-        yield 'lino_extjs6.extjs'
+        yield 'lino_extjs6.extjs6'
         yield 'lino.modlib.bootstrap3'
 
         for a in self.local_apps:
