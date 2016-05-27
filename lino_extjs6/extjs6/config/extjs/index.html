@@ -68,7 +68,7 @@
     {%- if site.use_spinner -%}
         {{ javascript(extjs.build_lib_url('examples/ux/Spinner.js')) }}
     {%- endif -%}
-    {{ javascript(site.build_static_url("extjs/Ext.ux.form.DateTime.js")) }}
+    {{ javascript(site.build_static_url("extjs6/Ext.ux.form.DateTime.js")) }}
     {%- if run_jasmine -%}  {# site.use_jasmine #}
         {{ javascript(site.build_static_url("jasmine/jasmine.js")) }}
         {{ javascript(site.build_static_url("jasmine/jasmine-html.js")) }}
