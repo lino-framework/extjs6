@@ -108,6 +108,8 @@ class Plugin(Plugin):
         from .ext_renderer import ExtRenderer
         self.renderer = ExtRenderer(self)
         kernel.extjs_renderer = self.renderer
+        from . import elems
+        kernel.widgets = elems
 
         # logger.info("20140227 extjs.Plugin.on_ui_init() b")
 
