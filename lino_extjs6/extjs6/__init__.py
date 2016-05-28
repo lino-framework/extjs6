@@ -48,8 +48,8 @@ class Plugin(Plugin):
 
         def setup_plugins(self):
             super(Site, self).setup_plugins()
-            if self.is_installed('extjs'):
-                self.plugins.extjs.configure(enter_submits_form=False)
+            if self.is_installed('extjs6'):
+                self.plugins.extjs6.configure(enter_submits_form=False)
 
 
     This setting is read by :xfile:`linoweb.js` who adds the exotic
@@ -108,6 +108,8 @@ class Plugin(Plugin):
         from .ext_renderer import ExtRenderer
         self.renderer = ExtRenderer(self)
         kernel.extjs_renderer = self.renderer
+        from . import elems
+        kernel.widgets = elems
 
         # logger.info("20140227 extjs.Plugin.on_ui_init() b")
 

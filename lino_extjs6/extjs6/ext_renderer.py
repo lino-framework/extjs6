@@ -450,7 +450,7 @@ class ExtRenderer(HtmlRenderer):
             tpl = env.get_template('extjs/index.html')
             context = {
                 'site': settings.SITE,
-                'extjs': settings.SITE.plugins.extjs,
+                'extjs': settings.SITE.plugins.extjs6,
                 'ext_renderer': self,
                 'py2js': py2js,  # TODO: Should be template filter
                 'jsgen': jsgen,  # TODO: Should be in filters
@@ -464,7 +464,6 @@ class ExtRenderer(HtmlRenderer):
         return jsgen.with_user_profile(user.profile, getit)
 
     def html_page_main_window(self, on_ready, request, site):
-        """Called from :srcref:`lino/modlib/extjs/config/extjs/index.html`."""
         dashboard = dict(
             id="dashboard",
             xtype='container',
@@ -479,7 +478,8 @@ class ExtRenderer(HtmlRenderer):
             items=dashboard,
         )
         if not on_ready:
-            dashboard.update(html=site.get_main_html(request))
+            dashboard.update(html=site.get_main_html(
+                request, extjs=self.plugin))
 
         win = dict(
             layout='fit',
@@ -726,7 +726,7 @@ class ExtRenderer(HtmlRenderer):
             language=translation.get_language(),
             # ext_requests=constants,
             constants=constants,
-            extjs=settings.SITE.plugins.extjs,
+            extjs=settings.SITE.plugins.extjs6,
         )
 
         context.update(_=_)
@@ -1342,7 +1342,7 @@ class ExtRenderer(HtmlRenderer):
             mainPanelClass = "Lino.%s.GridPanel" % rpt
         elif ba.action.parameters and not ba.action.no_params_window:
             params_panel = ba.action.make_params_layout_handle(
-                settings.SITE.plugins.extjs)
+                settings.SITE.plugins.extjs6)
         elif ba.action.extjs_main_panel:
             pass
         else:
@@ -1411,8 +1411,7 @@ class ExtRenderer(HtmlRenderer):
         """
         Called from :xfile:`linolib.js`.
         """
-
-        extjs = settings.SITE.plugins.extjs
+        extjs = settings.SITE.plugins.extjs6
 
         def fn():
             yield "// lino.js --- generated %s by %s for %s." % (

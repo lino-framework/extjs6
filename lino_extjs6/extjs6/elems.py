@@ -2185,7 +2185,7 @@ def create_layout_element(lh, name, **kw):
                         kw.update(ls_insert_handler=js_code("Lino.%s" %
                                                             a.full_name()))
                         kw.update(ls_bbar_actions=[
-                            settings.SITE.plugins.extjs.renderer.a2btn(a)])
+                            settings.SITE.plugins.extjs6.renderer.a2btn(a)])
                 field = fields.HtmlBox(verbose_name=de.label)
                 field.name = de.__name__
                 field.help_text = de.help_text

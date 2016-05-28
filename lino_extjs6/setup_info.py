@@ -49,6 +49,9 @@ SETUP_INFO.update(long_description="""\
 
 The Sencha ExtJS 6 user interface for Lino
 
+The central project homepage is http://extjs6.lino-framework.org/
+
+
 """)
 
 SETUP_INFO.update(packages=[str(n) for n in """

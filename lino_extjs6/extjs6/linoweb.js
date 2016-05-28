@@ -3409,7 +3409,7 @@ if (this.disable_editing | record.data.disable_editing) {
       //});
 
       wincfg.keyHandlers = [];
-{% if settings.SITE.plugins.extjs.enter_submits_form %}
+{% if extjs.enter_submits_form %}
       wincfg.keyHandlers.push({
               //key: Ext.EventObject.ENTER,
                 key : Ext.String.escape,
