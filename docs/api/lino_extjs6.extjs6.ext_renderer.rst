@@ -1,7 +1,7 @@
-lino_extjs6.extjs.ext_renderer
-==============================
+lino_extjs6.extjs6.ext_renderer
+===============================
 
-.. automodule:: lino_extjs6.extjs.ext_renderer
+.. automodule:: lino_extjs6.extjs6.ext_renderer
 
    
    

@@ -1,7 +1,7 @@
-lino_extjs6.extjs.views
-=======================
+lino_extjs6.extjs6.views
+========================
 
-.. automodule:: lino_extjs6.extjs.views
+.. automodule:: lino_extjs6.extjs6.views
 
    
    
