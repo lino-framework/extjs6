@@ -47,6 +47,7 @@ from lino.utils.jsgen import py2js, js_code
 from lino.utils.xmlgen.html import E
 
 from lino.core.roles import SiteUser, Supervisor
+from lino.core.widgets import with_user_profile, get_user_profile
 
 if False:
     from lino.utils.jscompressor import JSCompressor
@@ -464,7 +465,7 @@ class ExtRenderer(HtmlRenderer):
             context.update(kw)
             return tpl.render(context)
     
-        return jsgen.with_user_profile(user.profile, getit)
+        return with_user_profile(user.profile, getit)
 
     def html_page_main_window(self, on_ready, request, site):
         dashboard = dict(
@@ -620,7 +621,7 @@ class ExtRenderer(HtmlRenderer):
             for lng in settings.SITE.languages:
                 with translation.override(lng.django_code):
                     for profile in UserProfiles.objects():
-                        count += jsgen.with_user_profile(
+                        count += with_user_profile(
                             profile, self.build_js_cache, force)
             logger.info("%d lino*.js files have been built in %s seconds.",
                         count, time.time() - started)
@@ -719,7 +720,7 @@ class ExtRenderer(HtmlRenderer):
 
     def write_lino_js(self, f):
 
-        profile = jsgen.get_user_profile()
+        profile = get_user_profile()
 
         context = dict(
             ext_renderer=self,
@@ -781,7 +782,7 @@ class ExtRenderer(HtmlRenderer):
         #~ logger.info('20120120 dbtables.all_details:\n%s',
             #~ '\n'.join([str(d) for d in dbtables.all_details]))
 
-        assert profile == jsgen.get_user_profile()
+        assert profile == get_user_profile()
 
         def must_render(lh, profile):
             """Return True if the given form layout `fl` is needed for
@@ -810,7 +811,7 @@ class ExtRenderer(HtmlRenderer):
                 for ln in self.js_render_ActionFormPanelSubclass(lh):
                     f.write(ln + '\n')
 
-        assert profile == jsgen.get_user_profile()
+        assert profile == get_user_profile()
 
         for fl in self.form_panels:
             lh = fl.get_layout_handle(self.plugin)
@@ -852,15 +853,15 @@ class ExtRenderer(HtmlRenderer):
                     for ln in self.js_render_custom_action(rh, ba):
                         f.write(ln + '\n')
 
-        if profile != jsgen.get_user_profile():
+        if profile != get_user_profile():
             logger.warning(
-                "Oops, profile %s != jsgen.get_user_profile() %s",
-                profile, jsgen.get_user_profile())
+                "Oops, profile %s != get_user_profile() %s",
+                profile, get_user_profile())
 
         return 1
 
     def lino_js_parts(self):
-        profile = jsgen.get_user_profile()
+        profile = get_user_profile()
         # return ('genjs',
         return ('cache', 'js',
                 'lino_' + profile.value + '_'
@@ -881,7 +882,7 @@ class ExtRenderer(HtmlRenderer):
         """
         This also manages action groups
         """
-        profile = jsgen.get_user_profile()
+        profile = get_user_profile()
         buttons = []
         combo_map = dict()
         for ba in action_list:
@@ -970,7 +971,7 @@ class ExtRenderer(HtmlRenderer):
 
     def build_on_render(self, main):
         "dh is a FormLayout or a ColumnsLayout"
-        profile = jsgen.get_user_profile()
+        profile = get_user_profile()
         on_render = []
         elems_by_field = {}
         field_elems = []
@@ -1093,7 +1094,7 @@ class ExtRenderer(HtmlRenderer):
     def js_render_FormPanelSubclass(self, dh):
 
         tbl = dh.layout._datasource
-        if not dh.main.get_view_permission(jsgen.get_user_profile()):
+        if not dh.main.get_view_permission(get_user_profile()):
             msg = "No view permission for main panel of %s :" % \
                   dh.layout._formpanel_name
             msg += " main requires %s (actor %s requires %s)" % (
@@ -1329,7 +1330,7 @@ class ExtRenderer(HtmlRenderer):
         # x = str(rh)
         # if x.startswith('clocking'):
         #     print "20150421 {0}".format(x)
-        # profile = jsgen.get_user_profile()
+        # profile = get_user_profile()
         rpt = rh.actor
 
         if rpt.parameters and ba.action.use_param_panel:
@@ -1419,7 +1420,7 @@ class ExtRenderer(HtmlRenderer):
         def fn():
             yield "// lino.js --- generated %s by %s for %s." % (
                 time.ctime(), cgi.escape(settings.SITE.site_version()),
-                jsgen.get_user_profile())
+                get_user_profile())
             # lino.__version__)
             #~ // $site.title ($lino.welcome_text())
             # yield "Ext.BLANK_IMAGE_URL = '%s';" % extjs.build_lib_url(
