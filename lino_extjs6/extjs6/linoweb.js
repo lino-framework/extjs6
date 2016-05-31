@@ -2563,7 +2563,7 @@ Ext.define('Lino.HtmlBoxPanel', {
                 this.format_data(record.data[this.name]) : '';
             // console.log('20140917 HtmlBox.refresh()',
             //             this.name, record.data.LinksByHuman);
-            el.update(newcontent, true);
+            box.body.update(newcontent);
         // } else {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
         }

@@ -97,7 +97,7 @@ def delete_element(ar, elem):
 
     try:
         elem.delete()
-    except Exception, e:
+    except Exception as e:
         dblogger.exception(e)
         msg = _("Failed to delete %(record)s : %(error)s."
                 ) % dict(record=dd.obj2unicode(elem), error=e)
@@ -651,7 +651,7 @@ class GridConfig(View):
         gc.update(label=PUT.get('label', "Standard"))
         try:
             msg = rpt.save_grid_config(name, gc)
-        except IOError, e:
+        except IOError as e:
             msg = _("Error while saving GC for %(table)s: %(error)s") % dict(
                 table=rpt, error=e)
             return settings.SITE.kernel.error(None, msg, alert=True)
