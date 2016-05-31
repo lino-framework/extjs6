@@ -1,7 +1,7 @@
-lino_extjs6.extjs
-=================
+lino_extjs6.extjs6
+==================
 
-.. automodule:: lino_extjs6.extjs
+.. automodule:: lino_extjs6.extjs6
 
    
    

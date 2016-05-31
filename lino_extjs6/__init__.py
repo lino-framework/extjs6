@@ -2,7 +2,7 @@
 .. autosummary::
    :toctree:
 
-    extjs
+    extjs6
     projects
 
 """

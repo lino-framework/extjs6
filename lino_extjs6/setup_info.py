@@ -18,6 +18,7 @@ SETUP_INFO = dict(
     version='0.0.1',
     install_requires=['lino'],
     tests_require=[],
+    test_suite='tests',
 
     description="The Sencha ExtJS 6 user interface for Lino",
     license='GPLv6+',
@@ -56,7 +57,7 @@ The central project homepage is http://extjs6.lino-framework.org/
 
 SETUP_INFO.update(packages=[str(n) for n in """
 lino_extjs6
-lino_extjs6.extjs
+lino_extjs6.extjs6
 lino_extjs6.projects
 lino_extjs6.projects.mysite
 lino_extjs6.projects.mysite.settings

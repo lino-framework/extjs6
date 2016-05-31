@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2015 Luc Saffre
+# Copyright 2009-2016 Luc Saffre
 # License: BSD (see file COPYING for details)
 
 """The Lino user interface based on ExtJS 6.
@@ -16,7 +16,6 @@ your application.
 .. autosummary::
    :toctree:
 
-   elems
    views
    ext_renderer
 
@@ -108,14 +107,12 @@ class Plugin(Plugin):
         from .ext_renderer import ExtRenderer
         self.renderer = ExtRenderer(self)
         kernel.extjs_renderer = self.renderer
-        from . import elems
-        kernel.widgets = elems
 
         # logger.info("20140227 extjs.Plugin.on_ui_init() b")
 
     def get_row_edit_lines(self, e, panel):
-        from .elems import (GridElement, HtmlBoxElement, FieldElement,
-                            form_field_name)
+        from lino.modlib.extjs.elems import (GridElement, HtmlBoxElement,
+                                             FieldElement, form_field_name)
         from lino.core import constants
         master_field = panel.layout_handle.layout._datasource.master_field
         if isinstance(e, GridElement):
