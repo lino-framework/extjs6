@@ -9,6 +9,9 @@ Defines the :class:`ExtRenderer` class.
 from __future__ import unicode_literals
 
 import logging
+
+from lino_extjs6.extjs6 import elems
+
 logger = logging.getLogger(__name__)
 
 import os
@@ -47,7 +50,7 @@ from lino.utils.jsgen import py2js, js_code
 from lino.utils.xmlgen.html import E
 
 from lino.core.roles import SiteUser, Supervisor
-from lino.core.widgets import with_user_profile, get_user_profile
+from lino.core.widgets import with_user_profile, get_user_profile, WidgetFactory
 
 if False:
     from lino.utils.jscompressor import JSCompressor
@@ -56,14 +59,13 @@ else:
     def jscompress(s):
         return s
 
-from lino.modlib.extjs import elems as ext_elems
 
 from lino.modlib.users.choicelists import UserProfiles
 
 if settings.SITE.user_model:
     from lino.modlib.users import models as users
 
-from lino.modlib.extjs.elems import WidgetFactory
+from .elems import *
 
 
 def prepare_label(mi):
@@ -976,7 +978,7 @@ class ExtRenderer(HtmlRenderer):
         elems_by_field = {}
         field_elems = []
         for e in main.active_children:
-            if isinstance(e, ext_elems.FieldElement):
+            if isinstance(e, elems.FieldElement):
                 if e.get_view_permission(profile):
                     field_elems.append(e)
                     l = elems_by_field.get(e.field.name, None)
@@ -1041,7 +1043,7 @@ class ExtRenderer(HtmlRenderer):
         yield "    this.items = %s;" % py2js(dh.main.elements)
         yield "    this.fields = %s;" % py2js(
             [e for e in dh.main.walk()
-             if isinstance(e, ext_elems.FieldElement)])
+             if isinstance(e, elems.FieldElement)])
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
         #     dh.layout._formpanel_name
         yield "this.callSuper();"
@@ -1083,7 +1085,7 @@ class ExtRenderer(HtmlRenderer):
         yield "    this.items = %s;" % py2js(dh.main.elements)
         yield "    this.fields = %s;" % py2js(
             [e for e in dh.main.walk()
-             if isinstance(e, ext_elems.FieldElement)])
+             if isinstance(e, elems.FieldElement)])
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
         #     dh.layout._formpanel_name
         yield "this.callSuper();";
@@ -1300,7 +1302,7 @@ class ExtRenderer(HtmlRenderer):
             yield "    }"
 
         yield "    this.ls_columns = %s;" % py2js([
-            ext_elems.GridColumn(rh.list_layout, i, e) for i, e
+            elems.GridColumn(rh.list_layout, i, e) for i, e
             in enumerate(rh.list_layout.main.columns)])
 
         # yield "    Lino.%s.GridPanel.superclass.initComponent.call(this);" \
