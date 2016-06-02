@@ -10,8 +10,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from lino_extjs6.extjs6 import elems
-
 logger = logging.getLogger(__name__)
 
 import os
@@ -50,22 +48,21 @@ from lino.utils.jsgen import py2js, js_code
 from lino.utils.xmlgen.html import E
 
 from lino.core.roles import SiteUser, Supervisor
-from lino.core.widgets import with_user_profile, get_user_profile, WidgetFactory
 
 if False:
     from lino.utils.jscompressor import JSCompressor
+
     jscompress = JSCompressor().compress
 else:
     def jscompress(s):
         return s
 
+from . import elems as ext_elems
 
 from lino.modlib.users.choicelists import UserProfiles
 
 if settings.SITE.user_model:
     from lino.modlib.users import models as users
-
-from .elems import *
 
 
 def prepare_label(mi):
@@ -75,11 +72,11 @@ def prepare_label(mi):
     See `/blog/2011/1112`
     """
     # ~ label = unicode(mi.label) # trigger translation
-    #~ n = label.find(mi.HOTKEY_MARKER)
-    #~ if n != -1:
-        #~ label = label.replace(mi.HOTKEY_MARKER,'')
-        # ~ #label=label[:n] + '<u>' + label[n] + '</u>' + label[n+1:]
-    #~ return label
+    # ~ n = label.find(mi.HOTKEY_MARKER)
+    # ~ if n != -1:
+    # ~ label = label.replace(mi.HOTKEY_MARKER,'')
+    # ~ #label=label[:n] + '<u>' + label[n] + '</u>' + label[n+1:]
+    # ~ return label
 
 
 class ExtRenderer(HtmlRenderer):
@@ -87,11 +84,11 @@ class ExtRenderer(HtmlRenderer):
 
     """
     is_interactive = True
+
     # is_prepared = False
 
     def __init__(self, plugin):
         HtmlRenderer.__init__(self, plugin)
-        self.widgets = WidgetFactory()
         jsgen.register_converter(self.py2js_converter)
 
         for s in 'green blue red yellow'.split():
@@ -137,11 +134,11 @@ class ExtRenderer(HtmlRenderer):
                 assert h is not None
                 js = "function() {%s}" % h
                 return self.handler_item(v, js, None)
-                #~ handler = "function(){%s}" % self.instance_handler(v.instance)
-                #~ return dict(text=prepare_label(v),handler=js_code(handler))
+                # ~ handler = "function(){%s}" % self.instance_handler(v.instance)
+                # ~ return dict(text=prepare_label(v),handler=js_code(handler))
 
-                #~ url = self.get_detail_url(v.instance,an='detail')
-                #~ url = self.get_detail_url(v.instance)
+                # ~ url = self.get_detail_url(v.instance,an='detail')
+                # ~ url = self.get_detail_url(v.instance)
             elif v.bound_action is not None:
                 if v.params:
                     ar = v.bound_action.request(**v.params)
@@ -156,19 +153,19 @@ class ExtRenderer(HtmlRenderer):
                 return self.handler_item(v, js, v.help_text)
             elif v.href is not None:
                 url = v.href
-            #~ elif v.request is not None:
-                #~ raise Exception("20120918 request %r still used?" % v.request)
-                #~ url = self.get_request_url(v.request)
+                # ~ elif v.request is not None:
+                # ~ raise Exception("20120918 request %r still used?" % v.request)
+                # ~ url = self.get_request_url(v.request)
             else:
                 # a separator
-                #~ return dict(text=v.label)
+                # ~ return dict(text=v.label)
                 return v.label
-                #~ url = self.build_url('api',v.action.actor.app_label,v.action.actor.__name__,fmt=v.action.name)
+                # ~ url = self.build_url('api',v.action.actor.app_label,v.action.actor.__name__,fmt=v.action.name)
             if v.parent.parent is None:
                 # special case for href items in main menubar
                 return dict(
                     xtype='button', text=prepare_label(v),
-                    #~ handler=js_code("function() { window.location='%s'; }" % url))
+                    # ~ handler=js_code("function() { window.location='%s'; }" % url))
                     handler=js_code("function() { Lino.load_url('%s'); }" % url))
             return dict(text=prepare_label(v), href=url)
         return v
@@ -362,7 +359,7 @@ class ExtRenderer(HtmlRenderer):
 
     def instance_handler(self, ar, obj):
         a = obj.get_detail_action(ar)
-        
+
         if a is not None:
             if ar is None:
                 return self.action_call(None, a, dict(record_id=obj.pk))
@@ -403,7 +400,7 @@ class ExtRenderer(HtmlRenderer):
         kw = ar.get_status(**kw)
         if not kw['base_params']:
             del kw['base_params']
-        #~ kw = self.request2kw(rr,**kw)
+        # ~ kw = self.request2kw(rr,**kw)
         if ar.bound_action != ar.actor.default_action:
             kw[constants.URL_PARAM_ACTION_NAME] = ar.bound_action.action.action_name
         return self.plugin.build_plain_url(
@@ -425,8 +422,8 @@ class ExtRenderer(HtmlRenderer):
     #     return ar.table2xhtml(**kw)
 
     def handler_item(self, mi, handler, help_text):
-        #~ handler = "function(){%s}" % handler
-        #~ d = dict(text=prepare_label(mi),handler=js_code(handler),tooltip="Foo")
+        # ~ handler = "function(){%s}" % handler
+        # ~ d = dict(text=prepare_label(mi),handler=js_code(handler),tooltip="Foo")
         d = dict(text=prepare_label(mi), handler=js_code(handler))
         if mi.bound_action and mi.bound_action.action.icon_name:
             d.update(iconCls='x-tbar-' + mi.bound_action.action.icon_name)
@@ -466,8 +463,8 @@ class ExtRenderer(HtmlRenderer):
             }
             context.update(kw)
             return tpl.render(context)
-    
-        return with_user_profile(user.profile, getit)
+
+        return jsgen.with_user_profile(user.profile, getit)
 
     def html_page_main_window(self, on_ready, request, site):
         dashboard = dict(
@@ -479,7 +476,7 @@ class ExtRenderer(HtmlRenderer):
             id="main_area",
             xtype='container',
             region="center",
-            #~ autoScroll=True,
+            # ~ autoScroll=True,
             layout='fit',
             items=dashboard,
         )
@@ -489,11 +486,11 @@ class ExtRenderer(HtmlRenderer):
 
         win = dict(
             layout='fit',
-            #~ maximized=True,
+            # ~ maximized=True,
             items=main,
-            #~ closable=False,
+            # ~ closable=False,
             bbar=dict(xtype='toolbar', items=js_code('Lino.status_bar')),
-            #~ title=self.site.title,
+            # ~ title=self.site.title,
             tbar=js_code('Lino.main_menu'),
         )
         return win
@@ -510,8 +507,8 @@ class ExtRenderer(HtmlRenderer):
                         py2js(request.subst_user.id),
                         py2js(unicode(request.subst_user)))
                     user_text = unicode(request.user) + \
-                        " (" + _("as") + " " + \
-                        unicode(request.subst_user) + ")"
+                                " (" + _("as") + " " + \
+                                unicode(request.subst_user) + ")"
                 else:
                     yield "Lino.set_subst_user();"
                     user_text = unicode(request.user)
@@ -546,7 +543,7 @@ class ExtRenderer(HtmlRenderer):
                         dict(text=t, handler=js_code(
                             "function(){Lino.set_subst_user(%s, %s)}" % (v, py2js(t))))
                         for v, t in authorities]
-                            #~ for v,t in user.get_received_mandates()]
+                    # ~ for v,t in user.get_received_mandates()]
                     act_as.insert(0, dict(
                         text=_("Myself"),
                         handler=js_code("function(){Lino.set_subst_user(null)}")))
@@ -573,21 +570,21 @@ class ExtRenderer(HtmlRenderer):
                 login_buttons = [
                     dict(xtype="button", text=_("Log in"),
                          handler=js_code('Lino.show_login_window')),
-                    #~ dict(xtype="button",text="Register",handler=Lino.register),
+                    # ~ dict(xtype="button",text="Register",handler=Lino.register),
                 ]
                 yield "Lino.main_menu = \
                 Lino.main_menu.concat(['->',%s]);" % py2js(login_buttons)
 
     def before_row_edit(self, panel):
         from lino.core.actions import get_view_permission
-        #~ l.append("console.log('before_row_edit',record);")
+        # ~ l.append("console.log('before_row_edit',record);")
         for e in panel.active_children:
             if not get_view_permission(e):
                 continue
             for p in settings.SITE.installed_plugins:
                 for ln in p.get_row_edit_lines(e, panel):
                     yield ln
-        
+
     def build_site_cache(self, force=False):
         """Build the site cache files under `/media/cache`, especially the
         :xfile:`lino*.js` files, one per user profile and language.
@@ -623,7 +620,7 @@ class ExtRenderer(HtmlRenderer):
             for lng in settings.SITE.languages:
                 with translation.override(lng.django_code):
                     for profile in UserProfiles.objects():
-                        count += with_user_profile(
+                        count += jsgen.with_user_profile(
                             profile, self.build_js_cache, force)
             logger.info("%d lino*.js files have been built in %s seconds.",
                         count, time.time() - started)
@@ -649,9 +646,9 @@ class ExtRenderer(HtmlRenderer):
             self.write_lino_js(f)
 
         return settings.SITE.kernel.make_cache_file(fn, write, force)
-    
+
     def prepare_layouts(self):
-        
+
         self.actors_list = [
             rpt for rpt in dbtables.master_reports
             + dbtables.slave_reports
@@ -696,7 +693,6 @@ class ExtRenderer(HtmlRenderer):
                     raise Exception("Could not define %s for %r: %s" % (
                         formpanel_name, res, e))
 
-                    
                 # lh.main.loosen_requirements(res)
                 for e in lh.main.walk():
                     e.loosen_requirements(res)
@@ -722,7 +718,7 @@ class ExtRenderer(HtmlRenderer):
 
     def write_lino_js(self, f):
 
-        profile = get_user_profile()
+        profile = jsgen.get_user_profile()
 
         context = dict(
             ext_renderer=self,
@@ -739,7 +735,7 @@ class ExtRenderer(HtmlRenderer):
 
         tpl = self.linolib_template()
 
-        #~ f.write(jscompress(unicode(tpl)+'\n'))
+        # ~ f.write(jscompress(unicode(tpl)+'\n'))
         f.write(jscompress(tpl.render(**context) + '\n'))
 
         env = settings.SITE.plugins.jinja.renderer.jinja_env
@@ -777,14 +773,14 @@ class ExtRenderer(HtmlRenderer):
         f.write("\n// ChoiceLists: \n")
         for a in choicelists.CHOICELISTS.values():
             if settings.SITE.is_installed(a.app_label):
-                #~ if issubclass(a,choicelists.ChoiceList):
+                # ~ if issubclass(a,choicelists.ChoiceList):
                 f.write("Lino.%s = %s;\n" %
                         (a.actor_id, py2js(a.get_choices())))
 
-        #~ logger.info('20120120 dbtables.all_details:\n%s',
-            #~ '\n'.join([str(d) for d in dbtables.all_details]))
+                # ~ logger.info('20120120 dbtables.all_details:\n%s',
+                # ~ '\n'.join([str(d) for d in dbtables.all_details]))
 
-        assert profile == get_user_profile()
+        assert profile == jsgen.get_user_profile()
 
         def must_render(lh, profile):
             """Return True if the given form layout `fl` is needed for
@@ -798,27 +794,27 @@ class ExtRenderer(HtmlRenderer):
                     return True
             return False
 
-        #~ f.write('\n/* Application FormPanel subclasses */\n')
+        # ~ f.write('\n/* Application FormPanel subclasses */\n')
         for fl in self.param_panels:
             lh = fl.get_layout_handle(self.plugin)
             if must_render(lh, profile):
-            # if lh.main.get_view_permission(profile):
+                # if lh.main.get_view_permission(profile):
                 for ln in self.js_render_ParamsPanelSubclass(lh):
                     f.write(ln + '\n')
 
         for fl in self.action_param_panels:
             lh = fl.get_layout_handle(self.plugin)
             if must_render(lh, profile):
-            # if lh.main.get_view_permission(profile):
+                # if lh.main.get_view_permission(profile):
                 for ln in self.js_render_ActionFormPanelSubclass(lh):
                     f.write(ln + '\n')
 
-        assert profile == get_user_profile()
+        assert profile == jsgen.get_user_profile()
 
         for fl in self.form_panels:
             lh = fl.get_layout_handle(self.plugin)
             if must_render(lh, profile):
-            # if lh.main.get_view_permission(profile):
+                # if lh.main.get_view_permission(profile):
                 for ln in self.js_render_FormPanelSubclass(lh):
                     f.write(ln + '\n')
 
@@ -855,15 +851,15 @@ class ExtRenderer(HtmlRenderer):
                     for ln in self.js_render_custom_action(rh, ba):
                         f.write(ln + '\n')
 
-        if profile != get_user_profile():
+        if profile != jsgen.get_user_profile():
             logger.warning(
-                "Oops, profile %s != get_user_profile() %s",
-                profile, get_user_profile())
+                "Oops, profile %s != jsgen.get_user_profile() %s",
+                profile, jsgen.get_user_profile())
 
         return 1
 
     def lino_js_parts(self):
-        profile = get_user_profile()
+        profile = jsgen.get_user_profile()
         # return ('genjs',
         return ('cache', 'js',
                 'lino_' + profile.value + '_'
@@ -875,23 +871,23 @@ class ExtRenderer(HtmlRenderer):
         return env.get_template('linoweb.js')
 
     def create_layout_element(self, *args, **kw):
-        return self.widgets.create_layout_element(*args, **kw)
+        return ext_elems.create_layout_element(*args, **kw)
 
     def create_layout_panel(self, *args, **kw):
-        return self.widgets.create_layout_panel(*args, **kw)
+        return ext_elems.create_layout_panel(*args, **kw)
 
     def toolbar(self, action_list):
         """
         This also manages action groups
         """
-        profile = get_user_profile()
+        profile = jsgen.get_user_profile()
         buttons = []
         combo_map = dict()
         for ba in action_list:
 
             # if ba.actor.__name__ == 'AttestationsByProject':
             #     logger.info("20140401 toolbar() %r", ba.action)
-            
+
             if ba.action.show_in_bbar and ba.get_view_permission(profile):
                 if ba.action.combo_group is None:
                     buttons.append(self.a2btn(ba))
@@ -909,9 +905,9 @@ class ExtRenderer(HtmlRenderer):
                         buttons.append(combo)
                         combo_map[k] = combo
                     else:
-                        #~ menu = parent.get('menu',None)
-                        #~ if menu is None:
-                            #~ id_map[k] = menu_btn
+                        # ~ menu = parent.get('menu',None)
+                        # ~ if menu is None:
+                        # ~ id_map[k] = menu_btn
                         combo['menu'].append(self.a2btn(ba))
         reduced_buttons = []
         for b in buttons:
@@ -956,12 +952,12 @@ class ExtRenderer(HtmlRenderer):
         else:
             kw.update(text=a.label)
         kw.update(
-            #~ name=a.name,
+            # ~ name=a.name,
             menu_item_text=a.label,
             overflowText=a.label,
             auto_save=a.auto_save,
             itemId=a.action_name,
-            #~ text=unicode(a.label),
+            # ~ text=unicode(a.label),
         )
         if a.key:
             kw.update(keycode=a.key.keycode)
@@ -973,12 +969,12 @@ class ExtRenderer(HtmlRenderer):
 
     def build_on_render(self, main):
         "dh is a FormLayout or a ColumnsLayout"
-        profile = get_user_profile()
+        profile = jsgen.get_user_profile()
         on_render = []
         elems_by_field = {}
         field_elems = []
         for e in main.active_children:
-            if isinstance(e, elems.FieldElement):
+            if isinstance(e, ext_elems.FieldElement):
                 if e.get_view_permission(profile):
                     field_elems.append(e)
                     l = elems_by_field.get(e.field.name, None)
@@ -988,17 +984,17 @@ class ExtRenderer(HtmlRenderer):
                     l.append(e)
 
         for e in field_elems:
-            #~ if isinstance(e,FileFieldElement):
-                #~ kw.update(fileUpload=True)
+            # ~ if isinstance(e,FileFieldElement):
+            # ~ kw.update(fileUpload=True)
             holder = main.layout_handle.layout.get_chooser_holder()
             chooser = holder.get_chooser_for_field(e.field.name)
             if chooser:
-                #~ logger.debug("20100615 %s.%s has chooser", self.lh.layout, e.field.name)
+                # ~ logger.debug("20100615 %s.%s has chooser", self.lh.layout, e.field.name)
                 for f in chooser.context_fields:
                     for el in elems_by_field.get(f.name, []):
-                        #~ if main.has_field(f):
-                        #~ varname = varname_field(f)
-                        #~ on_render.append("%s.on('change',Lino.chooser_handler(%s,%r));" % (varname,e.ext_name,f.name))
+                        # ~ if main.has_field(f):
+                        # ~ varname = varname_field(f)
+                        # ~ on_render.append("%s.on('change',Lino.chooser_handler(%s,%r));" % (varname,e.ext_name,f.name))
                         on_render.append(
                             "%s.on('change',Lino.chooser_handler(%s,%r));" % (
                                 el.as_ext(), e.as_ext(), f.name))
@@ -1012,19 +1008,19 @@ class ExtRenderer(HtmlRenderer):
         # yield "Lino.%s = Ext.extend(Ext.form.FormPanel, {" % \
         #     dh.layout._formpanel_name
         yield "Ext.define('Lino.%s' , { extend : 'Ext.form.FormPanel'," % \
-            dh.layout._formpanel_name
+              dh.layout._formpanel_name
         for k, v in dh.main.ext_options().items():
-            #~ if k != 'items':
+            # ~ if k != 'items':
             if not k in self.SUPPRESSED:
                 yield "  %s: %s," % (k, py2js(v))
-        #~ yield "  collapsible: true,"
+        # ~ yield "  collapsible: true,"
         if dh.main.value['layout'] == 'hbox':
             yield "  layout: 'hbox',"
         else:
             yield "  layout: 'form',"
         yield "  autoHeight: true,"
-        #~ if dh.layout.window_size and dh.layout.window_size[1] == 'auto':
-            #~ yield "  autoHeight: true,"
+        # ~ if dh.layout.window_size and dh.layout.window_size[1] == 'auto':
+        # ~ yield "  autoHeight: true,"
         yield "  initComponent : function() {"
         # 20140503 yield "    var containing_panel = this;"
         lc = 0
@@ -1043,7 +1039,7 @@ class ExtRenderer(HtmlRenderer):
         yield "    this.items = %s;" % py2js(dh.main.elements)
         yield "    this.fields = %s;" % py2js(
             [e for e in dh.main.walk()
-             if isinstance(e, elems.FieldElement)])
+             if isinstance(e, ext_elems.FieldElement)])
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
         #     dh.layout._formpanel_name
         yield "this.callSuper();"
@@ -1057,12 +1053,12 @@ class ExtRenderer(HtmlRenderer):
         # yield "Lino.%s = Ext.extend(Lino.ActionFormPanel,{" % \
         #     dh.layout._formpanel_name
         yield "Ext.define('Lino.%s' , { extend : 'Lino.ActionFormPanel'," % \
-            dh.layout._formpanel_name
+              dh.layout._formpanel_name
         for k, v in dh.main.ext_options().items():
             if k != 'items':
                 yield "  %s: %s," % (k, py2js(v))
         assert tbl.action_name is not None
-            #~ raise Exception("20121009 action_name of %r is None" % tbl)
+        # ~ raise Exception("20121009 action_name of %r is None" % tbl)
         yield "  action_name: '%s'," % tbl.action_name
         yield "  ls_url: %s," % py2js(dh.layout._url)
         yield "  window_title: %s," % py2js(tbl.label)
@@ -1072,8 +1068,8 @@ class ExtRenderer(HtmlRenderer):
             yield "    " + ln
         yield "  },"
 
-        #~ yield "  layout: 'fit',"
-        #~ yield "  auto_save: true,"
+        # ~ yield "  layout: 'fit',"
+        # ~ yield "  auto_save: true,"
         if dh.layout.window_size and dh.layout.window_size[1] == 'auto':
             yield "  autoHeight: true,"
         yield "  initComponent : function() {"
@@ -1085,7 +1081,7 @@ class ExtRenderer(HtmlRenderer):
         yield "    this.items = %s;" % py2js(dh.main.elements)
         yield "    this.fields = %s;" % py2js(
             [e for e in dh.main.walk()
-             if isinstance(e, elems.FieldElement)])
+             if isinstance(e, ext_elems.FieldElement)])
         # yield "    Lino.%s.superclass.initComponent.call(this);" % \
         #     dh.layout._formpanel_name
         yield "this.callSuper();";
@@ -1096,13 +1092,13 @@ class ExtRenderer(HtmlRenderer):
     def js_render_FormPanelSubclass(self, dh):
 
         tbl = dh.layout._datasource
-        if not dh.main.get_view_permission(get_user_profile()):
+        if not dh.main.get_view_permission(jsgen.get_user_profile()):
             msg = "No view permission for main panel of %s :" % \
                   dh.layout._formpanel_name
             msg += " main requires %s (actor %s requires %s)" % (
                 dh.main.required_roles,
                 tbl, tbl.required_roles)
-            #~ raise Exception(msg)
+            # ~ raise Exception(msg)
             logger.warning(msg)
             print(20150717, msg)
             return
@@ -1111,7 +1107,7 @@ class ExtRenderer(HtmlRenderer):
         # yield "Lino.%s = Ext.extend(Lino.FormPanel,{" % \
         #     dh.layout._formpanel_name
         yield "Ext.define('Lino.%s' , { extend : 'Lino.FormPanel'," % \
-            dh.layout._formpanel_name
+              dh.layout._formpanel_name
         yield "  layout: 'fit',"
         yield "  auto_save: true,"
         if dh.layout.window_size and dh.layout.window_size[1] == 'auto':
@@ -1130,7 +1126,7 @@ class ExtRenderer(HtmlRenderer):
         if lc == 0:
             raise Exception("%r of %s has no variables" % (dh.main, dh))
         yield "    this.items = %s;" % dh.main.as_ext()
-        #~ if issubclass(tbl,tables.AbstractTable):
+        # ~ if issubclass(tbl,tables.AbstractTable):
         if True:
             yield "    this.before_row_edit = function(record) {"
             for ln in self.before_row_edit(dh.main):
@@ -1142,7 +1138,7 @@ class ExtRenderer(HtmlRenderer):
             for ln in on_render:
                 yield "      " + ln
             yield "      Lino.%s.superclass.onRender.call(this, ct, position);" % \
-                dh.layout._formpanel_name
+                  dh.layout._formpanel_name
             # yield "      this.callSuper(ct, position);"
             yield "    }"
 
@@ -1171,9 +1167,9 @@ class ExtRenderer(HtmlRenderer):
 
     def js_render_detail_action_FormPanel(self, rh, action):
         rpt = rh.actor
-        #~ logger.info('20121005 js_render_detail_action_FormPanel(%s,%s)',rpt,action.full_name(rpt))
+        # ~ logger.info('20121005 js_render_detail_action_FormPanel(%s,%s)',rpt,action.full_name(rpt))
         yield ""
-        #~ yield "// js_render_detail_action_FormPanel %s" % action
+        # ~ yield "// js_render_detail_action_FormPanel %s" % action
         dtl = action.get_window_layout()
         if dtl is None:
             raise Exception("action %s without detail?" % action.full_name())
@@ -1223,10 +1219,10 @@ class ExtRenderer(HtmlRenderer):
         yield "Ext.define('Lino.%s.GridPanel' , { extend : 'Lino.GridPanel'," % rh.actor
 
         kw = dict()
-        #~ kw.update(empty_title=%s,rh.actor.get_button_label()
+        # ~ kw.update(empty_title=%s,rh.actor.get_button_label()
         kw.update(ls_url=rh.actor.actor_url())
         kw.update(ls_store_fields=[js_code(f.as_js(f.name))
-                  for f in rh.store.list_fields])
+                                   for f in rh.store.list_fields])
         if rh.store.pk is not None:
             kw.update(ls_id_property=rh.store.pk.name)
             kw.update(pk_index=rh.store.pk_index)
@@ -1243,9 +1239,9 @@ class ExtRenderer(HtmlRenderer):
             rh.actor.get_toolbar_actions(rh.actor.default_action.action)))
         kw.update(ls_grid_configs=[gc.data for gc in rh.actor.grid_configs])
         kw.update(gc_name=constants.DEFAULT_GC_NAME)
-        #~ if action != rh.actor.default_action:
-            #~ kw.update(action_name=action.name)
-        #~ kw.update(content_type=rh.report.content_type)
+        # ~ if action != rh.actor.default_action:
+        # ~ kw.update(action_name=action.name)
+        # ~ kw.update(content_type=rh.report.content_type)
 
         vc = dict(emptyText=_("No data to display."))
         if rh.actor.editable:
@@ -1266,7 +1262,7 @@ class ExtRenderer(HtmlRenderer):
         kw.update(page_length=rh.actor.page_length)
         kw.update(stripeRows=True)
 
-        #~ if rh.actor.master:
+        # ~ if rh.actor.master:
         kw.update(title=rh.actor.label)
         kw.update(
             disabled_actions_index=rh.store.column_index('disabled_actions'))
@@ -1302,8 +1298,8 @@ class ExtRenderer(HtmlRenderer):
             yield "    }"
 
         yield "    this.ls_columns = %s;" % py2js([
-            elems.GridColumn(rh.list_layout, i, e) for i, e
-            in enumerate(rh.list_layout.main.columns)])
+                                                      ext_elems.GridColumn(rh.list_layout, i, e) for i, e
+                                                      in enumerate(rh.list_layout.main.columns)])
 
         # yield "    Lino.%s.GridPanel.superclass.initComponent.call(this);" \
         #     % rh.actor
@@ -1332,7 +1328,7 @@ class ExtRenderer(HtmlRenderer):
         # x = str(rh)
         # if x.startswith('clocking'):
         #     print "20150421 {0}".format(x)
-        # profile = get_user_profile()
+        # profile = jsgen.get_user_profile()
         rpt = rh.actor
 
         if rpt.parameters and ba.action.use_param_panel:
@@ -1358,12 +1354,12 @@ class ExtRenderer(HtmlRenderer):
         windowConfig = dict()
         wl = ba.get_window_layout()
         ws = ba.get_window_size()
-        #~ if wl is not None:
-            #~ ws = wl.window_size
+        # ~ if wl is not None:
+        # ~ ws = wl.window_size
         if True:
             if ws:
                 windowConfig.update(
-                    #~ width=ws[0],
+                    # ~ width=ws[0],
                     width=js_code('Lino.chars2width(%d)' % ws[0]),
                     maximized=False,
                     draggable=True,
@@ -1380,16 +1376,16 @@ class ExtRenderer(HtmlRenderer):
                 if ws[1] == 'auto':
                     windowConfig.update(autoHeight=True)
                 elif isinstance(ws[1], int):
-                    #~ windowConfig.update(height=ws[1])
+                    # ~ windowConfig.update(height=ws[1])
                     windowConfig.update(
                         height=js_code('Lino.rows2height(%d)' % ws[1]))
                 else:
                     raise ValueError("height")
-                #~ print 20120629, action, windowConfig
+                    # ~ print 20120629, action, windowConfig
 
         yield "Lino.%s = Ext.create('Lino.WindowAction',%s, function(){" % (
             ba.full_name(), py2js(windowConfig))
-        #~ yield "  console.log('20120625 fn');"
+        # ~ yield "  console.log('20120625 fn');"
         if ba.action.extjs_main_panel:
             yield "  return %s;" % ba.action.extjs_main_panel
         else:
@@ -1422,9 +1418,9 @@ class ExtRenderer(HtmlRenderer):
         def fn():
             yield "// lino.js --- generated %s by %s for %s." % (
                 time.ctime(), cgi.escape(settings.SITE.site_version()),
-                get_user_profile())
+                jsgen.get_user_profile())
             # lino.__version__)
-            #~ // $site.title ($lino.welcome_text())
+            # ~ // $site.title ($lino.welcome_text())
             # yield "Ext.BLANK_IMAGE_URL = '%s';" % extjs.build_lib_url(
             #     'resources/images/default/s.gif')
             yield "LANGUAGE_CHOICES = %s;" % py2js(
