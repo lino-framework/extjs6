@@ -1197,7 +1197,7 @@ class DisplayElement(FieldElement):
 
 class BooleanMixin(object):
     def format_sum(self, ar, sums, i):
-        return E.b(str(sums[i]))
+        return E.b(str(sums[self.name]))
 
     def value2num(self, v):
         if v:
