@@ -8,13 +8,18 @@
     <script type="text/javascript" src="{{ url }}"></script>
 {%- endmacro -%}
 <head>
+{%- if not extjs.theme_name == '' -%}
+    {%- set theme = extjs.theme_name  -%}
+{%- else -%}
+    {%- set theme ='ext-theme-neptune-lino'  -%}
+{%- endif -%}
 {%- block head -%}
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title id="title">{{ site.title or site.verbose_name }}</title>
     {# ###### CSS files ###### #}
-    {{ stylesheet(extjs.build_lib_url('classic/ext-theme-neptune-lino/resources/ext-theme-neptune-lino-all.css')) }}
-    {{ stylesheet(extjs.build_lib_url('classic/ext-theme-neptune-lino/resources/ext-theme-neptune-lino-all-rtl.css')) }}
+    {{ stylesheet(extjs.build_lib_url('classic/'+ theme + '/resources/'+theme +'-all.css')) }}
+    {{ stylesheet(extjs.build_lib_url('classic/'+theme +'/resources/'+theme +'-all-rtl.css')) }}
     {%- block css -%}
         {# CSS files from plugins #}
         {%- block css_plugins -%}
@@ -54,11 +59,11 @@
         {%- if settings.DEBUG -%}
             <!--{{ javascript(extjs.build_lib_url('adapter/ext/ext-base-debug.js'))}}-->
             {{ javascript(extjs.build_lib_url('ext-all-debug.js')) }}
-            {{ javascript(extjs.build_lib_url('classic/ext-theme-neptune-lino/ext-theme-neptune-lino.js')) }}
+            {{ javascript(extjs.build_lib_url('classic/'+theme +'/'+theme +'.js')) }}
         {%- else -%}
             <!--{{ javascript(extjs.build_lib_url('adapter/ext/ext-base.js')) }}-->
             {{ javascript(extjs.build_lib_url('ext-all.js')) }}
-            {{ javascript(extjs.build_lib_url('classic/ext-theme-neptune-lino/ext-theme-neptune-lino-debug.js')) }}
+            {{ javascript(extjs.build_lib_url('classic/'+theme +'/'+theme +'-debug.js')) }}
         {%- endif -%}
     {%- endblock js -%}
     {%- if not language.startswith('en') -%}
