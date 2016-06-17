@@ -8,18 +8,14 @@
     <script type="text/javascript" src="{{ url }}"></script>
 {%- endmacro -%}
 <head>
-{%- if not extjs.theme_name == '' -%}
-    {%- set theme = extjs.theme_name  -%}
-{%- else -%}
-    {%- set theme ='ext-theme-neptune-lino'  -%}
-{%- endif -%}
+{%- set theme = extjs.theme_name  -%}
 {%- block head -%}
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title id="title">{{ site.title or site.verbose_name }}</title>
     {# ###### CSS files ###### #}
-    {{ stylesheet(extjs.build_lib_url('classic/'+ theme + '/resources/'+theme +'-all.css')) }}
-    {{ stylesheet(extjs.build_lib_url('classic/'+theme +'/resources/'+theme +'-all-rtl.css')) }}
+    {{ stylesheet(extjs.build_lib_url('classic/'+theme+'/resources/'+theme+'-all.css')) }}
+    {{ stylesheet(extjs.build_lib_url('classic/'+theme+'/resources/'+theme+'-all-rtl.css')) }}
     {%- block css -%}
         {# CSS files from plugins #}
         {%- block css_plugins -%}
