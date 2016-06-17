@@ -102,13 +102,13 @@ class Plugin(Plugin):
 
     ui_handle_attr_name = 'extjs_handle'
 
-    theme_name = 'ext-theme-neptune-lino'
+    theme_name = 'theme-classic'
     """
     The Extjs6 theme to be used.
     Available themes are:
     theme-aria,theme-classic,theme-classic-sandbox,theme-crisp,theme-crisp-touch,theme-gray,theme-neptune,
-    theme-neptune-touch,theme-triton,ext-theme-neptune-lino
-    ext-theme-neptune-lino is the default theme.
+    theme-neptune-touch,theme-triton,theme-neptune-lino
+    theme-classic is the default theme.
     """
 
     def on_ui_init(self, kernel):
