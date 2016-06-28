@@ -3481,7 +3481,7 @@ Ext.define('Lino.GridStore', {
           options.params.{{constants.URL_PARAM_LIMIT}} = this.grid_panel.preview_limit;
         }
     } else {
-        //var ps = this.grid_panel.calculatePageSize();
+        var ps = this.grid_panel.calculatePageSize();
         var ps = 15;
         if (!ps) {
           // console.log("GridStore.load() failed to calculate pagesize");
@@ -3549,6 +3549,7 @@ Ext.define('Lino.GridPanel', {
   autoHeight: false,
   params_panel_hidden : false,
   preview_limit : undefined,
+  row_height: 1,
   //~ loadMask: true,
   //~ viewConfig: {
           //~ getRowClass: Lino.getRowClass,
@@ -3571,8 +3572,8 @@ Ext.define('Lino.GridPanel', {
           config.is_main_window = config.p.is_main_window;
           config.params_panel = config.p.params_panel;
           }
-    Lino.GridPanel.superclass.constructor.call(this,config);
-    // this.callSuper(config);
+    // Lino.GridPanel.superclass.constructor.call(this,config);
+    this.callSuper(config);
     
     //~ if (this.containing_window) {
         //~ console.log("20111206 install refresh");
@@ -3967,31 +3968,38 @@ Ext.define('Lino.GridPanel', {
     //~ console.log('getLayoutTarget().getHeight() is',this.getLayoutTarget().getHeight());
       
     //~ var rowHeight = 52; // experimental value
-    var row = this.view.getRow(0);
-    if (row) {
-      //~ console.log('20120213 yes');
-      var rowHeight = Ext.get(row).getHeight();
-    } else {
-        //~ var rowHeight = this.getFrameHeight();
-        //~ var rowHeight = 10; // reasonably smallest approximative value
-        //~ There is no data yet. Construct a fake row and get its height
-        var Element = Ext.Element;
-        var gv = this.view;
-        var fakeBody = new Element(Element.fly(gv.scroller).child('div.x-grid3-body'));
-        var rowTemplate = gv.templates.row;
-        var cellTemplate = gv.templates.cell;
-        var tstyle  = 'width:' + gv.getGridInnerWidth() + 'px;';
-        var cells = cellTemplate.apply({value:'&#160;'});
-        var markup = rowTemplate.apply({
-                tstyle: tstyle,
-                cols  : 1,
-                cells : cells,
-                alt   : ''
-            });        
-        fakeBody.dom.innerHTML = gv.templates.body.apply({rows: markup});
-        var row = fakeBody.dom.childNodes[0];
-        var rowHeight = Ext.get(row).getHeight();
+    // var rowHeight = this.row_height * 11;
+    var row_content = '&nbsp;';
+    for (var i = 0; i < this.row_height;i++) {
+        row_content += '<br>';
     }
+
+    var Element = Ext.Element;
+    var gv = this;
+    // var gv = this.view;
+    // var fakeBody = new Element(Element.fly(gv.scroller).child('div.x-grid3-body'));
+    //   .child('div.x-grid-view')
+    var fakeBody = Ext.get(Element.fly(this.body));
+    var rowTemplate = gv.view.rowTpl;
+      // rowTpl
+    var cellTemplate = gv.view.cellTpl;
+      // cellTpl
+    // var tstyle  = 'width:' + gv.getGridInnerWidth() + 'px;';
+    //   var tstyle  = 'width:' + gv.getWidth() + 'px;';
+      var tstyle  = 'width: 20px;';
+    // console.log("20160615", this.fake_row_content);
+    var cells = cellTemplate.apply({value:row_content});
+    var markup = rowTemplate.apply({
+            tstyle: tstyle,
+            cols  : 1,
+            cells : cells,
+            alt   : ''
+        });
+    // fakeBody.dom.innerHTML = gv.tpl.apply({rows: markup});
+    fakeBody.dom.innerHTML = gv.view.tpl.apply({rows: markup});
+    // var row = fakeBody.dom.childNodes[0];
+    var rowHeight = fakeBody.getHeight();
+
     //~ console.log('rowHeight is ',rowHeight,this,caller);
     //~ this.getView().syncScroll();
     //~ this.getView().initTemplates();
@@ -4007,7 +4015,7 @@ Ext.define('Lino.GridPanel', {
     //~ this.syncSize();
     //~ var height = this.getInnerHeight() - this.getFrameHeight();
     //~ var height = this.getHeight() - this.getFrameHeight();
-    height -= Ext.getScrollBarWidth(); // leave room for a possible horizontal scrollbar... 
+    height -= Ext.getScrollBarWidth(); // leave room for a possible horizontal scrollbar...
     //~ height -= this.getView().scrollOffset;
     var ps = Math.floor(height / rowHeight);
     //~ console.log('20130816 calculatePageSize():',height,'/',rowHeight,'->',ps);
