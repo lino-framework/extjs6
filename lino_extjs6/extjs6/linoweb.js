@@ -3482,7 +3482,7 @@ Ext.define('Lino.GridStore', {
         }
     } else {
         var ps = this.grid_panel.calculatePageSize();
-        var ps = 15;
+        // var ps = 15;
         if (!ps) {
           // console.log("GridStore.load() failed to calculate pagesize");
           return false;
@@ -3974,36 +3974,65 @@ Ext.define('Lino.GridPanel', {
         row_content += '<br>';
     }
 
-    var Element = Ext.Element;
-    var gv = this;
-    // var gv = this.view;
-    // var fakeBody = new Element(Element.fly(gv.scroller).child('div.x-grid3-body'));
-    //   .child('div.x-grid-view')
-    var fakeBody = Ext.get(Element.fly(this.body));
-    var rowTemplate = gv.view.rowTpl;
-      // rowTpl
-    var cellTemplate = gv.view.cellTpl;
-      // cellTpl
-    // var tstyle  = 'width:' + gv.getGridInnerWidth() + 'px;';
-    //   var tstyle  = 'width:' + gv.getWidth() + 'px;';
-      var tstyle  = 'width: 20px;';
-    // console.log("20160615", this.fake_row_content);
-    var cells = cellTemplate.apply({value:row_content});
-    var markup = rowTemplate.apply({
-            tstyle: tstyle,
-            cols  : 1,
-            cells : cells,
-            alt   : ''
-        });
-    // fakeBody.dom.innerHTML = gv.tpl.apply({rows: markup});
-    fakeBody.dom.innerHTML = gv.view.tpl.apply({rows: markup});
-    // var row = fakeBody.dom.childNodes[0];
-    var rowHeight = fakeBody.getHeight();
+     /*
+       20160628 In ExtJS 3 we had a trick to compute the exact height
+       of a row, but that trick fails with ExtJS 6. We want to know
+       the number of grid rows that will fit into the grid before
+       actually requesting any data from the server.  The store is not
+       yet loaded. We don't want the height of *every* data row. The
+       trick is to create a volatile DOM element with the same CSS as
+       a grid cell and with `<br/>` as content. And instead of
+       displaying this element, we just note its height.
+      */
+     if (false) {
+        var Element = Ext.Element;
+        var gv = this.view;
+        var fakeBody = new Element(document.createElement('div'));
+        fakeBody = fakeBody.child('tr.x-grid-row');
+        // var fakeBody = new Element(Element.fly(this.view.body).child('div.x-grid3-body'));
+        //   .child('div.x-grid-view')
+        // var fakeBody = Ext.get(Element.fly(this.body));
+        var rowTemplate = gv.rowTpl;
+          // rowTpl
+        var cellTemplate = gv.cellTpl;
+          // cellTpl
+        // var tstyle  = 'width:' + gv.getGridInnerWidth() + 'px;';
+        //   var tstyle  = 'width:' + gv.getWidth() + 'px;';
+        var tstyle  = 'width: 20px;';
+        // console.log("20160615", this.fake_row_content);
+        var cells = cellTemplate.apply({value:row_content});
+        var markup = rowTemplate.apply({
+                tstyle: tstyle,
+                cols  : 1,
+                cells : cells,
+                alt   : ''
+            });
+        fakeBody.dom.innerHTML = gv.tpl.apply({rows: markup});
+        // var row = fakeBody.dom.childNodes[0];
+        var rowHeight = fakeBody.getHeight();
+    } else {
+        // use hard-coded experimental value 26
+        var rowHeight = 26 * this.row_height;  
+
+        // var el = new Ext.Element(document.createElement('div'));
+        // el.dom.innerHTML = row_content;
+        // var rowHeight = el.getHeight();
+
+        // var el = document.createElement('div')
+        // var t = document.createTextNode(row_content);
+        // el.appendChild(t);
+        // var rowHeight = el.clientHeight;
+
+        // var row = this.view.getNode(0);
+        // var rowHeight = Ext.get(row).getHeight();
+    }
 
     //~ console.log('rowHeight is ',rowHeight,this,caller);
     //~ this.getView().syncScroll();
     //~ this.getView().initTemplates();
-    var height = this.getView().scroller.getHeight();
+    var height = this.getViewRegion().getSize().height;
+    // var height = this.getHeight();
+    // var height = this.getView().scroller.getHeight();  // 20160628
     //~ console.log('getView().scroller.getHeight() is',this.getView().scroller.getHeight());
     //~ console.log('getInnerHeight() - getFrameHeight() is',
       //~ this.getInnerHeight(), '-',
@@ -4015,10 +4044,11 @@ Ext.define('Lino.GridPanel', {
     //~ this.syncSize();
     //~ var height = this.getInnerHeight() - this.getFrameHeight();
     //~ var height = this.getHeight() - this.getFrameHeight();
-    height -= Ext.getScrollBarWidth(); // leave room for a possible horizontal scrollbar...
+    // height -= Ext.getScrollBarWidth(); // leave room for a possible horizontal scrollbar...
+    // height -= 10; // leave room for a possible horizontal scrollbar...
     //~ height -= this.getView().scrollOffset;
     var ps = Math.floor(height / rowHeight);
-    //~ console.log('20130816 calculatePageSize():',height,'/',rowHeight,'->',ps);
+    // console.log('20160628 calculatePageSize():',height,'/',rowHeight,'->',ps);
     ps -= 1; // leave room for a possible phantom row
     //~ return (ps > 1 ? ps : false);
     if (ps > 1) return ps;
