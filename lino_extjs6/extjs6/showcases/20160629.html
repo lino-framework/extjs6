@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Manipulating DOM elements</title>
+    <script src="../static/ext-6.0.1/ext-all.js"></script>
+        <script>
+            Ext.onReady(function () {
+                // get Ext.dom.Element object
+                var txtFirst = Ext.get("txtFirstName");
+                txtFirst.set({ 'value': 'Steve' });
+
+                Ext.fly('txtLastName').set({ 'value': 'Jobs' });
+
+                console.log(txtFirst);
+            });
+    </script>
+</head>
+<body>
+
+<p>Adapted copy
+of <a href="http://www.extjs-tutorial.com/extjs/working-with-dom">extjs-tutorial.com</a></p>
+
+<ul>
+<li>First Name: <input type="text" id="txtFirstName" class="myclass"/> <br /><br />
+<li>Last Name:  <input type="text" id="txtLastName" class="myclass" /> 
+</ul>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="../lino_extjs6/extjs6/static/ext-6.0.1/ext-all.js"></script>
+        <script>
+            Ext.onReady(function () {
+                // get Ext.dom.Element object
+                var txtFirst = Ext.get("txtFirstName");
+                txtFirst.set({ 'value': 'Steve' });
+
+                Ext.fly('txtLastName').set({ 'value': 'Jobs' });
+
+                console.log(txtFirst);
+            });
+    </script>
+</head>
+<body>
+
+
+  First Name: <input type="text" id="txtFirstName" class="myclass"/> <br /><br />
+  Last Name:  <input type="text" id="txtLastName" class="myclass" /> 
+</body>
+</html>
