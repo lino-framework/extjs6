@@ -815,7 +815,8 @@ Ext.define('Lino.Viewport', {
       //this.loadMask = new Ext.getBody().mask("{{_('Please wait...')}}");
       //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
     },this);
-        this.callSuper();
+        // this.callSuper();  // 20160630
+        this.callParent();  // 20160630
   }
   ,refresh : function() {
       var caller = this;
@@ -1439,7 +1440,8 @@ Ext.define('Lino.selection.CellModel', {
                       //~ console.log('home',newCell);
                       break;
                   }else if(e.ctrlKey){
-                      var t = g.getTopToolbar();
+                      // var t = g.getTopToolbar();
+                      var t = this.grid.paging_toolbar;
                       var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
                       if (activePage > 1) {
                           e.stopEvent();
@@ -1458,7 +1460,8 @@ Ext.define('Lino.selection.CellModel', {
                       //~ console.log('end',newCell);
                       break;
                   }else if(e.ctrlKey){
-                      var t = g.getTopToolbar();
+                      var t = this.grid.paging_toolbar;
+                      // var t = g.getTopToolbar();
                       var d = t.getPageData();
                       if (d.activePage < d.pages) {
                           e.stopEvent();
@@ -2934,9 +2937,11 @@ Ext.define('Lino.FormPanel', {
     //~ if (this.master_panel) {
         //~ this.set_base_params(this.master_panel.get_master_params());
     //~ }
+
     //  Edited by HKC
     //Lino.FormPanel.superclass.initComponent.call(this);
-      this.callSuper();
+    // this.callSuper();  // 20160630
+    this.callParent();  // 20160630
 
     // this.on('show',
     //         function(){ this.init_focus();},
@@ -3187,7 +3192,8 @@ Ext.define('Lino.FormPanel', {
       if (da) {
           //~ console.log('20120528 disabled_actions =',da,this.getBottomToolbar());
           //~ 20121016 this.getBottomToolbar().items.each(function(item,index,length){
-          //var tb = this.getTopToolbar();
+          // var tb = this.tbar;
+          // var tb = this.getTopToolbar();
           var tb = this.getDockedItems()[0];
           if (tb) tb.items.each(function(item,index,length){
               //~ console.log('20120528 ',item.itemId,'-->',da[item.itemId]);
@@ -3489,10 +3495,15 @@ Ext.define('Lino.GridStore', {
         } 
         options.params.{{constants.URL_PARAM_LIMIT}} = ps;
       
-        //this.grid_panel.getTopToolbar().pageSize =  ps;
-        var toptoolbar = this.grid_panel.getDockedComponent('toptoolbar');
-        if (toptoolbar){
-            toptoolbar.pageSize =  ps;
+        if (this.grid_panel.paging_toolbar) {
+            this.grid_panel.paging_toolbar.pageSize =  ps;
+            console.log(
+                "20160630 GridStore.load() tbar ok", 
+                this.grid_panel);
+        } else {
+            console.log(
+                "20160630 GridStore.load() without tbar?!", 
+                this.grid_panel);
         }
         if (options.params.{{constants.URL_PARAM_START}} == undefined)
             // if (start != -1) 
@@ -3766,7 +3777,7 @@ Ext.define('Lino.GridPanel', {
           //~ this.bbar = actions.bbar;
       }
       
-      this.tbar = Ext.create('Ext.PagingToolbar',{
+      this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
         store: this.store, 
         prependButtons: true, 
         //~ pageSize: this.page_length, 
@@ -3837,11 +3848,15 @@ Ext.define('Lino.GridPanel', {
         this.on('rowcontextmenu', Lino.row_context_menu, this);
     }
     this.on('celldblclick' , this.on_celldblclick , this);
+
     //~ this.on('contextmenu', Lino.grid_context_menu, this);
-      Lino.GridPanel.superclass.initComponent.call(this);
+      // Lino.GridPanel.superclass.initComponent.call(this);
       //this.callSuper();
+    this.callParent(); // 20160630
     
     delete this.cell_edit;
+
+
     
   },
   
@@ -3854,10 +3869,8 @@ Ext.define('Lino.GridPanel', {
   
   get_status : function(){
     var st = { base_params : this.get_base_params()};
-    if (!this.hide_top_toolbar) {
-        //Edited by HKC
-        //st.current_page = this.getTopToolbar().current;
-        st.current_page = this.getDockedComponent('toptoolbar');
+    if (this.paging_toolbar) {
+        st.current_page = this.paging_toolbar.current;
     }
     st.param_values = this.status_param_values;
     //~ console.log("20120213 GridPanel.get_status",st);
@@ -3882,11 +3895,11 @@ Ext.define('Lino.GridPanel', {
             this.toggle_params_panel_btn.toggle(status.show_params_panel);
         }
     }
-    if (!this.hide_top_toolbar) {
+    if (this.paging_toolbar) {
       //~ console.log("20120213 GridPanel.getTopToolbar().changePage",
           //~ status.current_page || 1);
-      //  Edited by HKC
-      //this.getTopToolbar().changePage(status.current_page || 1);
+      // this.paging_toolbar.changePage(status.current_page || 1);
+      this.paging_toolbar.store.loadPage(status.current_page || 1);
       //  var toptoolbar = this.getDockedComponent('toptoolbar');
       //  toptoolbar.changePage(status.current_page || 1);
     }
@@ -3988,7 +4001,7 @@ Ext.define('Lino.GridPanel', {
       //~ this.getView().initTemplates();
 
 
-    var height = this.getViewRegion().getSize().height;
+    // var height = this.getViewRegion().getSize().height;
     // var height = this.getHeight();
     // var height = this.getView().scroller.getHeight();  // 20160628
     //~ console.log('getView().scroller.getHeight() is',this.getView().scroller.getHeight());
@@ -4152,8 +4165,7 @@ Ext.define('Lino.GridPanel', {
     this.quick_search_text = value;
     this.set_base_param('{{constants.URL_PARAM_FILTER}}',value); 
     //~ this.getTopToolbar().changePage(1);
-    //  HKC disable this.getTopToolbar()
-    //this.getTopToolbar().moveFirst();
+    this.paging_toolbar.moveFirst();
     //~ this.refresh();
     return true;
   },
@@ -4161,7 +4173,7 @@ Ext.define('Lino.GridPanel', {
   search_change : function(field,oldValue,newValue) {
     //~ console.log('search_change',field.getValue(),oldValue,newValue)
     this.set_base_param('{{constants.URL_PARAM_FILTER}}',field.getValue()); 
-    this.getTopToolbar().moveFirst();
+    this.paging_toolbar.moveFirst();
     //~ this.refresh();
   },
   
@@ -4411,20 +4423,23 @@ Ext.define('Lino.GridPanel', {
     //~ this.my_load_mask = new Ext.LoadMask(this.getEl(), {
         //~ msg:'$_("Please wait...")',
         //~ store:this.store});
-    //  Edited by HKC
-    //var tbar = this.getTopToolbar();
-      var tbar = this.getDockedComponent('toptoolbar');
-    // tbar.on('change',function() {this.getView().focusRow(1);},this);
-    // tbar.on('change',function() {this.getSelectionModel().selectFirstRow();this.getView().mainBody.focus();},this);
-    // tbar.on('change',function() {this.getView().mainBody.focus();},this);
-    // tbar.on('change',function() {this.getView().focusRow(1);},this);
-    this.nav = new Ext.KeyNav(this.getEl(),{
-      pageUp: function() {tbar.movePrevious(); },
-      pageDown: function() {tbar.moveNext(); },
-      home: function() {tbar.moveFirst(); },
-      end: function() {tbar.moveLast(); },
-      scope: this
-    });
+    if (this.paging_toolbar) {
+        var tbar = this.paging_toolbar;
+        // //  Edited by HKC
+        // var tbar = this.getDockedComponent('toptoolbar');
+
+        // tbar.on('change',function() {this.getView().focusRow(1);},this);
+        // tbar.on('change',function() {this.getSelectionModel().selectFirstRow();this.getView().mainBody.focus();},this);
+        // tbar.on('change',function() {this.getView().mainBody.focus();},this);
+        // tbar.on('change',function() {this.getView().focusRow(1);},this);
+        this.nav = new Ext.KeyNav(this.getEl(),{
+          pageUp: function() {tbar.movePrevious(); },
+          pageDown: function() {tbar.moveNext(); },
+          home: function() {tbar.moveFirst(); },
+          end: function() {tbar.moveLast(); },
+          scope: this
+        });
+    }
 
   },
   after_delete : function() {
@@ -4567,8 +4582,9 @@ Ext.define('Lino.ComboBox', {
   initComponent : function(){
       this.contextParams = {};
       //~ Ext.form.ComboBox.initComponent(this);
-      Lino.ComboBox.superclass.initComponent.call(this);
-      //this.callSuper(arguments);
+      // Lino.ComboBox.superclass.initComponent.call(this);
+      // this.callSuper(arguments);
+      this.callParent();  // 20160630
   },
 
     updateValue: function() {
@@ -4934,7 +4950,8 @@ Ext.define('Lino.Window', {
   },
   initComponent : function() {
     this.main_item.init_containing_window(this);
-    Lino.Window.superclass.initComponent.call(this);
+    this.callParent();  // 20160630
+    // Lino.Window.superclass.initComponent.call(this);
     //this.callSuper(arguments);
   
   },
