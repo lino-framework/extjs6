@@ -1195,17 +1195,7 @@ class DisplayElement(FieldElement):
         return self.field._lino_atomizer.format_value(ar, v)
 
 
-class BooleanMixin(object):
-    def format_sum(self, ar, sums, i):
-        return E.b(str(sums[self.name]))
-
-    def value2num(self, v):
-        if v:
-            return 1
-        return 0
-
-
-class BooleanDisplayElement(BooleanMixin, DisplayElement):
+class BooleanDisplayElement(DisplayElement):
     preferred_width = 20
     preferred_height = 1
 
@@ -1216,7 +1206,7 @@ class BooleanDisplayElement(BooleanMixin, DisplayElement):
         FieldElement.__init__(self, *args, **kw)
 
 
-class BooleanFieldElement(BooleanMixin, FieldElement):
+class BooleanFieldElement(FieldElement):
     value_template = "Ext.create('Ext.form.Checkbox',%s)"
     # ~ xtype = 'checkbox'
     # ~ data_type = 'boolean'
