@@ -3496,7 +3496,8 @@ Ext.define('Lino.GridStore', {
         options.params.{{constants.URL_PARAM_LIMIT}} = ps;
       
         if (this.grid_panel.paging_toolbar) {
-            this.grid_panel.paging_toolbar.pageSize =  ps;
+            // this.grid_panel.paging_toolbar.pageSize =  ps;
+            this.grid_panel.paging_toolbar.store.pageSize =  ps;
             console.log(
                 "20160630 GridStore.load() tbar ok", 
                 this.grid_panel);
@@ -3512,7 +3513,9 @@ Ext.define('Lino.GridStore', {
       
         // console.log("20141108 GridStore.load() ", options.params);
     }
-      
+    // this.grid_panel.paging_toolbar.store.load(options.params);
+    //     this.grid_panel.paging_toolbar.store.proxy.config.reader.limit = options.limit;
+    //     this.grid_panel.paging_toolbar.store.proxy.config.reader.start = options.start;
     this.grid_panel.add_param_values(options.params);
     //~ Lino.insert_subst_user(options.params);
     //~ console.log("20120814 GridStore.load()",options.params,this.baseParams);
