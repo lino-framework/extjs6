@@ -3496,11 +3496,11 @@ Ext.define('Lino.GridStore', {
         options.params.{{constants.URL_PARAM_LIMIT}} = ps;
       
         if (this.grid_panel.paging_toolbar) {
-            // this.grid_panel.paging_toolbar.pageSize =  ps;
-            this.grid_panel.paging_toolbar.store.pageSize =  ps;
-            console.log(
-                "20160630 GridStore.load() tbar ok", 
-                this.grid_panel);
+            // this.grid_panel.paging_toolbar.store.pageSize =  ps;
+            this.grid_panel.paging_toolbar.store.setConfig('pageSize', ps);
+            // console.log(
+            //     "20160630 GridStore.load() tbar ok", 
+            //     this.grid_panel);
         } else {
             console.log(
                 "20160630 GridStore.load() without tbar?!", 
@@ -3783,8 +3783,7 @@ Ext.define('Lino.GridPanel', {
       this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
         store: this.store, 
         prependButtons: true, 
-        //~ pageSize: this.page_length, 
-        pageSize: 1, 
+        // pageSize: 1, 
         displayInfo: true, 
         beforePageText: "{{_('Page')}}",
         afterPageText: "{{_('of {0}')}}",

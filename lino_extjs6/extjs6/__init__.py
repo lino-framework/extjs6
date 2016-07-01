@@ -31,9 +31,14 @@ from django.utils.translation import ugettext_lazy as _
 class Plugin(Plugin):
     """Extends :class:`lino.core.plugin.Plugin`.
 
+    This plugin automatically disables the :mod:`lino.modlib.tinymce`
+    plugin.
+
     """
 
     needs_plugins = ['lino.modlib.bootstrap3']
+
+    disables_plugins = ['tinymce']
 
     enter_submits_form = False
     """Whether the :kbd:`ENTER` key (or :kbd:`CTRL+ENTER` when in a
