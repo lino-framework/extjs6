@@ -659,6 +659,7 @@ Ext.define('Lino.MainPanel',{
     return p;
   }
   ,add_params_panel : function (tbar) {
+      // console.log("20160701 Lino.MainPanel.add_params_panel()")
       if (this.params_panel) {
         //~  20130923b
         //~ this.params_panel.autoHeight = true; // 20130924
@@ -3054,8 +3055,8 @@ Ext.define('Lino.FormPanel', {
     Ext.apply(this.base_params,p);
     if (this.record_selector) {
         var store = this.record_selector.getStore();
-        for (k in p) store.setBaseParam(k,p[k]);
-        // for (k in p) store.getProxy().setExtraParam(k,p[k]);
+        // for (k in p) store.setBaseParam(k,p[k]);
+        for (k in p) store.getProxy().setExtraParam(k,p[k]);
         delete this.record_selector.lastQuery;
         //~ console.log("20120725 record_selector.setBaseParam",p)
     }
@@ -3499,6 +3500,7 @@ Ext.define('Lino.GridStore', {
       
         if (this.grid_panel.paging_toolbar) {
             // this.grid_panel.paging_toolbar.store.pageSize =  ps;
+            // this.pageSize = ps;
             this.setConfig('pageSize', ps);
             // this.grid_panel.paging_toolbar.store.setConfig('pageSize', ps);
             // console.log(
@@ -3509,10 +3511,14 @@ Ext.define('Lino.GridStore', {
                 "20160630 GridStore.load() without tbar?!", 
                 this.grid_panel);
         }
-        if (options.params.{{constants.URL_PARAM_START}} == undefined)
+        // if (options.params.{{constants.URL_PARAM_START}} == undefined)
+        //     // if (start != -1) 
+        //     //     start = this.grid_panel.getTopToolbar().cursor
+        //     options.params.{{constants.URL_PARAM_START}} = start;
+        if (options.{{constants.URL_PARAM_START}} == undefined)
             // if (start != -1) 
             //     start = this.grid_panel.getTopToolbar().cursor
-            options.params.{{constants.URL_PARAM_START}} = start;
+            options.{{constants.URL_PARAM_START}} = start;
       
         // console.log("20141108 GridStore.load() ", options.params);
     }
@@ -3589,8 +3595,11 @@ Ext.define('Lino.GridPanel', {
           config.is_main_window = config.p.is_main_window;
           config.params_panel = config.p.params_panel;
           }
-    // Lino.GridPanel.superclass.constructor.call(this,config);
-    this.callSuper(config);
+    /* Very strange... here we cannot use callSuper()... otherwise
+     * `this` is not passed correctly... 
+     */ 
+    Lino.GridPanel.superclass.constructor.call(this, config);
+    // this.callSuper(config);
     
     //~ if (this.containing_window) {
         //~ console.log("20111206 install refresh");
@@ -4132,8 +4141,8 @@ Ext.define('Lino.GridPanel', {
   },
   set_base_params : function(p) {
     // console.log('20130911 GridPanel.set_base_params',p)
-    for (k in p) this.store.setBaseParam(k,p[k]);
-    // for (k in p) this.store.getProxy().setExtraParam(k,p[k]);
+    // for (k in p) this.store.setBaseParam(k,p[k]);
+    for (k in p) this.store.getProxy().setExtraParam(k,p[k]);
     //~ this.store.baseParams = p;
     if (this.quick_search_field)
       this.quick_search_field.setValue(p.query || "");
@@ -4145,9 +4154,9 @@ Ext.define('Lino.GridPanel', {
       Lino.insert_subst_user(this.store.baseParams);
   },
   set_base_param : function(k,v) {
-      this.store.setBaseParam(k,v);
-      // HKC (undone by LS 20160701)
-      // this.store.getProxy().setExtraParam(k, v);
+      // HKC
+      // this.store.setBaseParam(k,v);
+      this.store.getProxy().setExtraParam(k, v);
       // var options = {};
       // this.store.load(options);
   },
@@ -4676,8 +4685,8 @@ Ext.define('Lino.ComboBox', {
                   }else{
                       var q = this.allQuery;
                       this.lastQuery = q;
-                      this.store.setBaseParam(this.queryParam, q);
-                      // this.store.getProxy().setExtraParam(this.queryParam, q);
+                      // this.store.setBaseParam(this.queryParam, q);
+                      this.store.getProxy().setExtraParam(this.queryParam, q);
                       params = this.getParams(q);
                   }
                   //~ if (this.name == 'birth_country')
@@ -4707,9 +4716,9 @@ Ext.define('Lino.ComboBox', {
           this.hiddenField.value = v;
       }
       this.value = v; // needed for grid.afteredit
-      // Ext.form.ComboBox.superclass.setValue.call(this, text);
-      //this.callSuper(text);
-      this.callParent(arguments);  // 20160701
+      Ext.form.ComboBox.superclass.setValue.call(this, text);
+      // this.callSuper(text);
+      // this.callParent(arguments);  // 20160701
   },
   
   getParams : function(q){
@@ -4954,10 +4963,9 @@ Ext.define('Lino.Window', {
   },
   initComponent : function() {
     this.main_item.init_containing_window(this);
-    this.callSuper();  // 20160630
+    Lino.Window.superclass.initComponent.call(this);
     // this.callParent();  // 20160630
-    // Lino.Window.superclass.initComponent.call(this);
-    //this.callSuper(arguments);
+    // this.callSuper(arguments);
   
   },
   hide : function() { 
