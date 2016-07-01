@@ -815,8 +815,8 @@ Ext.define('Lino.Viewport', {
       //this.loadMask = new Ext.getBody().mask("{{_('Please wait...')}}");
       //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
     },this);
-        // this.callSuper();  // 20160630
-        this.callParent();  // 20160630
+        this.callSuper();  // 20160630
+        // this.callParent();  // 20160630
   }
   ,refresh : function() {
       var caller = this;
@@ -1442,7 +1442,7 @@ Ext.define('Lino.selection.CellModel', {
                   }else if(e.ctrlKey){
                       // var t = g.getTopToolbar();
                       var t = this.grid.paging_toolbar;
-                      var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
+                      var activePage = Math.ceil((t.cursor + t.store.pageSize) / t.store.pageSize);
                       if (activePage > 1) {
                           e.stopEvent();
                           t.moveFirst();
@@ -2789,7 +2789,7 @@ Ext.define('Lino.form.Panel', {
 //Lino.FormPanel = Ext.extend(Lino.FormPanel,{
 // https://www.sencha.com/forum/showthread.php?287211-extjs5-amp-initComponent&p=1050308&viewfull=1#post1050308
 Ext.define('Lino.FormPanel', {
-    extend : 'Ext.form.FormPanel',
+    extend : 'Ext.form.Panel',
      mixins: [
          'Lino.PanelMixin',
          'Lino.MainPanel'
@@ -2940,8 +2940,8 @@ Ext.define('Lino.FormPanel', {
 
     //  Edited by HKC
     //Lino.FormPanel.superclass.initComponent.call(this);
-    // this.callSuper();  // 20160630
-    this.callParent();  // 20160630
+    this.callSuper();  // 20160630
+    // this.callParent();  // 20160630
 
     // this.on('show',
     //         function(){ this.init_focus();},
@@ -2991,7 +2991,7 @@ Ext.define('Lino.FormPanel', {
         }
       st.record_id = this.get_current_record().id;
       // 20140917 : get_status must not store the whole data_record
-      // because that would prevent the form to actually reload
+      // because that would prevent the form from actually reloading
       // when set_status is called after a child window closed.
 
       var tp = this.items.get(0);
@@ -3054,8 +3054,8 @@ Ext.define('Lino.FormPanel', {
     Ext.apply(this.base_params,p);
     if (this.record_selector) {
         var store = this.record_selector.getStore();
-        //for (k in p) store.setBaseParam(k,p[k]);
-        for (k in p) store.getProxy().setExtraParam(k,p[k]);
+        for (k in p) store.setBaseParam(k,p[k]);
+        // for (k in p) store.getProxy().setExtraParam(k,p[k]);
         delete this.record_selector.lastQuery;
         //~ console.log("20120725 record_selector.setBaseParam",p)
     }
@@ -3471,8 +3471,10 @@ Ext.define('Lino.GridStore', {
     extend : 'Ext.data.JsonStore',
     //extend : 'Ext.data.ArrayStore',
   autoLoad: false
+  ,pageSize: 1
   ,load: function(options) {
     //~ foo.bar = baz; // 20120213
+    console.log("20160701 GridStore.load()", this, options);
     if (!options) options = {};
     if (!options.params) options.params = {};
     options.params.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
@@ -3490,17 +3492,18 @@ Ext.define('Lino.GridStore', {
         var ps = this.grid_panel.calculatePageSize();
         // var ps = 15;
         if (!ps) {
-          // console.log("GridStore.load() failed to calculate pagesize");
+          console.log("GridStore.load() failed to calculate pagesize");
           return false;
         } 
         options.params.{{constants.URL_PARAM_LIMIT}} = ps;
       
         if (this.grid_panel.paging_toolbar) {
-            // this.grid_panel.paging_toolbar.pageSize =  ps;
-            this.grid_panel.paging_toolbar.store.pageSize =  ps;
-            console.log(
-                "20160630 GridStore.load() tbar ok", 
-                this.grid_panel);
+            // this.grid_panel.paging_toolbar.store.pageSize =  ps;
+            this.setConfig('pageSize', ps);
+            // this.grid_panel.paging_toolbar.store.setConfig('pageSize', ps);
+            // console.log(
+            //     "20160630 GridStore.load() tbar ok", 
+            //     this.grid_panel);
         } else {
             console.log(
                 "20160630 GridStore.load() without tbar?!", 
@@ -3518,7 +3521,7 @@ Ext.define('Lino.GridStore', {
     //     this.grid_panel.paging_toolbar.store.proxy.config.reader.start = options.start;
     this.grid_panel.add_param_values(options.params);
     //~ Lino.insert_subst_user(options.params);
-    //~ console.log("20120814 GridStore.load()",options.params,this.baseParams);
+    // console.log("20160701 GridStore.load()", options.params, this.baseParams);
     //return Lino.GridStore.superclass.load.call(this, options);
     return this.callSuper(arguments);
   }
@@ -3682,8 +3685,9 @@ Ext.define('Lino.GridPanel', {
       
     var this_ = this;
     //~ var grid = this;
-    this.store.on('load', function() {
-        //~ console.log('20120814 GridStore.on(load)',this_.store);
+    this.store.on('load', function(records, successful, operation, eOpts) {
+        console.log('20160701 GridStore.on(load)',
+                    this, records, successful, operation, eOpts);
         // this_.set_param_values(this_.store.reader.arrayData.param_values);
         // console.log(20151221, this_.store.getProxy().getReader());
         this_.set_param_values(this_.store.getProxy().getReader().rawData.param_values);
@@ -3717,8 +3721,6 @@ Ext.define('Lino.GridPanel', {
         //~ this.quick_search_field.focus(); // 20121024
       }, this
     );
-
-
 
     var actions = Lino.build_buttons(this, this.ls_bbar_actions);
     //var actions;
@@ -3783,8 +3785,7 @@ Ext.define('Lino.GridPanel', {
       this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
         store: this.store, 
         prependButtons: true, 
-        //~ pageSize: this.page_length, 
-        pageSize: 1, 
+        // pageSize: 1, 
         displayInfo: true, 
         beforePageText: "{{_('Page')}}",
         afterPageText: "{{_('of {0}')}}",
@@ -3854,8 +3855,8 @@ Ext.define('Lino.GridPanel', {
 
     //~ this.on('contextmenu', Lino.grid_context_menu, this);
       // Lino.GridPanel.superclass.initComponent.call(this);
-      //this.callSuper();
-    this.callParent(); // 20160630
+    this.callSuper();
+    // this.callParent(); // 20160630
     
     delete this.cell_edit;
 
@@ -4130,9 +4131,9 @@ Ext.define('Lino.GridPanel', {
     return p;
   },
   set_base_params : function(p) {
-    //~ console.log('20130911 GridPanel.set_base_params',p)
-    //for (k in p) this.store.setBaseParam(k,p[k]);
-    for (k in p) this.store.getProxy().setExtraParam(k,p[k]);
+    // console.log('20130911 GridPanel.set_base_params',p)
+    for (k in p) this.store.setBaseParam(k,p[k]);
+    // for (k in p) this.store.getProxy().setExtraParam(k,p[k]);
     //~ this.store.baseParams = p;
     if (this.quick_search_field)
       this.quick_search_field.setValue(p.query || "");
@@ -4144,11 +4145,11 @@ Ext.define('Lino.GridPanel', {
       Lino.insert_subst_user(this.store.baseParams);
   },
   set_base_param : function(k,v) {
-    //  HKC
-    //this.store.setBaseParam(k,v);
-      this.store.getProxy().setExtraParam(k, v);
-      var options = {};
-      this.store.load(options);
+      this.store.setBaseParam(k,v);
+      // HKC (undone by LS 20160701)
+      // this.store.getProxy().setExtraParam(k, v);
+      // var options = {};
+      // this.store.load(options);
   },
   
   //~ get_permalink_params : function() {
@@ -4586,8 +4587,8 @@ Ext.define('Lino.ComboBox', {
       this.contextParams = {};
       //~ Ext.form.ComboBox.initComponent(this);
       // Lino.ComboBox.superclass.initComponent.call(this);
-      // this.callSuper(arguments);
-      this.callParent();  // 20160630
+      this.callSuper(arguments);
+      // this.callParent();  // 20160630
   },
 
     updateValue: function() {
@@ -4675,8 +4676,8 @@ Ext.define('Lino.ComboBox', {
                   }else{
                       var q = this.allQuery;
                       this.lastQuery = q;
-                      //this.store.setBaseParam(this.queryParam, q);
-                      this.store.getProxy().setExtraParam(this.queryParam, q);
+                      this.store.setBaseParam(this.queryParam, q);
+                      // this.store.getProxy().setExtraParam(this.queryParam, q);
                       params = this.getParams(q);
                   }
                   //~ if (this.name == 'birth_country')
@@ -4706,9 +4707,9 @@ Ext.define('Lino.ComboBox', {
           this.hiddenField.value = v;
       }
       this.value = v; // needed for grid.afteredit
-      Ext.form.ComboBox.superclass.setValue.call(this, text);
+      // Ext.form.ComboBox.superclass.setValue.call(this, text);
       //this.callSuper(text);
-      //this.callParent(text);
+      this.callParent(arguments);  // 20160701
   },
   
   getParams : function(q){
@@ -4953,7 +4954,8 @@ Ext.define('Lino.Window', {
   },
   initComponent : function() {
     this.main_item.init_containing_window(this);
-    this.callParent();  // 20160630
+    this.callSuper();  // 20160630
+    // this.callParent();  // 20160630
     // Lino.Window.superclass.initComponent.call(this);
     //this.callSuper(arguments);
   
