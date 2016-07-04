@@ -1298,7 +1298,8 @@ Lino.file_field_handler = function(panel,config) {
 Ext.define('Lino_Panel', {
     override : 'Ext.panel.Panel',
 
-    bodyStyle: 'padding:0px;width:0px;'
+    // bodyStyle: 'padding:0px;width:0px;',
+    bodyStyle : 'background: #d3e1f1;',
 });
 
 Lino.VBorderPanel = Ext.extend(Ext.Panel,{
@@ -2816,8 +2817,8 @@ Ext.define('Lino.FormPanel', {
 
     config.trackResetOnLoad = true;
 
-    //Lino.FormPanel.superclass.constructor.call(this, config);
-      this.callSuper(arguments);
+    Lino.FormPanel.superclass.constructor.call(this, config);
+      // this.callSuper(arguments);
 
     //~ this.set_base_param('$URL_PARAM_FILTER',null); // 20111018
     //~ this.set_base_param('$URL_PARAM_FILTER',''); // 20111018
@@ -2940,8 +2941,8 @@ Ext.define('Lino.FormPanel', {
     //~ }
 
     //  Edited by HKC
-    //Lino.FormPanel.superclass.initComponent.call(this);
-    this.callSuper();  // 20160630
+    Lino.FormPanel.superclass.initComponent.call(this);
+    // this.callSuper();  // 20160630
     // this.callParent();  // 20160630
 
     // this.on('show',
@@ -3475,7 +3476,7 @@ Ext.define('Lino.GridStore', {
   ,pageSize: 1
   ,load: function(options) {
     //~ foo.bar = baz; // 20120213
-    console.log("20160701 GridStore.load()", this, options);
+    // console.log("20160701 GridStore.load()", this, options);
     if (!options) options = {};
     if (!options.params) options.params = {};
     options.params.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
@@ -3695,8 +3696,8 @@ Ext.define('Lino.GridPanel', {
     var this_ = this;
     //~ var grid = this;
     this.store.on('load', function(records, successful, operation, eOpts) {
-        console.log('20160701 GridStore.on(load)',
-                    this, records, successful, operation, eOpts);
+        // console.log('20160701 GridStore.on(load)',
+        //             this, records, successful, operation, eOpts);
         // this_.set_param_values(this_.store.reader.arrayData.param_values);
         // console.log(20151221, this_.store.getProxy().getReader());
         this_.set_param_values(this_.store.getProxy().getReader().rawData.param_values);
