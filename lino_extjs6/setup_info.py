@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2015 Luc Saffre
+# Copyright 2015-2016 Luc Saffre
 # License: GPL (see file COPYING for details)
 
 # ~ Note that this module may not have a docstring because any
@@ -16,7 +16,7 @@ from __future__ import unicode_literals
 SETUP_INFO = dict(
     name='lino_extjs6',
     version='0.0.1',
-    install_requires=['lino'],
+    install_requires=['lino', 'lino_noi'],
     tests_require=[],
     test_suite='tests',
 
