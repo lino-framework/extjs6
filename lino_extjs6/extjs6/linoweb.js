@@ -2568,6 +2568,7 @@ Ext.define('Lino.HtmlBoxPanel', {
                 this.format_data(record.data[this.name]) : '';
             // console.log('20140917 HtmlBox.refresh()',
             //             this.name, record.data.LinksByHuman);
+            // TODO: Check whether this is optimal. In ExtJS3 we updated the el, not box.body
             box.body.update(newcontent);
         // } else {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
