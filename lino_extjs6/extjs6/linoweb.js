@@ -2882,16 +2882,16 @@ Ext.define('Lino.FormPanel', {
         this.tbar = this.tbar.concat([this.record_selector]);
 
         this.tbar = this.tbar.concat([
-          this.first = Ext.create('Ext.toolbar.Toolbar',{
+            this.first = Ext.create('Ext.button.Button',{
               tooltip:"{{_('First')}}",disabled:true,
               handler:this.moveFirst,scope:this,iconCls:'x-tbar-page-first'}),
-          this.prev = Ext.create('Ext.toolbar.Toolbar',{
+          this.prev = Ext.create('Ext.button.Button',{
               tooltip:"{{_('Previous')}}",disabled:true,
               handler:this.movePrev,scope:this,iconCls:'x-tbar-page-prev'}),
-          this.next = Ext.create('Ext.toolbar.Toolbar',{
+          this.next = Ext.create('Ext.button.Button',{
               tooltip:"{{_('Next')}}",disabled:true,
               handler:this.moveNext,scope:this,iconCls:'x-tbar-page-next'}),
-          this.last = Ext.create('Ext.toolbar.Toolbar',{
+          this.last = Ext.create('Ext.button.Button',{
               tooltip:"{{_('Last')}}",disabled:true,
               handler:this.moveLast,scope:this,iconCls:'x-tbar-page-last'})
         ]);
