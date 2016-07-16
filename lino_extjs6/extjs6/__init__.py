@@ -38,7 +38,12 @@ class Plugin(Plugin):
 
     needs_plugins = ['lino.modlib.bootstrap3']
 
-    disables_plugins = ['tinymce']
+    disables_plugins = ['tinymce', 'extensible']
+    """These two plugins don't work with ExtJS6 and therefore will
+    automatically disabled if you set :attr:`default_ui` to
+    :mod:`lino_extjs6.extjs6`.
+
+    """
 
     enter_submits_form = False
     """Whether the :kbd:`ENTER` key (or :kbd:`CTRL+ENTER` when in a
