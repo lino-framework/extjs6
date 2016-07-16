@@ -44,6 +44,7 @@ from lino.core import layouts
 from lino.core import fields
 from lino.core.actions import Permittable
 from lino.core import constants
+from lino.core.gfks import GenericRelation
 
 from lino.utils.ranges import constrain
 from lino.utils import jsgen
@@ -1532,7 +1533,7 @@ class Wrapper(VisibleComponent):
 
     def __init__(self, e, **kw):
         # HKC : remove this config to get labelAlign top works
-        # kw.update(layout='form')
+        kw.update(layout='form')
         if not isinstance(e, TextFieldElement):
             kw.update(autoHeight=True)
         kw.update(labelAlign=e.parent.label_align)
@@ -1732,7 +1733,9 @@ class Panel(Container):
                 if isinstance(e, TextFieldElement) and e.format == 'html':
                     # no need to wrap them since they are Panels
                     return e
-            return Wrapper(e)
+            # Disable Wrapper usage to avoid having an layout field issue. (#1021)
+            # return Wrapper(e)
+            return e
 
         self.elements = [wrap(e) for e in self.elements]
 
@@ -2100,6 +2103,9 @@ def create_layout_element(lh, name, **kw):
         return None
 
     if isinstance(de, DummyPanel):
+        return None
+
+    if isinstance(de, GenericRelation):
         return None
 
     if isinstance(de, fields.DummyField):

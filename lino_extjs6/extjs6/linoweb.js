@@ -3495,7 +3495,7 @@ Ext.define('Lino.GridStore', {
         var ps = this.grid_panel.calculatePageSize();
         // var ps = 15;
         if (!ps) {
-          console.log("GridStore.load() failed to calculate pagesize");
+          // console.log("GridStore.load() failed to calculate pagesize");
           return false;
         } 
         options.params.{{constants.URL_PARAM_LIMIT}} = ps;
@@ -4867,7 +4867,7 @@ Lino.TwinCombo.prototype.onTrigger1Click = Ext.form.ComboBox.prototype.onTrigger
 Ext.define('Lino.SimpleRemoteComboFieldElement',{
     extend : 'Lino.RemoteComboFieldElement',
   displayField: 'value',
-  valueField: null,
+  valueField: undefined,
   forceSelection: false
 });
 

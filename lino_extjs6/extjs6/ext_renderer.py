@@ -1368,7 +1368,7 @@ class ExtRenderer(HtmlRenderer):
             if ws:
                 windowConfig.update(
                     # ~ width=ws[0],
-                    width=js_code('Lino.chars2width(%d)' % ws[0]),
+                    # width=js_code('Lino.chars2width(%d)' % ws[0]),
                     maximized=False,
                     draggable=True,
                     maximizable=True,
