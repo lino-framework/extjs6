@@ -1,5 +1,5 @@
 /*
- Copyright 2009-2015 Luc Saffre
+ Copyright 2009-2016 Luc Saffre
  License: BSD (see file COPYING for details)
 */
 
@@ -1371,199 +1371,7 @@ Lino.VBorderPanel = Ext.extend(Ext.Panel,{
 });
 
 
-/*
-  modifications to the standard behaviour of a CellSelectionModel:
-  
-*/
-    // Edited by HKC (Migratio to Exjts6)
-    // CellSelectionModel does not exist any more. replaced by Ext.selection.CellModel
-//Ext.override(Ext.grid.CellSelectionModel, {
-//Ext.override(Ext.selection.CellModel, {
-Ext.define('Lino.selection.CellModel', {
-    override : 'Ext.selection.CellModel',
-//~ var dummy = {
 
-    handleKeyDown : function(e){
-        /* removed because F2 wouldn't pass
-        if(!e.isNavKeyPress()){
-            return;
-        }
-        */
-        //~ console.log('handleKeyDown',e)
-        var k = e.getKey(),
-            g = this.grid,
-            s = this.selection,
-            sm = this,
-            walk = function(row, col, step){
-                return g.walkCells(
-                    row,
-                    col,
-                    step,
-                    g.isEditor && g.editing ? sm.acceptsNav : sm.isSelectable,
-                    sm
-                );
-            },
-            cell, newCell, r, c, ae;
-
-        switch(k){
-            case e.ESC:
-            case e.PAGE_UP:
-            case e.PAGE_DOWN:
-                break;
-            default:
-                // e.stopEvent(); // removed because Browser keys like Alt-Home, Ctrl-R wouldn't work
-                break;
-        }
-
-        if(!s){
-            cell = walk(0, 0, 1);
-            if(cell){
-                this.select(cell[0], cell[1]);
-            }
-            return;
-        }
-
-        cell = s.cell;
-        r = cell[0];
-        c = cell[1];
-
-        switch(k){
-            case e.TAB:
-                if(e.shiftKey){
-                    newCell = walk(r, c - 1, -1);
-                }else{
-                    newCell = walk(r, c + 1, 1);
-                }
-                break;
-            case e.HOME:
-                if (! (g.isEditor && g.editing)) {
-                  if (!e.hasModifier()){
-                      newCell = [r, 0];
-                      //~ console.log('home',newCell);
-                      break;
-                  }else if(e.ctrlKey){
-                      // var t = g.getTopToolbar();
-                      var t = this.grid.paging_toolbar;
-                      var activePage = Math.ceil((t.cursor + t.store.pageSize) / t.store.pageSize);
-                      if (activePage > 1) {
-                          e.stopEvent();
-                          t.moveFirst();
-                          return;
-                      }
-                      newCell = [0, c];
-                      break;
-                  }
-                }
-            case e.END:
-                if (! (g.isEditor && g.editing)) {
-                  c = g.colModel.getColumnCount()-1;
-                  if (!e.hasModifier()) {
-                      newCell = [r, c];
-                      //~ console.log('end',newCell);
-                      break;
-                  }else if(e.ctrlKey){
-                      var t = this.grid.paging_toolbar;
-                      // var t = g.getTopToolbar();
-                      var d = t.getPageData();
-                      if (d.activePage < d.pages) {
-                          e.stopEvent();
-                          var self = this;
-                          t.on('change',function(tb,pageData) {
-                              var r = g.store.getCount()-2;
-                              self.select(r, c);
-                              //~ console.log('change',r,c);
-                          },this,{single:true});
-                          t.moveLast();
-                          return;
-                      } else {
-                          newCell = [g.store.getCount()-1, c];
-                          //~ console.log('ctrl-end',newCell);
-                          break;
-                      }
-                  }
-                }
-            case e.DOWN:
-                newCell = walk(r + 1, c, 1);
-                break;
-            case e.UP:
-                newCell = walk(r - 1, c, -1);
-                break;
-            case e.RIGHT:
-                newCell = walk(r, c + 1, 1);
-                break;
-            case e.LEFT:
-                newCell = walk(r, c - 1, -1);
-                break;
-            case e.F2:
-                if (!e.hasModifier()) {
-                    if (g.isEditor && !g.editing) {
-                        g.startEditing(r, c);
-                        e.stopEvent();
-                        return;
-                    }
-                    break;
-                }
-            case e.INSERT:
-                if (!e.hasModifier()) {
-                    if (g.ls_insert_handler && !g.editing) {
-                        e.stopEvent();
-                        Lino.show_insert(g);
-                        return;
-                    }
-                    break;
-                }
-            // case e.DELETE:
-            //     if (!e.hasModifier()) {
-            //         if (!g.editing) {
-            //             e.stopEvent();
-            //             Lino.delete_selected(g);
-            //             return;
-            //         }
-            //         break;
-            //     }
-
-            case e.ENTER:
-                e.stopEvent();
-                g.on_celldblclick(r,c);
-                break;
-
-            default:
-                g.handle_key_event(e);
-
-        }
-
-
-        if(newCell){
-          e.stopEvent();
-          r = newCell[0];
-          c = newCell[1];
-          this.select(r, c);
-          if(g.isEditor && g.editing){
-            ae = g.activeEditor;
-            if(ae && ae.field.triggerBlur){
-                ae.field.triggerBlur();
-            }
-            g.startEditing(r, c);
-          }
-        //~ } else if (g.isEditor && !g.editing && e.charCode) {
-        //~ // } else if (!e.isSpecialKey() && g.isEditor && !g.editing) {
-            //~ g.set_start_value(String.fromCharCode(e.charCode));
-            //~ // g.set_start_value(String.fromCharCode(k));
-            //~ // g.set_start_value(e.charCode);
-            //~ g.startEditing(r, c);
-            //~ // e.stopEvent();
-            //~ return;
-        // } else {
-          // console.log('20120513',e,g);
-        }
-
-    }
-
-
-//~ };
-});
-
- 
 
 function PseudoConsole() {
     this.log = function() {};
@@ -3569,7 +3377,7 @@ Ext.define('Lino.GridPanel', {
   start_at_bottom : false,
   is_searching : false,
   disabled_in_insert_window : true,
-  clicksToEdit:2,
+  // clicksToEdit:2,  // 20160815
   enableColLock: false,
   autoHeight: false,
   params_panel_hidden : false,
@@ -3585,14 +3393,20 @@ Ext.define('Lino.GridPanel', {
   loadMask: {msg:"{{_('Please wait...')}}"},
   
   constructor : function(config){
+      config.plugins = [];
+      config.plugins.push({
+          ptype: 'cellediting',
+          // clicksToEdit: 1
+      });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
     // config.plugins = [Ext.create('Lino.GridFilters',{})];
-      config.plugins = ['gridfilters'];
+      config.plugins.push('gridfilters');
 {% endif %}
 {% if settings.SITE.use_filterRow %}
-    config.plugins = [Ext.create('Ext.ux.grid.FilterRow',{})];
+      config.plugins.push(Ext.create('Ext.ux.grid.FilterRow',{}));
 {% endif %}
+
       if (config.p){
           config.is_main_window = config.p.is_main_window;
           config.params_panel = config.p.params_panel;
@@ -3616,7 +3430,7 @@ Ext.define('Lino.GridPanel', {
   }
 
   ,handle_key_event : function(e) { 
-    // console.log("20140514 handle_key_event", e, this.keyhandlers);
+    console.log("20140514 handle_key_event", e, this.keyhandlers);
     var h = this.keyhandlers[e.keyCode];
     if (h) {
       h(this);
@@ -3812,17 +3626,18 @@ Ext.define('Lino.GridPanel', {
     if (this.cell_edit) {
       //  Edited by HKC
       //this.selModel = new Ext.grid.CellSelectionModel();
-        this.selModel = Ext.create('Ext.selection.CellModel',{});
+      this.selModel = Ext.create('Ext.selection.CellModel', {});
+      // this.selModel = 'cellmodel';
       this.get_selected = function() {
-        //~ console.log(this.getSelectionModel().selection);
-        if (this.selModel.selection)
-            return [ this.selModel.selection.record ];
-        return [this.store.getAt(0)];
+          //~ console.log(this.getSelectionModel().selection);
+          if (this.selModel.selection)
+              return [ this.selModel.selection.record ];
+          return [this.store.getAt(0)];
       };
       this.get_current_record = function() { 
-        if (this.getSelectionModel().selection) 
-          return this.selModel.selection.record;
-        return this.store.getAt(0);
+          if (this.getSelectionModel().selection) 
+              return this.selModel.selection.record;
+          return this.store.getAt(0);
       };
     } else { 
       //this.selModel = new Ext.grid.RowSelectionModel();
@@ -3862,7 +3677,9 @@ Ext.define('Lino.GridPanel', {
     } else {
         this.on('rowcontextmenu', Lino.row_context_menu, this);
     }
+      
     this.on('celldblclick' , this.on_celldblclick , this);
+    this.on('cellkeydown' , this.on_cellkeydown , this);
 
     //~ this.on('contextmenu', Lino.grid_context_menu, this);
       // Lino.GridPanel.superclass.initComponent.call(this);
@@ -4125,17 +3942,22 @@ Ext.define('Lino.GridPanel', {
   },
 
   //on_celldblclick : function(grid, row, col){
-  on_celldblclick : function(view, td, cellIndex, record, tr, rowIndex, e, eOpts ){
-      //~ console.log("20120307 on_celldblclick",this,grid, row, col);
+    // on_celldblclick : function(view, td, cellIndex, record, tr, rowIndex, e, eOpts ){
+    on_celldblclick : function(view, record, item, index, e, eOpts ){        
+      // console.log(
+      //     "20160815 on_celldblclick", this, view, record, item, index);
       if (this.ls_detail_handler) {
           //~ Lino.notify('show detail');
           Lino.show_detail(this);
           return false;
-      }else{
-        //~ console.log('startEditing');
-        this.startEditing(rowIndex,cellIndex);
       }
-  }
+    }
+
+    ,on_cellkeydown : function ( view , td , cellIndex , record , tr , rowIndex , e , eOpts ) {
+      console.log(
+          "20160815 on_cellkeydown", view, td, cellIndex, record, tr , rowIndex , e , eOpts);
+        
+    }
   ,get_base_params : function() {  /* Lino.GridPanel */
     var p = Ext.apply({}, this.store.baseParams);
     Lino.insert_subst_user(p);
@@ -4299,15 +4121,16 @@ Ext.define('Lino.GridPanel', {
     return p;
   },
   
-  on_beforeedit : function(e) {
-    //~ console.log('20130128 GridPanel.on_beforeedit()',e,e.record.data.disable_editing);
-    if(this.disable_editing | e.record.data.disable_editing) {
-      e.cancel = true;
+  on_beforeedit : function(editor, context, eOpts) {
+    // console.log('20130128 GridPanel.on_beforeedit()',e,e.record.data.disable_editing);
+      var record = context.record;
+    if(this.disable_editing | record.data.disable_editing) {
+      context.cancel = true;
       Lino.notify("{{_("This record is disabled")}}");
       return;
     }
-    if(e.record.data.disabled_fields && e.record.data.disabled_fields[e.field]) {
-      e.cancel = true;
+    if(record.data.disabled_fields && record.data.disabled_fields[context.field]) {
+      context.cancel = true;
       Lino.notify("{{_("This field is disabled")}}");
       return;
     }
