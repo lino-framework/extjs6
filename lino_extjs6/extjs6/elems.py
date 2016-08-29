@@ -2198,6 +2198,7 @@ def create_layout_element(lh, name, **kw):
 
             elif de.slave_grid_format == 'summary':
                 e = SlaveSummaryPanel(lh, de, **kw)
+                e.add_requirements(*de.required_roles)
                 lh.add_store_field(e.field)
                 return e
             else:
