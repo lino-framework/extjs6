@@ -3279,11 +3279,15 @@ Lino.getRowClass = function(record, rowIndex, rowParams, store) {
 //Edited by HKC
 //Lino.GridStore = Ext.extend(Ext.data.ArrayStore,{
 Ext.define('Lino.GridStore', {
-    extend : 'Ext.data.JsonStore',
-    //extend : 'Ext.data.ArrayStore',
-  autoLoad: false
-  ,pageSize: 1
-  ,load: function(options) {
+    extend: 'Ext.data.BufferedStore'
+    // extend : 'Ext.data.JsonStore'
+    // ,mixins: ['Ext.data.BufferedStore']
+    //extend : 'Ext.data.ArrayStore'
+    ,autoLoad: true // 20160915
+    ,leadingBufferZone: 5
+     ,pageSize: 10 // 20160915
+    // ,buffered: true // 20160915
+  ,prefetch: function(options) {
     //~ foo.bar = baz; // 20120213
     // console.log("20160701 GridStore.load()", this, options);
     if (!options) options = {};
@@ -3292,46 +3296,48 @@ Ext.define('Lino.GridStore', {
     options.params.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.grid_panel.getId();
     Lino.insert_subst_user(options.params); // since 20121016
       
-    var start = this.grid_panel.start_at_bottom ? -1 : 0;
-    if (this.grid_panel.hide_top_toolbar) {
-        //~ console.log("20120206 GridStore.load() toolbar is hidden");
-        options.params.{{constants.URL_PARAM_START}} = start;
-        if (this.grid_panel.preview_limit) {
-          options.params.{{constants.URL_PARAM_LIMIT}} = this.grid_panel.preview_limit;
-        }
-    } else {
-        var ps = this.grid_panel.calculatePageSize();
-        // var ps = 15;
-        if (!ps) {
-          // console.log("GridStore.load() failed to calculate pagesize");
-          return false;
-        } 
-        options.params.{{constants.URL_PARAM_LIMIT}} = ps;
+    // var start = this.grid_panel.start_at_bottom ? -1 : 0;
+    // // 20160915
+    // // if (this.grid_panel.hide_top_toolbar) {
+    // if (true) {
+    //     //~ console.log("20120206 GridStore.load() toolbar is hidden");
+    //     // options.params.{{constants.URL_PARAM_START}} = start;
+    //     // if (this.grid_panel.preview_limit) {
+    //     //   options.params.{{constants.URL_PARAM_LIMIT}} = this.grid_panel.preview_limit;
+    //     // }
+    // } else {
+    //     var ps = this.grid_panel.calculatePageSize();
+    //     // var ps = 15;
+    //     if (!ps) {
+    //       // console.log("GridStore.load() failed to calculate pagesize");
+    //       return false;
+    //     } 
+    //     options.params.{{constants.URL_PARAM_LIMIT}} = ps;
       
-        if (this.grid_panel.paging_toolbar) {
-            // this.grid_panel.paging_toolbar.store.pageSize =  ps;
-            // this.pageSize = ps;
-            this.setConfig('pageSize', ps);
-            // this.grid_panel.paging_toolbar.store.setConfig('pageSize', ps);
-            // console.log(
-            //     "20160630 GridStore.load() tbar ok", 
-            //     this.grid_panel);
-        } else {
-            console.log(
-                "20160630 GridStore.load() without tbar?!", 
-                this.grid_panel);
-        }
-        // if (options.params.{{constants.URL_PARAM_START}} == undefined)
-        //     // if (start != -1) 
-        //     //     start = this.grid_panel.getTopToolbar().cursor
-        //     options.params.{{constants.URL_PARAM_START}} = start;
-        if (options.{{constants.URL_PARAM_START}} == undefined)
-            // if (start != -1) 
-            //     start = this.grid_panel.getTopToolbar().cursor
-            options.{{constants.URL_PARAM_START}} = start;
+    //     if (this.grid_panel.paging_toolbar) {
+    //         // this.grid_panel.paging_toolbar.store.pageSize =  ps;
+    //         // this.pageSize = ps;
+    //         this.setConfig('pageSize', ps);
+    //         // this.grid_panel.paging_toolbar.store.setConfig('pageSize', ps);
+    //         // console.log(
+    //         //     "20160630 GridStore.load() tbar ok", 
+    //         //     this.grid_panel);
+    //     } else {
+    //         console.log(
+    //             "20160630 GridStore.load() without tbar?!", 
+    //             this.grid_panel);
+    //     }
+    //     if (options.params.{{constants.URL_PARAM_START}} == undefined)
+    //         // if (start != -1) 
+    //         //     start = this.grid_panel.getTopToolbar().cursor
+    //         options.params.{{constants.URL_PARAM_START}} = start;
+    //     if (options.{{constants.URL_PARAM_START}} == undefined)
+    //         // if (start != -1) 
+    //         //     start = this.grid_panel.getTopToolbar().cursor
+    //         options.{{constants.URL_PARAM_START}} = start;
       
-        // console.log("20141108 GridStore.load() ", options.params);
-    }
+    //     // console.log("20141108 GridStore.load() ", options.params);
+    // }
     // this.grid_panel.paging_toolbar.store.load(options.params);
     //     this.grid_panel.paging_toolbar.store.proxy.config.reader.limit = options.limit;
     //     this.grid_panel.paging_toolbar.store.proxy.config.reader.start = options.start;
@@ -3607,20 +3613,22 @@ Ext.define('Lino.GridPanel', {
           //~ this.bbar = actions.bbar;
       }
       
-      this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
-        store: this.store, 
-        prependButtons: true, 
-        // pageSize: 1, 
-        displayInfo: true, 
-        beforePageText: "{{_('Page')}}",
-        afterPageText: "{{_('of {0}')}}",
-        displayMsg: "{{_('Displaying {0} - {1} of {2}')}}",
-        firstText: "{{_('First page')}}",
-        lastText: "{{_('Last page')}}",
-        prevText: "{{_('Previous page')}}",
-        nextText: "{{_('Next page')}}",
-        items: tbar
-      });
+      this.tbar = Ext.create('Ext.toolbar.Toolbar',{items: tbar})
+        
+      // this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
+      //   store: this.store, 
+      //   prependButtons: true, 
+      //   // pageSize: 1, 
+      //   displayInfo: true, 
+      //   beforePageText: "{{_('Page')}}",
+      //   afterPageText: "{{_('of {0}')}}",
+      //   displayMsg: "{{_('Displaying {0} - {1} of {2}')}}",
+      //   firstText: "{{_('First page')}}",
+      //   lastText: "{{_('Last page')}}",
+      //   prevText: "{{_('Previous page')}}",
+      //   nextText: "{{_('Next page')}}",
+      //   items: tbar
+      // });
     }
       
     if (this.cell_edit) {
@@ -3727,14 +3735,15 @@ Ext.define('Lino.GridPanel', {
             this.toggle_params_panel_btn.toggle(status.show_params_panel);
         }
     }
-    if (this.paging_toolbar) {
-      //~ console.log("20120213 GridPanel.getTopToolbar().changePage",
-          //~ status.current_page || 1);
-      // this.paging_toolbar.changePage(status.current_page || 1);
-      this.paging_toolbar.store.loadPage(status.current_page || 1);
-      //  var toptoolbar = this.getDockedComponent('toptoolbar');
-      //  toptoolbar.changePage(status.current_page || 1);
-    }
+    // this.store.loadPage(1);
+    // 20160915 if (this.paging_toolbar) {
+    //   //~ console.log("20120213 GridPanel.getTopToolbar().changePage",
+    //       //~ status.current_page || 1);
+    //   // this.paging_toolbar.changePage(status.current_page || 1);
+    //   this.paging_toolbar.store.loadPage(status.current_page || 1);
+    //   //  var toptoolbar = this.getDockedComponent('toptoolbar');
+    //   //  toptoolbar.changePage(status.current_page || 1);
+    // }
     //~ this.fireEvent('resize');
     //~ this.refresh.defer(100,this); 
     //~ this.onResize.defer(100,this); 
@@ -4002,16 +4011,16 @@ Ext.define('Lino.GridPanel', {
     this.quick_search_text = value;
     this.set_base_param('{{constants.URL_PARAM_FILTER}}',value); 
     //~ this.getTopToolbar().changePage(1);
-    this.paging_toolbar.moveFirst();
-    //~ this.refresh();
+    // 20160915 this.paging_toolbar.moveFirst();
+    this.refresh();
     return true;
   },
   
   search_change : function(field,oldValue,newValue) {
     //~ console.log('search_change',field.getValue(),oldValue,newValue)
     this.set_base_param('{{constants.URL_PARAM_FILTER}}',field.getValue()); 
-    this.paging_toolbar.moveFirst();
-    //~ this.refresh();
+    // 20160915 this.paging_toolbar.moveFirst();
+    this.refresh();
   },
   
   apply_grid_config : function(index,grid_configs,rpt_columns) {
@@ -4250,7 +4259,7 @@ Ext.define('Lino.GridPanel', {
     Ext.Ajax.request(req);
   },
 
-  afterRender : function() {
+  unused_afterRender : function() {
     //Lino.GridPanel.superclass.afterRender.call(this);
       this.callSuper();
     // this.getView().mainBody.focus();
