@@ -1660,7 +1660,7 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
         if (cw) {
             // console.log("20140917 refresh_all calls refresh on", cw.main_item);
             cw.main_item.refresh();
-        }
+        } else { Lino.viewport.refresh(); }
         // else console.log("20140917 cannot refresh_all because ",
         //                  "there is no current_window");
     } else {
