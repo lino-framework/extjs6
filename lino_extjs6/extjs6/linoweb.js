@@ -1370,9 +1370,6 @@ Lino.VBorderPanel = Ext.extend(Ext.Panel,{
     }
 });
 
-
-
-
 function PseudoConsole() {
     this.log = function() {};
 };
@@ -3965,9 +3962,191 @@ Ext.define('Lino.GridPanel', {
     }
 
     ,on_cellkeydown : function ( view , td , cellIndex , record , tr , rowIndex , e , eOpts ) {
-      console.log(
-          "20160815 on_cellkeydown", view, td, cellIndex, record, tr , rowIndex , e , eOpts);
-        
+      // console.log(
+      //     "20160815 on_cellkeydown", view, td, cellIndex, record, tr , rowIndex , e , eOpts);
+        this.handleKeyDown(e,cellIndex,rowIndex,view);
+
+    },
+    handleKeyDown : function(e,c, r,g){
+        /* removed because F2 wouldn't pass
+        if(!e.isNavKeyPress()){
+            return;
+        }
+        */
+        //~ console.log('handleKeyDown',e)
+        var k = e.getKey(),
+            // g = this.grid,
+            s = this.selection,
+            sm = this,
+            walk = function(step){
+                return g.walkCells(
+                    e.position,
+                    step
+                );
+            },
+            cell, newCell, r, c, ae;
+
+        switch(k){
+            case e.ESC:
+            case e.PAGE_UP:
+            case e.PAGE_DOWN:
+                break;
+            default:
+                // e.stopEvent(); // removed because Browser keys like Alt-Home, Ctrl-R wouldn't work
+                break;
+        }
+
+        if(!s){
+            cell = walk('up');
+            if(cell){
+                this.select(cell[0], cell[1]);
+            }
+            return;
+        }
+
+        cell = s.cell;
+        // r = cell[0];
+        // c = cell[1];
+
+        switch(k){
+            case e.TAB:
+                if(e.shiftKey){
+                    newCell = walk('left');
+                }else{
+                    newCell = walk('right');
+                }
+                break;
+            case e.HOME:
+                if (! (g.isEditor && g.editing)) {
+                  if (!e.hasModifier()){
+                      newCell = [r, 0];
+                      //~ console.log('home',newCell);
+                      break;
+                  }else if(e.ctrlKey){
+                      var t = g.getTopToolbar();
+                      var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
+                      if (activePage > 1) {
+                          e.stopEvent();
+                          t.moveFirst();
+                          return;
+                      }
+                      newCell = [0, c];
+                      break;
+                  }
+                }
+            case e.END:
+                if (! (g.isEditor && g.editing)) {
+                  c = g.colModel.getColumnCount()-1;
+                  if (!e.hasModifier()) {
+                      newCell = [r, c];
+                      //~ console.log('end',newCell);
+                      break;
+                  }else if(e.ctrlKey){
+                      var t = g.getTopToolbar();
+                      var d = t.getPageData();
+                      if (d.activePage < d.pages) {
+                          e.stopEvent();
+                          var self = this;
+                          t.on('change',function(tb,pageData) {
+                              var r = g.store.getCount()-2;
+                              self.select(r, c);
+                              //~ console.log('change',r,c);
+                          },this,{single:true});
+                          t.moveLast();
+                          return;
+                      } else {
+                          newCell = [g.store.getCount()-1, c];
+                          //~ console.log('ctrl-end',newCell);
+                          break;
+                      }
+                  }
+                }
+            case e.DOWN:
+                newCell = walk('down');
+                break;
+            case e.UP:
+                newCell = walk('up');
+                break;
+            case e.RIGHT:
+                newCell = walk('right');
+                break;
+            case e.LEFT:
+                newCell = walk('left');
+                break;
+            case e.F2:
+                if (!e.hasModifier()) {
+                    if (g.isEditor && !g.editing) {
+                        g.startEditing(r, c);
+                        e.stopEvent();
+                        return;
+                    }
+                    break;
+                }
+            case e.INSERT:
+                if (!e.hasModifier()) {
+                    if (g.ls_insert_handler && !g.editing) {
+                        e.stopEvent();
+                        Lino.show_insert(g);
+                        return;
+                    }
+                    break;
+                }
+            // case e.DELETE:
+            //     if (!e.hasModifier()) {
+            //         if (!g.editing) {
+            //             e.stopEvent();
+            //             Lino.delete_selected(g);
+            //             return;
+            //         }
+            //         break;
+            //     }
+
+            case e.ENTER:
+                e.stopEvent();
+                g.onCellDblClick(r,c);
+                break;
+
+            default:
+                this.handle_key_event(e);
+
+        }
+
+
+        if(newCell){
+          e.stopEvent();
+          r = newCell.rowIdx;
+          c = newCell.colIdx;
+          // this.select(r, c);
+            g.getSelectionModel().setPosition({
+                          row: r,
+                          column: c
+                      }, true);
+            g.getSelectionModel().select({
+                          row: r,
+                          column: c
+                      });
+            g.getSelectionModel().refresh();
+            e.stopEvent();
+            // this.selModel.select(r,c);
+          if(g.isEditor && g.editing){
+            ae = g.activeEditor;
+            if(ae && ae.field.triggerBlur){
+                ae.field.triggerBlur();
+            }
+            g.startEditing(r, c);
+          }
+        //~ } else if (g.isEditor && !g.editing && e.charCode) {
+        //~ // } else if (!e.isSpecialKey() && g.isEditor && !g.editing) {
+            //~ g.set_start_value(String.fromCharCode(e.charCode));
+            //~ // g.set_start_value(String.fromCharCode(k));
+            //~ // g.set_start_value(e.charCode);
+            //~ g.startEditing(r, c);
+            //~ // e.stopEvent();
+            //~ return;
+        // } else {
+          // console.log('20120513',e,g);
+        }
+
     }
   ,get_base_params : function() {  /* Lino.GridPanel */
     var p = Ext.apply({}, this.store.baseParams);
