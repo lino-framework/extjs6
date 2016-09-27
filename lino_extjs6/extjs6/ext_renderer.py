@@ -20,7 +20,7 @@ import jinja2
 from django.conf import settings
 from django.db import models
 from django.utils import translation
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 
 from django.utils.translation import ugettext as _
 
@@ -102,9 +102,9 @@ class ExtRenderer(HtmlRenderer):
     def href_to(self, ar, obj, text=None):
         h = self.instance_handler(ar, obj)
         if h is None:
-            return cgi.escape(force_unicode(obj))
+            return cgi.escape(force_text(obj))
         uri = self.js2url(h)
-        return self.href(uri, text or force_unicode(obj))
+        return self.href(uri, text or force_text(obj))
 
     def py2js_converter(self, v):
         """
