@@ -469,8 +469,8 @@ Lino.show_login_window = function(on_login,username, password ) {
     
       var login_button = Ext.create('Ext.Button',{
         text:"{{_('Log in')}}",
-        formBind: true,	 
-        // Function that fires when user clicks the button 
+        formBind: true,
+        // Function that fires when user clicks the button
         handler: do_login});
     
       var login_panel = Ext.create('Ext.FormPanel',{
@@ -3435,7 +3435,7 @@ Ext.define('Lino.GridPanel', {
   }
 
   ,handle_key_event : function(e) { 
-    console.log("20140514 handle_key_event", e, this.keyhandlers);
+    // console.log("20140514 handle_key_event", e, this.keyhandlers);
     var h = this.keyhandlers[e.keyCode];
     if (h) {
       h(this);
@@ -3988,6 +3988,9 @@ Ext.define('Lino.GridPanel', {
 
         switch(k){
             case e.ESC:
+                this.containing_window.hide();
+                e.stopEvent();
+                break;
             case e.PAGE_UP:
             case e.PAGE_DOWN:
                 break;
@@ -4125,7 +4128,7 @@ Ext.define('Lino.GridPanel', {
                           row: r,
                           column: c
                       });
-            g.getSelectionModel().refresh();
+            // g.getSelectionModel().refresh();
             e.stopEvent();
             // this.selModel.select(r,c);
           if(g.isEditor && g.editing){
