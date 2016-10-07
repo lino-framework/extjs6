@@ -438,7 +438,7 @@ class FieldElement(LayoutElement):
             raise Exception("Field '%s' in %s has no name!" %
                             (field, layout_handle))
         self.field = field
-        self.editable = field.editable  # and not field.primary_key
+        self.editable = field.editable and not self.field.primary_key # and not field.primary_key
 
         if not 'listeners' in kw:
             if not isinstance(layout_handle.layout, layouts.ColumnsLayout):
