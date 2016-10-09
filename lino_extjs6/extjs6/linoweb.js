@@ -3550,9 +3550,11 @@ Ext.define('Lino.GridPanel', {
           this.is_searching = false;
           if (this_.selModel instanceof Ext.selection.CellModel){
               if (this_.getStore().getCount()) // there may be no data
-                  this_.selModel.select(0,0);
+                  // this_.selModel.select(0,0);
+                  this_.selModel.selectByPosition(0,0);
           } else {
-              this_.selModel.selectFirstRow();
+              // this_.selModel.selectFirstRow();
+              this_.selModel.selectByPosition(0,0);
               this_.getView().focusEl.focus();
           }
         }
