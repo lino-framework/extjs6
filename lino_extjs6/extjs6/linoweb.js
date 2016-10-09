@@ -2533,19 +2533,29 @@ Lino.fields2array = function(fields,values) {
     //~ console.log('20130605 fields2array gonna loop on', fields,values);
     var pv = Array(fields.length);
     for(var i=0; i < fields.length;i++) {
-        var f = fields[i]
+        var f = fields[i];
         if (values) 
           var v = values[f.name];
         else 
           var v = f.getValue();
         if (f.formatDate) {
             pv[i] = f.formatDate(v); 
-        } else {
-            pv[i] = v; // f.getValue(); 
+        } ;
+        if (f.config.store && f.config.store.length > 1){
+            data = f.config.store;
+            for (var e=0 ; e < data ; e++){
+                if (data[e][1] == v) {
+                    pv[i] = data[e][0];
+                    break;
+                }
+            }
         }
-    }
+        else {
+            pv[i] = v; // f.getValue();
+        }
+    };
     return pv;
-}
+};
 
 //Edited by HKC
 //    Ext.define('Lino.PanelMixin', {
@@ -3340,7 +3350,7 @@ Ext.define('Lino.GridStore', {
     this.grid_panel.add_param_values(options.params);
     //~ Lino.insert_subst_user(options.params);
     // console.log("20160701 GridStore.load()", options.params, this.baseParams);
-    //return Lino.GridStore.superclass.load.call(this, options);
+    // return Lino.GridStore.superclass.prefetch.call(this, options);
     return this.callSuper(arguments);
   }
   // ,insert : function(index, records) {
@@ -3368,7 +3378,8 @@ Lino.auto_height_cell_template = Ext.create('Ext.Template',
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, {
 Ext.define('Lino.GridPanel', {
-    extend : 'Ext.grid.GridPanel',
+    // extend : 'Ext.grid.GridPanel',
+    extend : 'Ext.grid.Panel',
      mixins: [
          //'Ext.grid.plugin.CellEditing',
          'Lino.MainPanel',
@@ -3539,9 +3550,11 @@ Ext.define('Lino.GridPanel', {
           this.is_searching = false;
           if (this_.selModel instanceof Ext.selection.CellModel){
               if (this_.getStore().getCount()) // there may be no data
-                  this_.selModel.select(0,0);
+                  // this_.selModel.select(0,0);
+                  this_.selModel.selectByPosition(0,0);
           } else {
-              this_.selModel.selectFirstRow();
+              // this_.selModel.selectFirstRow();
+              this_.selModel.selectByPosition(0,0);
               this_.getView().focusEl.focus();
           }
         }
@@ -3949,11 +3962,7 @@ Ext.define('Lino.GridPanel', {
     //~ return this.calculatePageSize.defer(500,this,[true]);
   },
 
-  //on_celldblclick : function(grid, row, col){
-    // on_celldblclick : function(view, td, cellIndex, record, tr, rowIndex, e, eOpts ){
-    on_celldblclick : function(view, record, item, index, e, eOpts ){        
-      // console.log(
-      //     "20160815 on_celldblclick", this, view, record, item, index);
+    on_celldblclick : function(view, record, item, index, e, eOpts ){
       if (this.ls_detail_handler) {
           //~ Lino.notify('show detail');
           Lino.show_detail(this);
@@ -3962,8 +3971,6 @@ Ext.define('Lino.GridPanel', {
     }
 
     ,on_cellkeydown : function ( view , td , cellIndex , record , tr , rowIndex , e , eOpts ) {
-      // console.log(
-      //     "20160815 on_cellkeydown", view, td, cellIndex, record, tr , rowIndex , e , eOpts);
         this.handleKeyDown(e,cellIndex,rowIndex,view);
 
     },
@@ -3992,6 +3999,8 @@ Ext.define('Lino.GridPanel', {
                 e.stopEvent();
                 break;
             case e.PAGE_UP:
+            case e.C:
+                console.log('C tapped');
             case e.PAGE_DOWN:
                 break;
             default:
@@ -4892,8 +4901,6 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
 Ext.define('Lino.Window', {
     extend: 'Ext.Window',
     mixins: ['Ext.Component'],
-//Lino.Window = Ext.extend(Ext.window.Window,{
-  //~ layout: "fit",
   closeAction : 'hide',
   renderTo: 'main_area',
   constrain: true,
@@ -4901,9 +4908,8 @@ Ext.define('Lino.Window', {
   draggable: false,
   width: 700,
   height: 500,
-  // maximizable: false,
   constructor : function (config) {
-    config.renderTo =  Ext.getBody() ;
+    // config.renderTo =  Ext.getBody() ;
     if (config.main_item.params_panel) {
         config.layout = 'border';
         config.main_item.region = 'center';
@@ -4930,7 +4936,7 @@ Ext.define('Lino.Window', {
     
     //~ console.log('20120110 Lino.Window.constructor() 1');
     //~ if (Lino.current_window) { // all windows except the top are closable
-    if (this.main_item.hide_window_title) { 
+    if (this.main_item.hide_window_title) {
       config.closable = false;
       config.frame = false;
       config.shadow = false;
