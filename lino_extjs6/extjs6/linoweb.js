@@ -4660,6 +4660,7 @@ Ext.define('Lino.ComboBox', {
                 }
                 valueArray.push(record.get(selector));
                 me.hiddenvalue_tosubmit = record.get(selector);
+                me.hiddenvalue_id = record.get(selector);
                 me.changed = true;
                 // console.log("20160504 field :",me.name," -> val",record.get(selector));
             }
@@ -4678,7 +4679,7 @@ Ext.define('Lino.ComboBox', {
         // Calculate raw value from the collection of Model data
         me.setRawValue(me.getDisplayValue());
         me.checkChange();
-        me.applyEmptyText();
+        // me.applyEmptyText();  Remove with Extjs 6.2.0
     },
     setValue : function(v,record_data){
       /*
