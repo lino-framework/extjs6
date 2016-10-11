@@ -3397,6 +3397,7 @@ Ext.define('Lino.GridPanel', {
   params_panel_hidden : false,
   preview_limit : undefined,
   row_height: 1,
+  forceFit:true,
     // Height setting has no effect but to overcome the hasRange() error.
     // See : https://www.sencha.com/forum/showthread.php?304363-Buffered-Store-Fatal-HasRange-Call/page2
     height : 100,
