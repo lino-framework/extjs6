@@ -1247,7 +1247,7 @@ class ExtRenderer(HtmlRenderer):
         if rh.actor.editable:
             vc.update(getRowClass=js_code('Lino.getRowClass'))
         if rh.actor.auto_fit_column_widths:
-            vc.update(forceFit=True)
+            kw.update(forceFit=True)
         if rh.actor.variable_row_height:
             vc.update(cellTpl=js_code("Lino.auto_height_cell_template"))
         if rh.actor.row_height != 1:
