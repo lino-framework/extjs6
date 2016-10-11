@@ -1,0 +1,23 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+env:
+  - DJANGO=1.8
+  - DJANGO=1.9
+  - DJANGO=1.10
+
+install:
+  - pip install -U setuptools
+  - pip install coveralls
+  - pip install Django==$DJANGO
+  - pip install -e .
+script:
+  - export LINO_CACHE_ROOT=$TRAVIS_BUILD_DIR/lino_cache
+  - mkdir $LINO_CACHE_ROOT
+  - inv cov
+
+after_script:
+  - coveralls
+

@@ -2195,14 +2195,15 @@ Lino.run_detail_handler = function(panel,pk) {
   var status = {
     record_id:pk,
     base_params:bp
-  }
+  };
   //~ console.log("20120918 Lino.show_detail",status);
   panel.ls_detail_handler.run(null,status);
-}
+};
 
 Lino.show_fk_detail = function(combo,detail_action,insert_action) {
     //~ console.log("Lino.show_fk_detail",combo,handler);
-    pk = combo.getValue();
+    // pk = combo.getValue();
+    pk = combo.hiddenvalue_id;
     if (pk) {
         detail_action.run(null,{record_id: pk})
       } else {
@@ -3646,7 +3647,7 @@ Ext.define('Lino.GridPanel', {
     if (this.cell_edit) {
       //  Edited by HKC
       //this.selModel = new Ext.grid.CellSelectionModel();
-      this.selModel = Ext.create('Ext.selection.CellModel', {});
+      this.selModel = Ext.create('Ext.selection.CellModel', {allowDeselect:true});
       // this.selModel = 'cellmodel';
       this.get_selected = function() {
           //~ console.log(this.getSelectionModel().selection);
@@ -3661,7 +3662,7 @@ Ext.define('Lino.GridPanel', {
       };
     } else { 
       //this.selModel = new Ext.grid.RowSelectionModel();
-        this.selModel = Ext.create('Ext.selection.RowModel',{});
+        this.selModel = Ext.create('Ext.selection.RowModel',{allowDeselect:true});
       this.get_selected = function() {
         var sels = this.selModel.getSelections();
         if (sels.length == 0) sels = [this.store.getAt(0)];
@@ -4618,6 +4619,7 @@ Ext.define('Lino.ComboBox', {
   changed : false,
   queryMode : 'remote',
   hiddenvalue_tosubmit: "",
+  hiddenvalue_id: null,
   //~ initComponent : Ext.form.ComboBox.prototype.initComponent.createSequence(function() {
   initComponent : function(){
       this.contextParams = {};
@@ -4658,6 +4660,7 @@ Ext.define('Lino.ComboBox', {
                 }
                 valueArray.push(record.get(selector));
                 me.hiddenvalue_tosubmit = record.get(selector);
+                me.hiddenvalue_id = record.get(selector);
                 me.changed = true;
                 // console.log("20160504 field :",me.name," -> val",record.get(selector));
             }
@@ -4676,7 +4679,7 @@ Ext.define('Lino.ComboBox', {
         // Calculate raw value from the collection of Model data
         me.setRawValue(me.getDisplayValue());
         me.checkChange();
-        me.applyEmptyText();
+        // me.applyEmptyText();  Remove with Extjs 6.2.0
     },
     setValue : function(v,record_data){
       /*
@@ -4695,8 +4698,7 @@ Ext.define('Lino.ComboBox', {
             //~ text = '';
         } else if (Ext.isDefined(record_data)) {
           text = record_data[this.name];
-          //~ if (this.name == 'birth_country')
-            //~ console.log(this.name,'.setValue',v,'got text ',text,' from record ',record);
+            this.hiddenvalue_id = record_data[this.hiddenName];
         } else {
           // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
           if(this.queryMode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
@@ -4737,7 +4739,6 @@ Ext.define('Lino.ComboBox', {
         }
       }
       this.lastSelectionText = text;
-      //~ this.lastSelectionText = v;
       if(this.hiddenField){
           //~ this.hiddenField.originalValue = v;
           this.hiddenField.value = v;
@@ -4864,31 +4865,21 @@ http://www.sencha.com/forum/showthread.php?15842-2.0-SOLVED-Combobox-twintrigger
 
 Ext.define('Lino.TwinCombo',{
   extend:'Lino.RemoteComboFieldElement',
-//Lino.TwinCombo = Ext.extend(Lino.RemoteComboFieldElement,{
     trigger2Class : 'x-form-search-trigger',
-    //~ trigger2Class : 'x-tbar-detail',
-    //initComponent : function() {
-        //~ Lino.TwinCombo.superclass.initComponent.call(this);
-        //this.callSuper();
-        //Lino.ComboBox.prototype.initComponent.call(this);
-        //Ext.form.TwinTriggerField.prototype.initComponent.call(this);
-    //},
-    onTrigger2Click : function() {
-        //~ console.log('onTrigger2Click',this,arguments);
+    triggers: {
+        search: {
+            cls: Ext.baseCSSPrefix + 'form-search-trigger',
+            handler: 'onTrigger2Click',
+            scope: 'this'
+        }
     }
   });
-//~ Lino.TwinCombo.prototype.initComponent = Ext.form.TwinTriggerField.prototype.initComponent;
 Lino.TwinCombo.prototype.getTrigger = Ext.form.field.Text.prototype.getTrigger;
 Lino.TwinCombo.prototype.getOuterSize = Ext.form.field.Text.prototype.getOuterSize;
 Lino.TwinCombo.prototype.initTrigger = Ext.form.field.Text.prototype.initTrigger;
 Lino.TwinCombo.prototype.onTrigger1Click = Ext.form.ComboBox.prototype.onTriggerClick;
-//~ Lino.TwinCombo.prototype.onTrigger2Click = function() {
-    //~ console.log('onTrigger2Click',arguments);
-//~ };
 
 
-
-//Lino.SimpleRemoteComboFieldElement = Ext.extend(Lino.RemoteComboFieldElement,{
 Ext.define('Lino.SimpleRemoteComboFieldElement',{
     extend : 'Lino.RemoteComboFieldElement',
   displayField: 'value',
@@ -4897,7 +4888,6 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
 });
 
 
-// Edit by HKC Ext.window  ->  Ext.window.Window
 Ext.define('Lino.Window', {
     extend: 'Ext.Window',
     mixins: ['Ext.Component'],
