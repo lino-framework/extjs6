@@ -1659,8 +1659,10 @@ class Panel(Container):
                 else:
                     # 20100921b
                     # ~ d.update(layout='form')
-                    d.update(layout='form', autoHeight=True)
-                    # ~ d.update(layout='vbox',autoHeight=True)
+                    # d.update(layout='form', autoHeight=True)
+                    # d.update(layout='vbox',autoHeight=True)
+                    d.update(autoHeight=True)
+                    d.update(layout=dict(type='vbox', align='stretch'))
             else:
                 d.update(layout='hbox', autoHeight=True)  # 20101028
 
