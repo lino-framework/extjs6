@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 # Copyright 2015-2016 Luc Saffre
-# License: GPL (see file COPYING for details)
+# License: BSD (see file COPYING for details)
 
 # ~ Note that this module may not have a docstring because any
 # ~ global variable defined here will override the global
@@ -21,7 +21,7 @@ SETUP_INFO = dict(
     test_suite='tests',
 
     description="The Sencha ExtJS 6 user interface for Lino",
-    license='GPLv6+',
+    license='BSD License',
     include_package_data=False,
     zip_safe=False,
     author='Luc Saffre',
@@ -36,7 +36,7 @@ SETUP_INFO = dict(
   Framework :: Django
   Intended Audience :: Developers
   Intended Audience :: System Administrators
-  License :: OSI Approved :: GPL
+  License :: OSI Approved :: BSD LIcense
   Natural Language :: English
   Natural Language :: French
   Natural Language :: German

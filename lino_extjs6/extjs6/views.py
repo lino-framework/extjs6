@@ -35,7 +35,7 @@ from django.conf import settings
 from django.views.generic import View
 import json
 from django.utils.translation import ugettext as _
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 
 from lino.api import dd
 
@@ -618,7 +618,7 @@ class ApiList(View):
                                 MAX_ROW_COUNT)
             response = http.HttpResponse(
                 content_type='text/html;charset="utf-8"')
-            doc = xghtml.Document(force_unicode(ar.get_title()))
+            doc = xghtml.Document(force_text(ar.get_title()))
             doc.body.append(E.h1(doc.title))
             t = doc.add_table()
             #~ settings.SITE.kernel.ar2html(ar,t,ar.data_iterator)

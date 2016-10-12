@@ -20,7 +20,7 @@ import jinja2
 from django.conf import settings
 from django.db import models
 from django.utils import translation
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 
 from django.utils.translation import ugettext as _
 
@@ -59,7 +59,7 @@ else:
 
 from . import elems as ext_elems
 
-from lino.modlib.users.choicelists import UserProfiles
+from lino.modlib.users.choicelists import UserTypes
 
 if settings.SITE.user_model:
     from lino.modlib.users import models as users
@@ -102,9 +102,9 @@ class ExtRenderer(HtmlRenderer):
     def href_to(self, ar, obj, text=None):
         h = self.instance_handler(ar, obj)
         if h is None:
-            return cgi.escape(force_unicode(obj))
+            return cgi.escape(force_text(obj))
         uri = self.js2url(h)
-        return self.href(uri, text or force_unicode(obj))
+        return self.href(uri, text or force_text(obj))
 
     def py2js_converter(self, v):
         """
@@ -619,7 +619,7 @@ class ExtRenderer(HtmlRenderer):
             count = 0
             for lng in settings.SITE.languages:
                 with translation.override(lng.django_code):
-                    for profile in UserProfiles.objects():
+                    for profile in UserTypes.objects():
                         count += jsgen.with_user_profile(
                             profile, self.build_js_cache, force)
             logger.info("%d lino*.js files have been built in %s seconds.",
@@ -1247,7 +1247,7 @@ class ExtRenderer(HtmlRenderer):
         if rh.actor.editable:
             vc.update(getRowClass=js_code('Lino.getRowClass'))
         if rh.actor.auto_fit_column_widths:
-            vc.update(forceFit=True)
+            kw.update(forceFit=True)
         if rh.actor.variable_row_height:
             vc.update(cellTpl=js_code("Lino.auto_height_cell_template"))
         if rh.actor.row_height != 1:
