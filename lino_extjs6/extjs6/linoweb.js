@@ -469,9 +469,8 @@ Lino.show_login_window = function(on_login,username, password ) {
     
       var login_button = Ext.create('Ext.Button',{
         text:"{{_('Log in')}}",
-        formBind: true,
-        // Function that fires when user clicks the button
-        handler: do_login});
+        formBind: true,});
+
        Ext.define('Login.Controller', {
        extend: 'Ext.app.ViewController',
        alias: 'controller.login',
@@ -479,7 +478,6 @@ Lino.show_login_window = function(on_login,username, password ) {
        onSpecialKey: function(field, e, eOpts) {
            if (e.getKey() == e.ENTER) {
                do_login();
-               // console.log('do something here');
            }
             }
         });
