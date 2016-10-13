@@ -3224,12 +3224,13 @@ if (this.disable_editing | record.data.disable_editing) {
   ,on_cancel : function() {
     this.get_containing_window().close();
   }
-  ,on_ok : function() {
+  ,on_ok : function(e) {
+        e.stopEvent();
       // console.log("20140424");
       // this.save(null, true, this.save_action_name);
       this.save();
   }
-  ,config_containing_window : function(wincfg) {
+  ,config_containing_window : function(cls, wincfg) {
 
       // Note that defaultButton means: which component should receive
       // focus when Window is focussed.  If no defaultButton set,
@@ -3242,8 +3243,8 @@ if (this.disable_editing | record.data.disable_editing) {
               //return false;
           //}
       //});
-
-      wincfg.keyHandlers = [];
+        // New feature by Extjs 6.2.0 , see http://docs.sencha.com/extjs/6.2.0/modern/Ext.mixin.Keyboard.html
+      wincfg.keyMap = {};
 {% if extjs.enter_submits_form %}
       wincfg.keyHandlers.push({
               //key: Ext.EventObject.ENTER,
@@ -3261,13 +3262,15 @@ if (this.disable_editing | record.data.disable_editing) {
               }
           });
 {% endif %}
-      wincfg.keyHandlers.push({
-          //key: Ext.EventObject.ESCAPE,
-          key : Ext.String.escape,
-          handler: this.on_cancel, scope:this });
-      wincfg.keyHandlers.push({
-          key: 's', ctrl: true,
-             stopEvent: true, handler: this.on_ok, scope:this });
+        wincfg.keyMap['ESC'] = {
+                 handler: 'on_cancel',
+                 scope: cls,
+             };
+        // Cmd on Mac OS X, Ctrl on Windows/Linux.
+        wincfg.keyMap['CmdOrCtrl+S'] = {
+                handler: 'on_ok',
+                 scope: cls,
+            };
   }
 
 });
@@ -4992,7 +4995,7 @@ Ext.define('Lino.Window', {
       //~ ]);
     }
     
-    this.main_item.config_containing_window(config);
+    this.main_item.config_containing_window(this.main_item, config);
     
     // console.log('20150514 Lino.Window.constructor() 2');
     Lino.Window.superclass.constructor.call(this,config);
