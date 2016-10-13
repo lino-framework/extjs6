@@ -3407,7 +3407,7 @@ Ext.define('Lino.GridPanel', {
         //~ },
         
         
-  loadMask: {msg:"{{_('Please wait...')}}"},
+  loadMask: {message:"{{_('Please wait...')}}"},
   
   constructor : function(config){
       config.plugins = [];
@@ -3686,7 +3686,8 @@ Ext.define('Lino.GridPanel', {
       this.view_is_ready = true;
       this.refresh(); // removed 20130911
       },this);
-    this.on('afteredit', this.on_afteredit); // 20120814
+    //    the 'afteredit' event doesn't exist any more. We use the 'edit' event instead.
+    this.on('edit', this.on_afteredit); // 20120814
     this.on('beforeedit', this.on_beforeedit);
     this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
     if (this.cell_edit) {
@@ -4162,7 +4163,8 @@ Ext.define('Lino.GridPanel', {
 
     }
   ,get_base_params : function() {  /* Lino.GridPanel */
-    var p = Ext.apply({}, this.store.baseParams);
+    // var p = Ext.apply({}, this.store.baseParams);
+    var p = Ext.apply({}, this.store.getProxy().extraParams);
     Lino.insert_subst_user(p);
     return p;
   },
@@ -4177,8 +4179,10 @@ Ext.define('Lino.GridPanel', {
         //~ this.set_param_values(p.param_values);  
   },
   clear_base_params : function() {
-      this.store.baseParams = {};
-      Lino.insert_subst_user(this.store.baseParams);
+      // this.store.baseParams = {};
+      // Lino.insert_subst_user(this.store.baseParams);
+      this.store.getProxy().extraParams = {};
+      Lino.insert_subst_user(this.store.getProxy().extraParams);
   },
   set_base_param : function(k,v) {
       // HKC
@@ -4351,7 +4355,7 @@ Ext.define('Lino.GridPanel', {
       //~ console.log("20120814 save_grid_data");
       this.getStore().commitChanges();
   },
-  on_afteredit : function(e) {
+  on_afteredit : function(editor, context, eOpts) {
     /*
     e.grid - The grid that fired the event
     e.record - The record being edited
@@ -4361,6 +4365,7 @@ Ext.define('Lino.GridPanel', {
     e.row - The grid row index
     e.column - The grid column index
     */
+    e = context;
     var p = {};
     // console.log('20140403 afteredit: ',e.record);
     //~ console.log('20101130 value: ',e.value);
@@ -4374,7 +4379,14 @@ Ext.define('Lino.GridPanel', {
         //~ console.log('20101130',k,'=',v);
         //~ var cm = e.grid.getColumnModel();
         //~ var di = cm.getDataIndex(k);
-        var f = e.record.fields.get(k);
+        // var f = e.record.fields.get(k);
+        var f = null;
+        for(_f in e.record.fields) {
+            if (e.record.fields[_f].name == k){
+                f = e.record.fields[_f];
+            }
+        }
+            // var f = e.record.fields[k];
         //~ console.log('20101130 f = ',f);
         //~ var v = e.record.get(di);
         if (f.type.type == 'date') {
@@ -4414,19 +4426,22 @@ Ext.define('Lino.GridPanel', {
               else console.log("20120123 cannot refresh_all",self);
           } else if (result.rows) {
               //~ self.getStore().loadData(result,true);
-              var r = self.getStore().reader.readRecords(result);
-              if (e.record.phantom) {
+              // var r = self.getStore().reader.readRecords(result);
+              var r = self.getStore().proxy.reader.readRecords(result);
+              // if (e.record.phantom) {
                   // console.log("20140728 gonna call Store.insert()", self.getStore(), e.row, r.records);
-                  self.getStore().insert(e.row, r.records);
-              }else{
+                  // self.getStore().insert(e.row, r.records);
+              // }else{
                   // console.log("20140728 afteredit.success doUpdate", r.records[0]);
-                  self.getStore().doUpdate(r.records[0]);
-              }
-              self.getStore().rejectChanges(); 
+                  // self.getStore().doUpdate(r.records[0]);
+              // }
+              // self.getStore().rejectChanges();
               /* 
               get rid of the red triangles without saving the record again
               */
               //~ self.getStore().commitChanges(); // get rid of the red triangles
+              // self.getStore().commitChanges(); // get rid of the red triangles
+              self.getStore().reload();        // reload our datastore.
           } else {
               self.getStore().commitChanges(); // get rid of the red triangles
               self.getStore().reload();        // reload our datastore.
@@ -4435,7 +4450,8 @@ Ext.define('Lino.GridPanel', {
         scope: this,
         failure: Lino.ajax_error_handler(this)
     };
-    if (e.record.phantom) {
+    // This is condition is not perfect but 'e.record.phantom' is not relevant any more.
+    if (typeof(e.record.id) == "string") {
       req.params.{{constants.URL_PARAM_ACTION_NAME}} = 'grid_post'; // CreateRow.action_name
       Ext.apply(req,{
         method: 'POST',
@@ -4449,7 +4465,8 @@ Ext.define('Lino.GridPanel', {
       });
     }
     //~ console.log('20110406 on_afteredit',req);
-    this.loadMask.show(); // 20120211
+    // this.loadMask.show(); // 20120211
+      Ext.Msg.show(this.loadMask);
     Ext.Ajax.request(req);
   },
 
