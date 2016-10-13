@@ -472,8 +472,18 @@ Lino.show_login_window = function(on_login,username, password ) {
         formBind: true,
         // Function that fires when user clicks the button
         handler: do_login});
-    
-      var login_panel = Ext.create('Ext.FormPanel',{
+       Ext.define('Login.Controller', {
+       extend: 'Ext.app.ViewController',
+       alias: 'controller.login',
+        // handler for specialkey event
+       onSpecialKey: function(field, e, eOpts) {
+           if (e.getKey() == e.ENTER) {
+               do_login();
+               // console.log('do something here');
+           }
+            }
+        });
+      var login_panel = Ext.create('Ext.form.FormPanel',{
         //~ inspired by http://www.sencha.com/learn/a-basic-login/
         autoHeight:true,
         labelWidth:90,
@@ -482,14 +492,20 @@ Lino.show_login_window = function(on_login,username, password ) {
         defaultType:'textfield',
         monitorValid:true,
         resizable: false,
+          controller: 'login',
+          defaults: {
+                listeners: {
+                    specialkey: 'onSpecialKey'
+                }
+            },
         items:[{ 
             fieldLabel:"{{_('Username')}}", 
             id: 'username',
             name:'username',
             value: username,
             autoHeight:true,
-            allowBlank:false 
-        },{ 
+            allowBlank:false
+        },{
             fieldLabel:"{{_('Password')}}",
             id:'password',
             name:'password',
@@ -509,12 +525,8 @@ Lino.show_login_window = function(on_login,username, password ) {
           autoHeight:true,
           modal: true,
           closeAction: "hide",
-          keys: {
-            //  Edited by HKC
-            //key: Ext.EventObject.ENTER,
-            key: Ext.event.Event.ENTER,
-            fn: function() { do_login()}
-          },
+          focusOnToFront: false,
+          defaultFocus : login_panel.form.findField('username'),
           items: [login_panel] });
   }else {
       var fld = Lino.login_window.items.first().form.findField('username');
