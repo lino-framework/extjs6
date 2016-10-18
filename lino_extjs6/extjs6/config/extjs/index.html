@@ -8,8 +8,8 @@
     <script type="text/javascript" src="{{ url }}"></script>
 {%- endmacro -%}
 <head>
-{%- if request.user.authenticated and request.user.prefered_theme != '' -%}
-    {%- set theme = request.user.prefered_theme  -%}
+{%- if request.user.authenticated and request.user.preferred_theme != '' -%}
+    {%- set theme = request.user.preferred_theme  -%}
 {%- else -%}
     {%- set theme = extjs.theme_name  -%}
 {%- endif -%}

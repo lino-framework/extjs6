@@ -32,15 +32,15 @@ EXTJS6_THEMES_CHOICES = (
 )
 
 dd.inject_field(
-    'users.User', 'prefered_theme',
-    models.CharField(_("Prefered theme"), choices=EXTJS6_THEMES_CHOICES, default="", blank=True, max_length=25))
+    'users.User', 'preferred_theme',
+    models.CharField(_("Preferred theme"), choices=EXTJS6_THEMES_CHOICES, default="", blank=True, max_length=25))
 
 
 class ThemedUserDetail(UserDetail):
     box1 = """
         username profile:20 partner
         first_name last_name initials
-        email language timezone prefered_theme
+        email language timezone preferred_theme
         id created modified
         """
 
