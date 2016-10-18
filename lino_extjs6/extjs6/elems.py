@@ -9,7 +9,8 @@ The biggest part of this module should actually be moved to
 """
 
 from __future__ import print_function
-
+from builtins import str
+import six
 import logging
 
 logger = logging.getLogger(__name__)
@@ -100,7 +101,7 @@ def py2html(obj, name):
         obj = obj()
     if getattr(obj, '__iter__', False):
         obj = list(obj)
-    return escape(unicode(obj))
+    return escape(str(obj))
 
 
 class GridColumn(jsgen.Component):
@@ -485,11 +486,11 @@ class FieldElement(LayoutElement):
 
     def as_plain_html(self, ar, obj):
         value = self.value_from_object(obj, ar)
-        text = unicode(value)
+        text = str(value)
         if not text:
             text = " "
         # ~ yield E.p(unicode(elem.field.verbose_name),':',E.br(),E.b(text))
-        yield E.label(unicode(self.field.verbose_name))
+        yield E.label(str(self.field.verbose_name))
         yield E.input(type="text", value=text)
         # ~ if self.field.help_text:
         # ~ yield E.span(unicode(text),class_="help-block")
@@ -681,11 +682,11 @@ class TextFieldElement(FieldElement):
 
     def as_plain_html(self, ar, obj):
         value = self.field.value_from_object(obj)
-        text = unicode(value)
+        text = str(value)
         if not text:
             text = " "
         # ~ yield E.p(unicode(elem.field.verbose_name),':',E.br(),E.b(text))
-        yield E.label(unicode(self.field.verbose_name))
+        yield E.label(str(self.field.verbose_name))
         yield E.textarea(text, rows=str(self.preferred_height))
 
     def value2html(self, ar, v, **cellattrs):
@@ -864,7 +865,7 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
 
     def get_field_options(self, **kw):
         kw = super(ForeignKeyElement, self).get_field_options(**kw)
-        if isinstance(self.field.rel.model, basestring):
+        if isinstance(self.field.rel.model, six.string_types):
             raise Exception("20130827 %s.rel.model is %r" %
                             (self.field, self.field.rel.model))
         pw = self.field.rel.model.preferred_foreignkey_width
@@ -1297,7 +1298,7 @@ class SingleRelatedObjectElement(DisplayElement):
         self.relobj = relobj
         self.editable = False
         kw.update(
-            label=unicode(getattr(relobj.model._meta, 'verbose_name', None))
+            label=str(getattr(relobj.model._meta, 'verbose_name', None))
                   or relobj.var_name)
         # ~ DisplayElement.__init__(self,lh,relobj.field,**kw)
 

@@ -217,7 +217,7 @@ def choices_for_field(request, holder, field):
                 holder.model, field.name, qs))
         if chooser.simple_values:
             def row2dict(obj, d):
-                d[constants.CHOICES_TEXT_FIELD] = unicode(obj)
+                d[constants.CHOICES_TEXT_FIELD] = str(obj)
                 d[constants.CHOICES_VALUE_FIELD] = obj
                 return d
         elif chooser.instance_values:
@@ -229,7 +229,7 @@ def choices_for_field(request, holder, field):
                 return d
         else:  # values are (value,text) tuples
             def row2dict(obj, d):
-                d[constants.CHOICES_TEXT_FIELD] = unicode(obj[1])
+                d[constants.CHOICES_TEXT_FIELD] = str(obj[1])
                 d[constants.CHOICES_VALUE_FIELD] = obj[0]
                 return d
 
@@ -238,12 +238,12 @@ def choices_for_field(request, holder, field):
 
         def row2dict(obj, d):
             if type(obj) is list or type(obj) is tuple:
-                d[constants.CHOICES_TEXT_FIELD] = unicode(obj[1])
+                d[constants.CHOICES_TEXT_FIELD] = str(obj[1])
                 d[constants.CHOICES_VALUE_FIELD] = obj[0]
             else:
                 d[constants.CHOICES_TEXT_FIELD] = holder.get_choices_text(
                     obj, request, field)
-                d[constants.CHOICES_VALUE_FIELD] = unicode(obj)
+                d[constants.CHOICES_VALUE_FIELD] = str(obj)
             return d
 
     elif isinstance(field, models.ForeignKey):
@@ -335,7 +335,7 @@ class Choices(View):
             #~ qs = rpt.request(self).get_queryset()
 
             def row2dict(obj, d):
-                d[constants.CHOICES_TEXT_FIELD] = unicode(obj)
+                d[constants.CHOICES_TEXT_FIELD] = str(obj)
                 # getattr(obj,'pk')
                 d[constants.CHOICES_VALUE_FIELD] = obj.pk
                 return d
@@ -398,7 +398,7 @@ class Restful(View):
             rh.store.row2dict(ar, row, rh.store.list_fields)
             for row in ar.sliced_data_iterator]
         kw = dict(count=ar.get_total_count(), rows=rows)
-        kw.update(title=unicode(ar.get_title()))
+        kw.update(title=str(ar.get_title()))
         return json_response(kw)
 
     def put(self, request, app_label=None, actor=None, pk=None):
@@ -557,7 +557,7 @@ class ApiList(View):
                       rows=rows,
                       success=True,
                       no_data_text=ar.no_data_text,
-                      title=unicode(ar.get_title()))
+                      title=str(ar.get_title()))
             if ar.actor.parameters:
                 kw.update(
                     param_values=ar.actor.params_layout.params_store.pv2dict(
@@ -609,7 +609,7 @@ class ApiList(View):
                 w.writerow(headers)
 
             for row in ar.data_iterator:
-                w.writerow([unicode(v) for v in rh.store.row2list(ar, row)])
+                w.writerow([str(v) for v in rh.store.row2list(ar, row)])
             return response
 
         if fmt == constants.URL_FORMAT_PRINTER:
