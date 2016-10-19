@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2015 Luc Saffre
+# Copyright 2009-2016 Luc Saffre
 # License: BSD (see file COPYING for details)
 
 """
@@ -7,7 +7,8 @@ Defines the :class:`ExtRenderer` class.
 """
 
 from __future__ import unicode_literals
-
+from builtins import str
+import six
 import logging
 
 logger = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ class ExtRenderer(HtmlRenderer):
         if isinstance(v, models.Model):
             return v.pk
         if isinstance(v, Exception):
-            return unicode(v)
+            return str(v)
         if isinstance(v, menus.Menu):
             if v.parent is None:
                 return v.items
@@ -211,7 +212,7 @@ class ExtRenderer(HtmlRenderer):
         using a Javascript link to this action.
 
         """
-        label = unicode(label or ba.get_button_label())
+        label = str(label or ba.get_button_label())
         uri = self.js2url(self.action_call(ar, ba, status))
         return self.href_button_action(
             ba, uri, label, title or ba.action.help_text, **kw)
@@ -368,7 +369,7 @@ class ExtRenderer(HtmlRenderer):
 
     def obj2html(self, ar, obj, text=None, **kw):
         if not text:
-            text = unicode(obj)
+            text = str(obj)
 
         h = self.instance_handler(ar, obj)
         uri = self.js2url(h)
@@ -505,22 +506,22 @@ class ExtRenderer(HtmlRenderer):
                 if request.subst_user:
                     yield "Lino.set_subst_user(%s,%s);" % (
                         py2js(request.subst_user.id),
-                        py2js(unicode(request.subst_user)))
-                    user_text = unicode(request.user) + \
+                        py2js(str(request.subst_user)))
+                    user_text = str(request.user) + \
                                 " (" + _("as") + " " + \
-                                unicode(request.subst_user) + ")"
+                                str(request.subst_user) + ")"
                 else:
                     yield "Lino.set_subst_user();"
-                    user_text = unicode(request.user)
+                    user_text = str(request.user)
 
                 user = request.user
 
                 yield "Lino.user = %s;" % py2js(
-                    dict(id=user.id, name=unicode(user)))
+                    dict(id=user.id, name=str(user)))
 
                 if user.profile.has_required_roles([Supervisor]):
                     authorities = [
-                        (u.id, unicode(u))
+                        (u.id, str(u))
                         for u in settings.SITE.user_model.objects.exclude(
                             profile='').exclude(id=user.id)]
                 else:
@@ -530,7 +531,7 @@ class ExtRenderer(HtmlRenderer):
                         'user__last_name', 'user__first_name',
                         'user__username')
                     authorities = [
-                        (a.user.id, unicode(a.user)) for a in qs]
+                        (a.user.id, str(a.user)) for a in qs]
 
                 a = users.MySettings.default_action
                 handler = self.action_call(None, a, dict(record_id=user.pk))
@@ -1376,7 +1377,7 @@ class ExtRenderer(HtmlRenderer):
                 # if isinstance(ws[0], basestring) and ws[0].endswith("%"):
                 #     windowConfig.update(
                 #         width=js_code('Lino.perc2width(%s)' % ws[0][:-1]))
-                if isinstance(ws[0], basestring):
+                if isinstance(ws[0], six.string_types):
                     windowConfig.update(width=ws[0])
                 else:
                     windowConfig.update(
