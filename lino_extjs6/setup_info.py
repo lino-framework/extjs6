@@ -10,7 +10,6 @@ SETUP_INFO = dict(
     install_requires=['lino', 'lino_noi'],
     tests_require=[],
     test_suite='tests',
-
     description="The Sencha ExtJS 6 user interface for Lino",
     license='BSD License',
     include_package_data=False,
