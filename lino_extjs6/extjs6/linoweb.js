@@ -1487,8 +1487,9 @@ Lino.action_handler = function (panel, on_success, on_confirm) {
               panel = Lino.current_window.main_item;
           else panel = Lino.viewport;
       }
-    //  Disabled by HCK
-    //if (panel.loadMask) panel.loadMask.hide(); // 20120211
+    if (panel.loadMask) {
+        Ext.MessageBox.hide(panel.loadMask);
+    }
     if (!response.responseText) return ;
     var result = Ext.decode(response.responseText);
     Lino.handle_action_result(panel, result, on_success, on_confirm);
@@ -2959,7 +2960,7 @@ Ext.define('Lino.FormPanel', {
             } else if (buttonId == "no") {
               todo();
             }
-          }
+          };
           Ext.MessageBox.show(config);
         }
     }else{
@@ -3437,7 +3438,7 @@ Ext.define('Lino.GridPanel', {
       config.plugins = [];
       config.plugins.push({
           ptype: 'cellediting',
-          // clicksToEdit: 1
+          clicksToEdit: 2
       });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
@@ -4111,10 +4112,17 @@ Ext.define('Lino.GridPanel', {
             case e.LEFT:
                 newCell = walk('left');
                 break;
-            case e.F2:
+            case e.F2 && false:
                 if (!e.hasModifier()) {
+                    // https://gist.github.com/zerkms/2572486 to add a key trigger.
                     if (!g.editingPlugin.editing) {
-                        g.editingPlugin.startEditByPosition(e.position);
+                        var columnId = g.getSelectionModel().getCurrentPosition().column,
+                            record = g.getSelectionModel().selection.record,
+                            header = g.getHeaderAtIndex(columnId);
+
+                        // me.startEdit(record, header);
+                        g.editingPlugin.startEdit(record, header);
+                        // editor.startEdit(e.position.cellElement);
                         e.stopEvent();
                         return;
                     }
