@@ -2568,6 +2568,17 @@ Lino.fields2array = function(fields,values) {
     return pv;
 };
 
+
+Ext.define('Lino.form.field.HtmlEditor',{
+    override : 'Ext.form.field.HtmlEditor',
+    // Extjs set the default value to (Non-breaking space) in Opera,
+    // (Zero-width space) in all other browsers. as following.
+    // defaultValue: Ext.isOpera ? '&#160;' : '&#8203;',
+    // So with Opera If the user does not edit a record with HtmlEditor as at least one of its fields. Lino will
+    // consider the record as Dirty (Edited by the user) which is false. To prevent this , we set the defaultValue to
+    // Zero-width space for all browsers.
+    defaultValue: '&#8203;',
+});
 //Edited by HKC
 //    Ext.define('Lino.PanelMixin', {
 //    extend: 'Ext.panel.Table',
@@ -3395,7 +3406,7 @@ Ext.define('Lino.GridPanel', {
     // extend : 'Ext.grid.GridPanel',
     extend : 'Ext.grid.Panel',
      mixins: [
-         //'Ext.grid.plugin.CellEditing',
+         // 'Ext.grid.plugin.CellEditing',
          'Lino.MainPanel',
          'Lino.PanelMixin'
      ],
@@ -3639,7 +3650,7 @@ Ext.define('Lino.GridPanel', {
           //~ this.bbar = actions.bbar;
       }
       
-      this.tbar = Ext.create('Ext.toolbar.Toolbar',{items: tbar})
+      this.tbar = Ext.create('Ext.toolbar.Toolbar',{items: tbar});
         
       // this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
       //   store: this.store, 
@@ -4102,8 +4113,8 @@ Ext.define('Lino.GridPanel', {
                 break;
             case e.F2:
                 if (!e.hasModifier()) {
-                    if (g.isEditor && !g.editing) {
-                        g.startEditing(r, c);
+                    if (!g.editingPlugin.editing) {
+                        g.editingPlugin.startEditByPosition(e.position);
                         e.stopEvent();
                         return;
                     }

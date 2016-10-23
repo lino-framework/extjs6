@@ -25,7 +25,8 @@ Summary from <http://en.wikipedia.org/wiki/Restful>:
 
 
 """
-
+from __future__ import unicode_literals
+from builtins import str
 import logging
 logger = logging.getLogger(__name__)
 
