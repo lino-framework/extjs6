@@ -707,7 +707,7 @@ class CharFieldElement(FieldElement):
 
     def __init__(self, *args, **kw):
         FieldElement.__init__(self, *args, **kw)
-        self.preferred_width = 1 + min(20, max(3, self.field.max_length))
+        self.preferred_width = 1 + min(20, max(3, self.field.max_length or 0))
 
     def get_field_options(self, **kw):
         kw = FieldElement.get_field_options(self, **kw)
@@ -1246,7 +1246,7 @@ class BooleanFieldElement(FieldElement):
     def get_field_options(self, **kw):
         kw = FieldElement.get_field_options(self, **kw)
         if not isinstance(self.layout_handle.layout, layouts.ColumnsLayout):
-            if kw.has_key('fieldLabel'):
+            if 'fieldLabel' in kw:
                 del kw['fieldLabel']
             # ~ kw.update(hideLabel=True)
 
