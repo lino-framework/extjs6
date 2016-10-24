@@ -653,7 +653,7 @@ class ExtRenderer(HtmlRenderer):
         self.actors_list = [
             rpt for rpt in dbtables.master_reports
             + dbtables.slave_reports
-            + dbtables.generic_slaves.values()
+            + list(dbtables.generic_slaves.values())
             + dbtables.custom_tables
             + dbtables.frames_list]
 
