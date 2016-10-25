@@ -113,9 +113,14 @@ class Plugin(Plugin):
     ui_handle_attr_name = 'extjs_handle'
 
     select_theme = False
-    """
-    Whether to let the user to choose his preferred theme.
-    Default False.
+    """Whether to let the user choose his preferred theme.
+    Default `False`.
+
+    Note that setting this to `True` will inject a field into the
+    :class:`lino.modlib.users.User` model with the result that
+    switching between :mod:`lino.modlib.extjs` and
+    :mod:`lino_extjs6.extjs6` requires a database migration
+
     """
 
     theme_name = 'theme-classic'
