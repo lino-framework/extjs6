@@ -112,6 +112,12 @@ class Plugin(Plugin):
 
     ui_handle_attr_name = 'extjs_handle'
 
+    select_theme = False
+    """
+    Whether to let the user to choose his preferred theme.
+    Default False.
+    """
+
     theme_name = 'theme-classic'
     """
     The Extjs6 theme to be used.

@@ -31,9 +31,12 @@ EXTJS6_THEMES_CHOICES = (
     ("theme-triton", "Theme triton"),
 )
 
-dd.inject_field(
-    'users.User', 'preferred_theme',
-    models.CharField(_("Preferred theme"), choices=EXTJS6_THEMES_CHOICES, default="", blank=True, max_length=25))
+if dd.plugins.extjs6.select_theme:
+    dd.inject_field(
+        'users.User', 'preferred_theme',
+        models.CharField(_("Preferred theme"), choices=EXTJS6_THEMES_CHOICES, default="", blank=True, max_length=25))
+else:
+    dd.inject_field('users.User', 'preferred_theme', dd.DummyField())
 
 
 class ThemedUserDetail(UserDetail):
