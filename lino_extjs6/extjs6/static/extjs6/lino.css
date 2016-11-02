@@ -1,5 +1,5 @@
 /*
- Copyright 2009-2015 Luc Saffre
+ Copyright 2009-2016 Luc Saffre
 */
 
 /* 
@@ -55,7 +55,14 @@ e.g. welfare.jobs.NewJobsOverview needs
   /*   opacity: 1;  
   font-weight: bold; */
 }
-
+.x-form-readonly{
+	color: blue !important;
+	/*background-color :blue !important;*/
+	/*background-image : none;*/
+}
+.x-form-item {
+	padding: 2px;
+}
 .x-item-disabled * {
   color: blue !important; 
   /*font-weight: bold !important; */
