@@ -2550,9 +2550,6 @@ Lino.fields2array = function(fields,values) {
           var v = values[f.name];
         else 
           var v = f.getValue();
-        if (f.formatDate) {
-            pv[i] = f.formatDate(v); 
-        } ;
         if (f.config.store && f.config.store.length > 1){
             data = f.config.store;
             for (var e=0 ; e < data ; e++){
@@ -2565,6 +2562,9 @@ Lino.fields2array = function(fields,values) {
         else {
             pv[i] = v; // f.getValue();
         }
+        if (f.formatDate) {
+            pv[i] = f.formatDate(pv[i]);
+        } ;
     };
     return pv;
 };
