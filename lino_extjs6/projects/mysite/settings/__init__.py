@@ -1,4 +1,4 @@
-from lino_noi.projects.team.settings import Site
+from lino_noi.projects.team.settings import *
 
 
 class Site(Site):
