@@ -468,8 +468,10 @@ Lino.show_login_window = function(on_login,username, password ) {
       };
     
       var login_button = Ext.create('Ext.Button',{
-        text:"{{_('Log in')}}",
-        formBind: true,});
+          text:"{{_('Log in')}}",
+          formBind: true,
+          handler: do_login
+      });
 
        Ext.define('Login.Controller', {
        extend: 'Ext.app.ViewController',
