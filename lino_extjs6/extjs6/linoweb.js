@@ -543,7 +543,7 @@ Lino.logout = function(id,name) {
         '{{extjs.build_plain_url("auth")}}',
         {}, 'logout', undefined, undefined,
         function(){Lino.reload();})
-}
+};
 
 Lino.set_subst_user = function(id, name) {
     //~ console.log(20130723,'Lino.set_subst_user',id,name,Lino.current_window,Lino.viewport);
@@ -552,7 +552,7 @@ Lino.set_subst_user = function(id, name) {
         Lino.current_window.main_item.set_base_param("{{constants.URL_PARAM_SUBST_USER}}",id);
     if (Lino.viewport) 
         Lino.permalink_handler(Lino.current_window)();
-}
+};
 
 
 
@@ -571,7 +571,7 @@ Lino.perc2width = function(perc) {
     // console.log("20151226", document, window, w);
     var w = Lino.viewport.getWidth();
     return w * perc / 100;
-}
+};
 
 
 // HKC
@@ -728,7 +728,7 @@ Ext.define('Lino.MainPanel',{
                 t._force_dirty = true;
                 t.refresh();
             }
-        }
+        };
         Ext.each(this.params_panel.fields,function(f) {
           //~ f.on('valid',function() {t.refresh()});
           if (f instanceof Ext.form.Checkbox) {
@@ -904,7 +904,7 @@ Lino.load_url = function(url) {
     //Lino.viewport.loadMask.show();
     //~ location.replace(url);
     document.location = url;
-}
+};
 
 Lino.close_window = function(status_update, norestore) {
   // norestore is used when called by handle_action_result() who 
@@ -945,33 +945,33 @@ Lino.reload = function() {
     Lino.close_all_windows();
 
     // Then reload current view
-    var url =  "{{extjs.build_plain_url()}}"
+    var url =  "{{extjs.build_plain_url()}}";
 
     var p = {};
-    Lino.insert_subst_user(p)
+    Lino.insert_subst_user(p);
     if (Ext.urlEncode(p))
         url = url + "?" + Ext.urlEncode(p);
 
     Lino.load_url(url);
-}
+};
 
 Lino.handle_home_button = function() {
   if (Lino.window_history.length == 0)
       Lino.reload();
   else
       Lino.close_all_windows();
-}
+};
 
 Lino.close_all_windows = function() {
     while (Lino.window_history.length > 0) {
         Lino.close_window();
     }
-}
+};
 
 Lino.calling_window = function() {
     if (Lino.window_history.length) 
         return Lino.window_history[Lino.window_history.length-1];
-}
+};
 
 //~ Lino.WindowAction = function(mainItemClass,windowConfig,mainConfig,ppf) {
 //Lino.WindowAction = function(windowConfig,main_item_fn) {
@@ -1158,7 +1158,7 @@ Lino.on_tab_activate = function(item) {
   //~ console.log('activate',item); 
   if (item.rendered && item.doLayout) item.doLayout();
   //~ if (item.rendered) item.doLayout();
-}
+};
 
 Ext.define('Lino.TimeField', {
     extend: 'Ext.form.field.Time',
@@ -2561,14 +2561,17 @@ Lino.fields2array = function(fields,values) {
           var v = values[f.name];
         else 
           var v = f.getValue();
-        if (f.config.store && f.config.store.length > 1){
-            data = f.config.store;
-            for (var e=0 ; e < data ; e++){
-                if (data[e][1] == v) {
-                    pv[i] = data[e][0];
-                    break;
-                }
-            }
+        if (f.config.store && f.config.store.totalCount > 0 && !Number.isInteger(v)){
+            pv[i] = f.hiddenvalue_tosubmit;
+            // v = f.rawValue;
+            // var data = f.config.store;
+            // var index = 1;
+            // for (var e=0 ; e < data.length ; e++){
+            //     if (data[e][index] == v) {
+            //         pv[i] = data[e][0];
+            //         break;
+            //     }
+            // }
         }
         else {
             pv[i] = v; // f.getValue();
