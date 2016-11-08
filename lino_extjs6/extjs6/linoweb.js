@@ -468,8 +468,10 @@ Lino.show_login_window = function(on_login,username, password ) {
       };
     
       var login_button = Ext.create('Ext.Button',{
-        text:"{{_('Log in')}}",
-        formBind: true,});
+          text:"{{_('Log in')}}",
+          formBind: true,
+          handler: do_login
+      });
 
        Ext.define('Login.Controller', {
        extend: 'Ext.app.ViewController',
@@ -541,7 +543,7 @@ Lino.logout = function(id,name) {
         '{{extjs.build_plain_url("auth")}}',
         {}, 'logout', undefined, undefined,
         function(){Lino.reload();})
-}
+};
 
 Lino.set_subst_user = function(id, name) {
     //~ console.log(20130723,'Lino.set_subst_user',id,name,Lino.current_window,Lino.viewport);
@@ -550,7 +552,7 @@ Lino.set_subst_user = function(id, name) {
         Lino.current_window.main_item.set_base_param("{{constants.URL_PARAM_SUBST_USER}}",id);
     if (Lino.viewport) 
         Lino.permalink_handler(Lino.current_window)();
-}
+};
 
 
 
@@ -569,7 +571,7 @@ Lino.perc2width = function(perc) {
     // console.log("20151226", document, window, w);
     var w = Lino.viewport.getWidth();
     return w * perc / 100;
-}
+};
 
 
 // HKC
@@ -726,7 +728,7 @@ Ext.define('Lino.MainPanel',{
                 t._force_dirty = true;
                 t.refresh();
             }
-        }
+        };
         Ext.each(this.params_panel.fields,function(f) {
           //~ f.on('valid',function() {t.refresh()});
           if (f instanceof Ext.form.Checkbox) {
@@ -902,7 +904,7 @@ Lino.load_url = function(url) {
     //Lino.viewport.loadMask.show();
     //~ location.replace(url);
     document.location = url;
-}
+};
 
 Lino.close_window = function(status_update, norestore) {
   // norestore is used when called by handle_action_result() who 
@@ -943,33 +945,33 @@ Lino.reload = function() {
     Lino.close_all_windows();
 
     // Then reload current view
-    var url =  "{{extjs.build_plain_url()}}"
+    var url =  "{{extjs.build_plain_url()}}";
 
     var p = {};
-    Lino.insert_subst_user(p)
+    Lino.insert_subst_user(p);
     if (Ext.urlEncode(p))
         url = url + "?" + Ext.urlEncode(p);
 
     Lino.load_url(url);
-}
+};
 
 Lino.handle_home_button = function() {
   if (Lino.window_history.length == 0)
       Lino.reload();
   else
       Lino.close_all_windows();
-}
+};
 
 Lino.close_all_windows = function() {
     while (Lino.window_history.length > 0) {
         Lino.close_window();
     }
-}
+};
 
 Lino.calling_window = function() {
     if (Lino.window_history.length) 
         return Lino.window_history[Lino.window_history.length-1];
-}
+};
 
 //~ Lino.WindowAction = function(mainItemClass,windowConfig,mainConfig,ppf) {
 //Lino.WindowAction = function(windowConfig,main_item_fn) {
@@ -1156,53 +1158,60 @@ Lino.on_tab_activate = function(item) {
   //~ console.log('activate',item); 
   if (item.rendered && item.doLayout) item.doLayout();
   //~ if (item.rendered) item.doLayout();
-}
+};
 
-Lino.TimeField = Ext.extend(Ext.form.TimeField,{
-  format: '{{settings.SITE.time_format_extjs}}',
-  increment: 15
+Ext.define('Lino.TimeField', {
+    extend: 'Ext.form.field.Time',
+    format: '{{settings.SITE.time_format_extjs}}',
+    increment: 15
   });
-Lino.DateField = Ext.extend(Ext.form.DateField,{
+
+Ext.define('Lino.DateField', {
+    extend: 'Ext.form.field.Date',
   //~ boxMinWidth: Lino.chars2width(15), // 20131005 changed from 11 to 15
-  format: '{{settings.SITE.date_format_extjs}}',
-  altFormats: '{{settings.SITE.alt_date_formats_extjs}}',
+    format: '{{settings.SITE.date_format_extjs}}',
+    altFormats: '{{settings.SITE.alt_date_formats_extjs}}',
   });
-Lino.DatePickerField = Ext.extend(Ext.DatePicker,{
+
+Ext.define('Lino.DatePickerField', {
+    extend: 'Ext.picker.Date',
   //~ boxMinWidth: Lino.chars2width(11),
-  format: '{{settings.SITE.date_format_extjs}}',
+    format: '{{settings.SITE.date_format_extjs}}',
   //~ altFormats: '{{settings.SITE.alt_date_formats_extjs}}'
-  formatDate : function(date){
+    formatDate : function(date){
       //~ console.log("20121203 formatDate",this.name,date);
       return Ext.isDate(date) ? date.dateFormat(this.format) : date;
   }
-  });
-// edited by HKC (Migratio to Exjts6)
-//Lino.DateTimeField = Ext.extend(Ext.ux.form.DateTime,{
-Lino.DateTimeField = Ext.extend(Ext.ux.DateTimeField,{
-  dateFormat: '{{settings.SITE.date_format_extjs}}',
-  timeFormat: '{{settings.SITE.time_format_extjs}}'
+});
+
+Ext.define('Lino.DateTimeField', {
+    extend: 'Ext.ux.DateTimeField',
+    dateFormat: '{{settings.SITE.date_format_extjs}}',
+    timeFormat: '{{settings.SITE.time_format_extjs}}'
   //~ ,hiddenFormat: '{{settings.SITE.date_format_extjs}} {{settings.SITE.time_format_extjs}}'
-  });
-// edited by HKC (Migratio to Exjts6)
-//Lino.URLField = Ext.extend(Ext.form.TriggerField,{
-Lino.URLField = Ext.extend(Ext.form.field.Text,{
-  triggerClass : 'x-form-search-trigger',
-  //~ triggerClass : 'x-form-world-trigger',
-  vtype: 'url',
-  onTriggerClick : function() {
+});
+
+Ext.define('Lino.URLField', {
+    extend: 'Ext.form.field.Text',
+    triggerClass : 'x-form-search-trigger',
+    //~ triggerClass : 'x-form-world-trigger',
+    vtype: 'url',
+    onTriggerClick : function() {
     //~ console.log('Lino.URLField.onTriggerClick',this.value)
     //~ document.location = this.value;
-    window.open(this.getValue(),'_blank');
-  }
+        window.open(this.getValue(),'_blank');
+    }
 });
-Lino.IncompleteDateField = Ext.extend(Ext.form.TextField,{
-  //~ regex: /^-?\d+-[01]\d-[0123]\d$/,
-  //~ regex: /^[0123]\d\.[01]\d\.-?\d+$/,
-  maxLength: 10,
-  boxMinWidth: Lino.chars2width(10),
-  regex: {{settings.SITE.date_format_regex}},
-  regexText: '{{_("Enter a date in format YYYY-MM-DD (use zeroes for unknown parts).")}}'
-  });
+
+Ext.define('Lino.IncompleteDateField', {
+    extend: 'Ext.form.TextField',
+    //~ regex: /^-?\d+-[01]\d-[0123]\d$/,
+    //~ regex: /^[0123]\d\.[01]\d\.-?\d+$/,
+    maxLength: 10,
+    boxMinWidth: Lino.chars2width(10),
+    regex: {{settings.SITE.date_format_regex}},
+    regexText: '{{_("Enter a date in format YYYY-MM-DD (use zeroes for unknown parts).")}}'
+});
 
 
 //~ Lino.make_dropzone = function(cmp) {
@@ -1239,7 +1248,8 @@ Lino.IncompleteDateField = Ext.extend(Ext.form.TextField,{
 
 //~ Lino.FileUploadField = Ext.ux.form.FileUploadField;
 
-Lino.FileUploadField = Ext.extend(Ext.ux.form.FileUploadField,{
+Ext.define('Lino.FileUploadField', {
+    extend: 'Ext.ux.form.FileUploadField',
     unused_onRender : function(ct, position){
       //Lino.FileUploadField.superclass.onRender.call(this, ct, position);
          this.callSuper(ct, position);
@@ -1273,16 +1283,15 @@ Lino.FileUploadField = Ext.extend(Ext.ux.form.FileUploadField,{
     }
 });
 
-// edited by HKC (Migratio to Exjts6)
-//Lino.FileField = Ext.extend(Ext.form.TriggerField,{
-Lino.FileField = Ext.extend(Ext.form.field.Text,{
-  triggerClass : 'x-form-search-trigger',
-  editable: false,
-  onTriggerClick : function() {
-    //~ console.log('Lino.URLField.onTriggerClick',this.value)
-    //~ document.location = this.value;
-    if (this.getValue()) window.open(MEDIA_URL + '/'+this.getValue(),'_blank');
-  }
+Ext.define('Lino.FileField', {
+    extend: 'Ext.form.field.Text',
+    triggerClass : 'x-form-search-trigger',
+    editable: false,
+    onTriggerClick : function() {
+        //~ console.log('Lino.URLField.onTriggerClick',this.value)
+        //~ document.location = this.value;
+        if (this.getValue()) window.open(MEDIA_URL + '/'+this.getValue(),'_blank');
+    }
 });
 
 Lino.file_field_handler = function(panel,config) {
@@ -1307,12 +1316,13 @@ Lino.file_field_handler = function(panel,config) {
 };
 Ext.define('Lino_Panel', {
     override : 'Ext.panel.Panel',
-
     // bodyStyle: 'padding:0px;width:0px;',
     bodyStyle : 'background: #d3e1f1;',
 });
 
-Lino.VBorderPanel = Ext.extend(Ext.Panel,{
+
+Ext.define('Lino.VBorderPanel', {
+    extend: 'Ext.Panel',
     constructor : function(config) {
       config.layout = 'border';
       delete config.layoutConfig;
@@ -1863,7 +1873,7 @@ Lino.help_text_editor = function() {
   //~ Lino.lino.ContentTypes.detail.run(null,{record_id:this.content_type});
   //  Edited by HKC
   Lino.gfks.ContentTypes.detail.run(null,{record_id:this.content_type});
-}
+};
 
 // Path to the blank image should point to a valid location on your server
 //~ Ext.BLANK_IMAGE_URL = MEDIA_URL + '/extjs/resources/images/default/s.gif'; 
@@ -1873,19 +1883,20 @@ Lino.help_text_editor = function() {
 Lino.id_renderer = function(value, metaData, record, rowIndex, colIndex, store) {
   //~ if (record.phantom) return '';
   return value;
-}
+;}
 
 Lino.raw_renderer = function(value, metaData, record, rowIndex, colIndex, store) {
   return value;
-}
+};
 
 Lino.text_renderer = function(value, metaData, record, rowIndex, colIndex, store) {
   //~ return "not implemented"; 
   return value;
-}
+};
 
-Lino.NullNumberColumn = Ext.extend(Ext.grid.Column, {
-    align : 'right', 
+Ext.define('Lino.NullNumberColumn', {
+    extend: 'Ext.grid.Column',
+    align : 'right',
     format : '{{settings.SITE.default_number_format_extjs}}', 
     renderer : function(value, metaData, record, rowIndex, colIndex, store) {
         //~ console.log(20130128,"NullNumberColumn.renderer",value);
@@ -1898,7 +1909,7 @@ Lino.NullNumberColumn = Ext.extend(Ext.grid.Column, {
 Lino.link_button = function(url) {
     // return '<a href="' + url + '"><img src="{{settings.SITE.build_media_url('lino', 'extjs', 'images', 'xsite', 'link.png')}}" alt="link_button"></a>'
     return '<a href="' + url + '" style="text-decoration:none;">&#10138;</a>'
-}
+};
 
 Lino.fk_renderer = function(fkname,handlername) {
   //~ console.log('Lino.fk_renderer handler=',handler);
@@ -2464,14 +2475,14 @@ Ext.define('Lino.ActionFormPanel', {
     // wrap into function to prepare possible recursive call
     var fn = function(panel, btn, step) {
       var p = {};
-      self.add_field_values(p)
+      self.add_field_values(p);
       if (panel) Ext.apply(p, panel.get_base_params());
       delete p.{{constants.URL_PARAM_PARAM_VALUES}};
       // console.log("20150130", p.{{constants.URL_PARAM_PARAM_VALUES}});
 
       Lino.call_ajax_action(
           panel, 'GET', url, p, actionName, step, fn); //  , on_success);
-    }
+    };
     fn(panel, null, null);
     
     
@@ -2550,14 +2561,17 @@ Lino.fields2array = function(fields,values) {
           var v = values[f.name];
         else 
           var v = f.getValue();
-        if (f.config.store && f.config.store.length > 1){
-            data = f.config.store;
-            for (var e=0 ; e < data ; e++){
-                if (data[e][1] == v) {
-                    pv[i] = data[e][0];
-                    break;
-                }
-            }
+        if (f instanceof Lino.ComboBox && (!Number.isInteger(v) || v == null )){
+            pv[i] = f.hiddenvalue_id;
+            // v = f.rawValue;
+            // var data = f.config.store;
+            // var index = 1;
+            // for (var e=0 ; e < data.length ; e++){
+            //     if (data[e][index] == v) {
+            //         pv[i] = data[e][0];
+            //         break;
+            //     }
+            // }
         }
         else {
             pv[i] = v; // f.getValue();
@@ -2716,7 +2730,7 @@ Ext.define('Lino.FormPanel', {
             }
           },
           emptyText: "{{_('Go to record')}}"
-        })
+        });
         this.tbar = this.tbar.concat([this.record_selector]);
 
         this.tbar = this.tbar.concat([
@@ -3404,7 +3418,6 @@ Lino.auto_height_cell_template = Ext.create('Ext.Template',
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, Lino.PanelMixin);
 //Lino.GridPanel = Ext.extend(Lino.GridPanel, {
 Ext.define('Lino.GridPanel', {
-    // extend : 'Ext.grid.GridPanel',
     extend : 'Ext.grid.Panel',
      mixins: [
          // 'Ext.grid.plugin.CellEditing',
@@ -3442,8 +3455,8 @@ Ext.define('Lino.GridPanel', {
       });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
-    // config.plugins = [Ext.create('Lino.GridFilters',{})];
-      config.plugins.push('gridfilters');
+    config.plugins = [Ext.create('Lino.GridFilters',{})];
+      // config.plugins.push('gridfilters');
 {% endif %}
 {% if settings.SITE.use_filterRow %}
       config.plugins.push(Ext.create('Ext.ux.grid.FilterRow',{}));
