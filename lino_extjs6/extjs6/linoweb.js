@@ -2561,8 +2561,8 @@ Lino.fields2array = function(fields,values) {
           var v = values[f.name];
         else 
           var v = f.getValue();
-        if (f.config.store && f.config.store.totalCount > 0 && !Number.isInteger(v)){
-            pv[i] = f.hiddenvalue_tosubmit;
+        if (f instanceof Lino.ComboBox && (!Number.isInteger(v) || v == null )){
+            pv[i] = f.hiddenvalue_id;
             // v = f.rawValue;
             // var data = f.config.store;
             // var index = 1;
