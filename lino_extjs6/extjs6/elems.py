@@ -64,6 +64,8 @@ from lino.core.layouts import (FormLayout, ParamsLayout,
 from lino.utils.mldbc.fields import BabelCharField, BabelTextField
 from lino.core import tables
 from lino.core.gfks import GenericForeignKey
+from lino.core.site import html2text
+from lino.utils.xmlgen.html import html2rst
 
 from lino.utils.xmlgen import etree
 from lino.utils.xmlgen.html import E
@@ -692,10 +694,18 @@ class TextFieldElement(FieldElement):
     def value2html(self, ar, v, **cellattrs):
         if self.format == 'html' and v:
             v = html2xhtml(v)
-            top = E.fromstring(v)
+            # top = E.fromstring(v)
+            top = E.raw(v)
         else:
             top = self.format_value(ar, v)
         return E.td(top, **cellattrs)
+
+    def format_value(self, ar, v):  # new since 20161120
+        if self.format == 'html' and v:
+            if etree.iselement(v):
+                return html2rst(v)
+            return html2text(v)
+        return super(TextFieldElement, self).format_value(ar, v)
 
 
 class CharFieldElement(FieldElement):
@@ -1193,7 +1203,6 @@ class DisplayElement(FieldElement):
             return E.td(str(e), **cellattrs)
 
     def format_value(self, ar, v):
-        from lino.utils.xmlgen.html import html2rst
         if etree.iselement(v):
             return html2rst(v)
         return self.field._lino_atomizer.format_value(ar, v)
