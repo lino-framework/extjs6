@@ -1163,7 +1163,16 @@ Lino.on_tab_activate = function(item) {
 Ext.define('Lino.TimeField', {
     extend: 'Ext.form.field.Time',
     format: '{{settings.SITE.time_format_extjs}}',
-    increment: 15
+    completeEdit: function() {
+        var me = this,
+            // val = me.getValue();   original code
+            val = val = me.getRawValue();
+        me.callParent(arguments);
+        // Only set the raw value if the current value is valid and is not falsy
+        if (me.validateValue(val)) {
+            me.setValue(val);
+        }
+    }
   });
 
 Ext.define('Lino.DateField', {
