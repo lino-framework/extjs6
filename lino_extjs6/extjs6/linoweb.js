@@ -1163,14 +1163,23 @@ Lino.on_tab_activate = function(item) {
 Ext.define('Lino.TimeField', {
     extend: 'Ext.form.field.Time',
     format: '{{settings.SITE.time_format_extjs}}',
-    increment: 15
+    completeEdit: function() {
+        var me = this,
+            // val = me.getValue();   original code
+            val = val = me.getRawValue();
+        me.callParent(arguments);
+        // Only set the raw value if the current value is valid and is not falsy
+        if (me.validateValue(val)) {
+            me.setValue(val);
+        }
+    }
   });
 
 Ext.define('Lino.DateField', {
     extend: 'Ext.form.field.Date',
   //~ boxMinWidth: Lino.chars2width(15), // 20131005 changed from 11 to 15
     format: '{{settings.SITE.date_format_extjs}}',
-    altFormats: '{{settings.SITE.alt_date_formats_extjs}}',
+    altFormats: '{{settings.SITE.alt_date_formats_extjs}}'
   });
 
 Ext.define('Lino.DatePickerField', {
@@ -3458,7 +3467,7 @@ Ext.define('Lino.GridPanel', {
       });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
-    config.plugins = [Ext.create('Lino.GridFilters',{})];
+    config.plugins.push(Ext.create('Lino.GridFilters',{}));
       // config.plugins.push('gridfilters');
 {% endif %}
 {% if settings.SITE.use_filterRow %}
@@ -4035,6 +4044,10 @@ Ext.define('Lino.GridPanel', {
                 );
             },
             cell, newCell, r, c, ae;
+        // Are we editing a cell ?
+        if (this.editingPlugin != undefined && this.editingPlugin.editing ){
+            return;
+        }
 
         switch(k){
             case e.ESC:
