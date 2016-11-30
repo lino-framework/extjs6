@@ -4981,11 +4981,6 @@ Ext.define('Lino.Window', {
         config.items = [config.main_item.params_panel, config.main_item];
         //~ 20130923b
     } else {
-        container = this.initContainer('main_area');
-        if (container == null){
-            // a permalink
-            config.renderTo =  Ext.getBody() ;
-        }
         config.layout = 'fit';
         config.items = config.main_item;
     }
@@ -5031,7 +5026,7 @@ Ext.define('Lino.Window', {
     //~ { qtip: this.config.qtip, handler: Lino.save_wc_handler(this), id: "save" }, 
     //~ { qtip: 'Call doLayout() on main Container.', handler: Lino.refresh_handler(this), id: "refresh" },
     //~ if (this.main_item.params_panel) {
-        //~ config.tools = config.tools.concat([ 
+        //~ config.tools = config.tools.concat([
           //~ { qtip: 'Show/hide parameter panel', handler: this.toggle_params_panel, id: "gear", scope:this } 
         //~ ]);
     //~ }
