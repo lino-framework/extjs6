@@ -2597,6 +2597,59 @@ Ext.define('Lino.form.field.HtmlEditor',{
     // specialkey : function ( field , event , eOpts ) {
     //     console.log("specialkey");
     // }
+    fixKeys: (function() {
+        var tag;
+        if (Ext.isIE10m) {
+            return function(e) {
+                var me = this,
+                    k = e.getKey(),
+                    doc = me.getDoc(),
+                    readOnly = me.readOnly,
+                    range, target;
+                if (k === e.TAB) {
+                    e.stopEvent();
+                    // TODO: add tab support for IE 11.
+                    if (!readOnly) {
+                        range = doc.selection.createRange();
+                        if (range) {
+                            if (range.collapse) {
+                                range.collapse(true);
+                                range.pasteHTML('&#160;&#160;&#160;&#160;');
+                            }
+                            me.deferFocus();
+                        }
+                    }
+                }
+            };
+        }
+        if (Ext.isOpera) {
+            return function(e) {
+                var me = this,
+                    k = e.getKey(),
+                    readOnly = me.readOnly;
+                if (k === e.TAB) {
+                    e.stopEvent();
+                    if (!readOnly) {
+                        me.win.focus();
+                        me.execCmd('InsertHTML', '&#160;&#160;&#160;&#160;');
+                        me.deferFocus();
+                    }
+                }
+                //HKC change | Start
+                else if (k == e.S && e.ctrlKey){
+                    e.stopEvent();
+                    e.preventDefault();
+                    //this.getWin.fireEvent('keyup');
+                    // this.fireKey(e);
+                    this.getBubbleTarget();
+                    console.log('HTMLEditor is saving...');
+                }
+                //HKC change | End
+            };
+        }
+        // Not needed, so null.
+        return null;
+    }()),
 });
 //Edited by HKC
 //    Ext.define('Lino.PanelMixin', {
