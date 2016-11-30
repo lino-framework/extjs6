@@ -807,30 +807,11 @@ Ext.define('Lino.MainPanel',{
 
 
 
-// Edited by
-// Ext.Viewport (extjs3) <==> Ext.container.Viewport (Extjs6)
-//Lino.Viewport = Ext.extend(Ext.Viewport, Lino.MainPanel);
 Ext.define('Lino.Viewport', {
     extend :  'Ext.container.Viewport',
-     mixins: [
-         //'Ext.container.Viewport',
-         'Lino.MainPanel'],
-    //extend: 'Ext.plugin.Viewport',
-//Lino.Viewport = Ext.extend(Lino.Viewport, {
+     mixins: ['Lino.MainPanel'],
   layout : "fit"
   ,is_home_page : true
-  ,initComponent : function(){
-    this.on('render',function(){
-      //  Edited by HKC
-      //  https://www.sencha.com/forum/showthread.php?282509-Update-Ext.LoadMask-Example
-      //this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
-      // this.loadMask =  new Ext.create('Ext.LoadMask',{msg:"{{_('Please wait...')}}"});
-      //this.loadMask = new Ext.getBody().mask("{{_('Please wait...')}}");
-      //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
-    },this);
-        this.callSuper();  // 20160630
-        // this.callParent();  // 20160630
-  }
   ,refresh : function() {
       var caller = this;
       // console.log("20140829 Lino.Viewport.refresh()");
@@ -2014,7 +1995,7 @@ Lino.build_buttons = function(panel,actions) {
     }
     return {
         bbar:buttons, 
-        //cmenu:new Ext.menu.Menu(cmenu),
+        // cmenu:new Ext.menu.Menu(cmenu),
         cmenu:Ext.create('Ext.menu.Menu', {renderTo: Ext.getBody(),items:cmenu}),
         keyhandlers: keyhandlers
     };
@@ -2602,6 +2583,20 @@ Ext.define('Lino.form.field.HtmlEditor',{
     // consider the record as Dirty (Edited by the user) which is false. To prevent this , we set the defaultValue to
     // Zero-width space for all browsers.
     defaultValue: '&#8203;',
+    // bubbleEvents : ['specialkey'],
+    // listeners: {
+    //     specialkey: {
+    //         element: 'el', //bind to the underlying el property on the panel
+    //         fn: function(){ console.log('click specialkey'); }
+    //     },
+    //     keypass: {
+    //         element: 'el', //bind to the underlying el property on the panel
+    //         fn: function(){ console.log('click specialkey'); }
+    //     }
+    // },
+    // specialkey : function ( field , event , eOpts ) {
+    //     console.log("specialkey");
+    // }
 });
 //Edited by HKC
 //    Ext.define('Lino.PanelMixin', {
@@ -4977,7 +4972,6 @@ Ext.define('Lino.Window', {
   width: 700,
   height: 500,
   constructor : function (config) {
-    // config.renderTo =  Ext.getBody() ;
     if (config.main_item.params_panel) {
         config.layout = 'border';
         config.main_item.region = 'center';
@@ -4987,6 +4981,11 @@ Ext.define('Lino.Window', {
         config.items = [config.main_item.params_panel, config.main_item];
         //~ 20130923b
     } else {
+        container = this.initContainer('main_area');
+        if (container == null){
+            // a permalink
+            config.renderTo =  Ext.getBody() ;
+        }
         config.layout = 'fit';
         config.items = config.main_item;
     }
