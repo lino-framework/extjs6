@@ -162,18 +162,11 @@
             jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
             jasmine.getEnv().execute();
         {%- else -%}
-//            Lino.viewport.render("body");
-                Ext.application({
-                    name: 'Lino',
-                    extend: 'Ext.app.Application',
-                    launch: function () {
-                        Lino.viewport = Ext.create('Lino.Viewport', {
+            Lino.viewport = Ext.create('Lino.Viewport', {
                             renderTo: Ext.get('body'),
                             items: [{{ py2js(win) }},
                                     ],
-                        })
-                    }
-                });
+                        });
             {{ on_ready }}
         {%- endif %}
         //console.timeEnd('onReady');"
