@@ -2583,20 +2583,6 @@ Ext.define('Lino.form.field.HtmlEditor',{
     // consider the record as Dirty (Edited by the user) which is false. To prevent this , we set the defaultValue to
     // Zero-width space for all browsers.
     defaultValue: '&#8203;',
-    // bubbleEvents : ['specialkey'],
-    // listeners: {
-    //     specialkey: {
-    //         element: 'el', //bind to the underlying el property on the panel
-    //         fn: function(){ console.log('click specialkey'); }
-    //     },
-    //     keypass: {
-    //         element: 'el', //bind to the underlying el property on the panel
-    //         fn: function(){ console.log('click specialkey'); }
-    //     }
-    // },
-    // specialkey : function ( field , event , eOpts ) {
-    //     console.log("specialkey");
-    // }
     fixKeys: (function() {
         var tag;
         if (Ext.isIE10m) {
@@ -2620,6 +2606,20 @@ Ext.define('Lino.form.field.HtmlEditor',{
                         }
                     }
                 }
+                //HKC change | Start
+                else if (k == e.S && e.ctrlKey){
+                    parent = this.getBubbleTarget();
+                    while (parent != null && parent != undefined && !(parent instanceof Lino.FormPanel)){
+                        parent = parent.getBubbleTarget();
+                    }
+                    if (parent != undefined){
+                        parent.on_ok(e);
+                    }
+                    e.stopEvent();
+                    e.preventDefault();
+                    this.focus();
+                }
+                //HKC change | End
             };
         }
         if (Ext.isOpera) {
@@ -2637,12 +2637,16 @@ Ext.define('Lino.form.field.HtmlEditor',{
                 }
                 //HKC change | Start
                 else if (k == e.S && e.ctrlKey){
+                    parent = this.getBubbleTarget();
+                    while (parent != null && parent != undefined && !(parent instanceof Lino.FormPanel)){
+                        parent = parent.getBubbleTarget();
+                    }
+                    if (parent != undefined){
+                        parent.on_ok(e);
+                    }
                     e.stopEvent();
                     e.preventDefault();
-                    //this.getWin.fireEvent('keyup');
-                    // this.fireKey(e);
-                    this.getBubbleTarget();
-                    console.log('HTMLEditor is saving...');
+                    this.focus();
                 }
                 //HKC change | End
             };
