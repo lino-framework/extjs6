@@ -2583,20 +2583,77 @@ Ext.define('Lino.form.field.HtmlEditor',{
     // consider the record as Dirty (Edited by the user) which is false. To prevent this , we set the defaultValue to
     // Zero-width space for all browsers.
     defaultValue: '&#8203;',
-    // bubbleEvents : ['specialkey'],
-    // listeners: {
-    //     specialkey: {
-    //         element: 'el', //bind to the underlying el property on the panel
-    //         fn: function(){ console.log('click specialkey'); }
-    //     },
-    //     keypass: {
-    //         element: 'el', //bind to the underlying el property on the panel
-    //         fn: function(){ console.log('click specialkey'); }
-    //     }
-    // },
-    // specialkey : function ( field , event , eOpts ) {
-    //     console.log("specialkey");
-    // }
+    fixKeys: (function() {
+        var tag;
+        if (Ext.isIE10m) {
+            return function(e) {
+                var me = this,
+                    k = e.getKey(),
+                    doc = me.getDoc(),
+                    readOnly = me.readOnly,
+                    range, target;
+                if (k === e.TAB) {
+                    e.stopEvent();
+                    // TODO: add tab support for IE 11.
+                    if (!readOnly) {
+                        range = doc.selection.createRange();
+                        if (range) {
+                            if (range.collapse) {
+                                range.collapse(true);
+                                range.pasteHTML('&#160;&#160;&#160;&#160;');
+                            }
+                            me.deferFocus();
+                        }
+                    }
+                }
+                //HKC change | Start
+                else if (k == e.S && e.ctrlKey){
+                    parent = this.getBubbleTarget();
+                    while (parent != null && parent != undefined && !(parent instanceof Lino.FormPanel)){
+                        parent = parent.getBubbleTarget();
+                    }
+                    if (parent != undefined){
+                        parent.on_ok(e);
+                    }
+                    e.stopEvent();
+                    e.preventDefault();
+                    this.focus();
+                }
+                //HKC change | End
+            };
+        }
+        if (Ext.isOpera) {
+            return function(e) {
+                var me = this,
+                    k = e.getKey(),
+                    readOnly = me.readOnly;
+                if (k === e.TAB) {
+                    e.stopEvent();
+                    if (!readOnly) {
+                        me.win.focus();
+                        me.execCmd('InsertHTML', '&#160;&#160;&#160;&#160;');
+                        me.deferFocus();
+                    }
+                }
+                //HKC change | Start
+                else if (k == e.S && e.ctrlKey){
+                    parent = this.getBubbleTarget();
+                    while (parent != null && parent != undefined && !(parent instanceof Lino.FormPanel)){
+                        parent = parent.getBubbleTarget();
+                    }
+                    if (parent != undefined){
+                        parent.on_ok(e);
+                    }
+                    e.stopEvent();
+                    e.preventDefault();
+                    this.focus();
+                }
+                //HKC change | End
+            };
+        }
+        // Not needed, so null.
+        return null;
+    }()),
 });
 //Edited by HKC
 //    Ext.define('Lino.PanelMixin', {
