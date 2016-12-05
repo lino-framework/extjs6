@@ -7,7 +7,7 @@ dist
 tmp
 */SciTE.session
 default.db
-media/cache
+media
 *.egg-info
 .build/
 warnings_linkcheck.txt
