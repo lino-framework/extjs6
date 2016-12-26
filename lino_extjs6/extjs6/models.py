@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from lino.api import dd
 
-from lino.modlib.users.models import Users, UserDetail
+from lino.modlib.users.desktop import Users, UserDetail
 from django.db import models
 
 EXTJS6_THEMES_CHOICES = (
