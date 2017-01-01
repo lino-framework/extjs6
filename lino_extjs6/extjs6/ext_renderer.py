@@ -27,6 +27,8 @@ from django.utils.translation import ugettext as _
 
 from lino.core.gfks import ContentType
 
+from lino.api import rt
+
 import lino
 from lino.core import constants
 from lino.core.renderer import HtmlRenderer
@@ -533,7 +535,7 @@ class ExtRenderer(HtmlRenderer):
                     authorities = [
                         (a.user.id, str(a.user)) for a in qs]
 
-                a = users.MySettings.default_action
+                a = rt.actors.users.MySettings.default_action
                 handler = self.action_call(None, a, dict(record_id=user.pk))
                 handler = "function(){%s}" % handler
                 mysettings = dict(text=_("My settings"),
