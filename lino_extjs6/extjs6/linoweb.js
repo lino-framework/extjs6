@@ -2812,16 +2812,22 @@ Ext.define('Lino.FormPanel', {
       this.tbar = this.add_params_panel(this.tbar);
 
       //~ console.log(20101117,this.containing_window.refresh);
-      this.tbar = this.tbar.concat([
-        {
+      // this.tbar = this.tbar.concat([
+      //   {
           //~ text:'Refresh',
           //HKC
           //handler:function(){ this.do_when_clean(false,this.refresh.createDelegate(this)) },
-            handler:function(){ this.do_when_clean(false,this.refresh.bind(this)) },
-          iconCls: 'x-tbar-loading',
-          tooltip:"{{_('Reload current record')}}",
-          scope:this}
-      ]);
+          //   handler:function(){ this.do_when_clean(false,this.refresh.bind(this)) },
+          // iconCls: 'x-tbar-loading',
+          // tooltip:"{{_('Reload current record')}}",
+          // scope:this}
+      // ]);
+      this.tbar = this.tbar.concat([this.refresh = Ext.create('Ext.button.Button',{
+                tooltip:"{{_('Reload current record')}}",
+                disabled:true,
+                handler:function(){ this.do_when_clean(false,this.refresh.bind(this)) },
+                scope:this,
+                iconCls:'x-tbar-loading'})]);
 
       if (this.bbar) { // since 20121016
         if (this.tbar) {
