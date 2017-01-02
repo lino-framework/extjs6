@@ -67,6 +67,7 @@ from lino.modlib.users.choicelists import UserTypes
 if settings.SITE.user_model:
     from lino.modlib.users import models as users
 
+ONE_CHAR_LABEL = " <font size=\"4\">{}</font>"
 
 def prepare_label(mi):
     return mi.label
@@ -182,7 +183,7 @@ class ExtRenderer(HtmlRenderer):
 
     def get_action_status(self, ar, ba, obj, **kw):
         kw.update(ar.get_status())
-        if ba.action.parameters:
+        if ba.action.parameters and not ba.action.keep_user_values:
             apv = ar.action_param_values
             if apv is None:
                 apv = ba.action.action_param_defaults(ar, obj)
@@ -194,8 +195,10 @@ class ExtRenderer(HtmlRenderer):
         return kw
 
     def action_button(self, obj, ar, ba, label=None, **kw):
-        if not label:
-            label = ba.action.label
+        label = label or ba.get_button_label()
+        if len(label) == 1:
+            label = "\u00A0{}\u00A0".format(label)
+            # label = ONE_CHAR_LABEL.format(label)
         if ba.action.parameters and not ba.action.no_params_window:
             st = self.get_action_status(ar, ba, obj)
             return self.window_action_button(
@@ -222,7 +225,7 @@ class ExtRenderer(HtmlRenderer):
     def put_button(self, ar, obj, text, data, **kw):
 
         put_data = dict()
-        for k, v in data.items():
+        for k, v in list(data.items()):
             fld = obj._meta.get_field(k)
             fld._lino_atomizer.value2dict(v, put_data, obj)
 
@@ -370,7 +373,8 @@ class ExtRenderer(HtmlRenderer):
                 return self.action_call(ar, a, dict(record_id=obj.pk))
 
     def obj2html(self, ar, obj, text=None, **kw):
-        if not text:
+        # if not text: # Note that html elements are logical False.
+        if text is None:
             text = str(obj)
 
         h = self.instance_handler(ar, obj)
@@ -432,9 +436,29 @@ class ExtRenderer(HtmlRenderer):
             d.update(iconCls='x-tbar-' + mi.bound_action.action.icon_name)
         if settings.SITE.use_quicktips and help_text:
             d.update(listeners=dict(render=js_code(
-                "Lino.quicktip_renderer(%s,%s)" % (py2js('Foo'), py2js(help_text)))
+                "Lino.quicktip_renderer(%s,%s)" % (
+                    py2js('Foo'), py2js(help_text)))
             ))
         return d
+
+    def html_text(self, html):
+        """Wrpt the given html fragment into a ``<div class="htmlText">``
+        which specifies that this fragment contains simple html text
+        inside an ExtJS component.  This is required because ExtJS
+        does a lot of CSS magic which neutralizes the "usual" effects
+        of most html tags.
+
+        """
+        if isinstance(html, six.string_types):
+            return '<div class="htmlText">{0}</div>'.format(html)
+        if not E.iselement(html):
+            raise Exception("{!r} is not an element".format(html))
+        if html.tag in ('div', 'span'):
+            html.attrib['class'] = 'htmlText'
+            return html
+        return E.div(html, class_='htmlText')
+        # # is a list or tuple of ET elements
+        # return E.div(*html, class_='htmlText')
 
     def html_page(self, request, *args, **kw):
         """Return a string with the index page.  Content is mostly in the
@@ -484,8 +508,9 @@ class ExtRenderer(HtmlRenderer):
             items=dashboard,
         )
         if not on_ready:
-            dashboard.update(html=site.get_main_html(
-                request, extjs=self.plugin))
+            html = site.get_main_html(request, extjs=self.plugin)
+            html = self.html_text(html)
+            dashboard.update(html=html)
 
         win = dict(
             layout='fit',
@@ -521,19 +546,23 @@ class ExtRenderer(HtmlRenderer):
                 yield "Lino.user = %s;" % py2js(
                     dict(id=user.id, name=str(user)))
 
+                def usertext(u):
+                    return "{0} {1}, {3} ({2})".format(
+                        u.last_name, u.first_name, u.username, u.profile)
+
                 if user.profile.has_required_roles([Supervisor]):
                     authorities = [
-                        (u.id, str(u))
+                        (u.id, usertext(u))
                         for u in settings.SITE.user_model.objects.exclude(
                             profile='').exclude(id=user.id)]
                 else:
-                    qs = users.Authority.objects.filter(
+                    qs = rt.models.users.Authority.objects.filter(
                         authorized=user).exclude(user__profile='')
                     qs = qs.order_by(
                         'user__last_name', 'user__first_name',
                         'user__username')
                     authorities = [
-                        (a.user.id, str(a.user)) for a in qs]
+                        (a.user.id, usertext(a.user)) for a in qs]
 
                 a = rt.actors.users.MySettings.default_action
                 handler = self.action_call(None, a, dict(record_id=user.pk))
@@ -660,7 +689,7 @@ class ExtRenderer(HtmlRenderer):
             + dbtables.frames_list]
 
         self.actors_list.extend(
-            [a for a in choicelists.CHOICELISTS.values()
+            [a for a in list(choicelists.CHOICELISTS.values())
              if settings.SITE.is_installed(a.app_label)])
 
         # don't generate JS for abstract actors
@@ -700,7 +729,7 @@ class ExtRenderer(HtmlRenderer):
                 for e in lh.main.walk():
                     e.loosen_requirements(res)
 
-            if not fl in collector:
+            if fl not in collector:
                 fl._formpanel_name = formpanel_name
                 fl._url = res.actor_url()
                 collector.add(fl)
@@ -774,7 +803,7 @@ class ExtRenderer(HtmlRenderer):
 
         # Define every choicelist as a JS array:
         f.write("\n// ChoiceLists: \n")
-        for a in choicelists.CHOICELISTS.values():
+        for a in list(choicelists.CHOICELISTS.values()):
             if settings.SITE.is_installed(a.app_label):
                 # ~ if issubclass(a,choicelists.ChoiceList):
                 f.write("Lino.%s = %s;\n" %
@@ -826,7 +855,7 @@ class ExtRenderer(HtmlRenderer):
             rh = rpt.get_handle()
             for ba in rpt.get_actions():
                 if ba.action.parameters:
-                    if not ba.action in actions_written:
+                    if ba.action not in actions_written:
                         actions_written.add(ba.action)
                         for ln in self.js_render_window_action(
                                 rh, ba, profile):
@@ -953,7 +982,11 @@ class ExtRenderer(HtmlRenderer):
         if a.icon_name:
             kw.update(iconCls='x-tbar-' + a.icon_name)
         else:
-            kw.update(text=a.label)
+            txt = a.button_text or a.label
+            if len(txt) == 1:
+                txt = ONE_CHAR_LABEL.format(txt)
+
+            kw.update(text=txt)
         kw.update(
             # ~ name=a.name,
             menu_item_text=a.label,
@@ -965,7 +998,20 @@ class ExtRenderer(HtmlRenderer):
         if a.key:
             kw.update(keycode=a.key.keycode)
         if a.help_text:
-            kw.update(tooltip=a.help_text)
+            # if a.__class__.__name__ in ('ChangePassword', 'SubmitDetail'):
+            #     logger.info("20160829 a2btn() %r %r", a, str(a.help_text))
+
+            # A tooltip becomes visible only on buttons with an
+            # iconCls. On a button which has only text we must use
+            # Lino.quicktip_renderer. But I didn't find out why this
+            # doesn't seem to work.
+            if a.icon_name:
+                kw.update(tooltip=a.help_text)
+            elif settings.SITE.use_quicktips:
+                kw.update(listeners=dict(render=js_code(
+                    "Lino.quicktip_renderer('a2btn',%s)" %
+                    py2js(a.help_text))
+                ))
         elif a.icon_name:
             kw.update(tooltip=a.label)
         return kw
@@ -999,7 +1045,7 @@ class ExtRenderer(HtmlRenderer):
                         # ~ varname = varname_field(f)
                         # ~ on_render.append("%s.on('change',Lino.chooser_handler(%s,%r));" % (varname,e.ext_name,f.name))
                         on_render.append(
-                            "%s.on('change',Lino.chooser_handler(%s,%r));" % (
+                            "%s.on('change',Lino.chooser_handler(%s,'%s'));" % (
                                 el.as_ext(), e.as_ext(), f.name))
         return on_render
 
@@ -1008,12 +1054,10 @@ class ExtRenderer(HtmlRenderer):
     def js_render_ParamsPanelSubclass(self, dh):
 
         yield ""
-        # yield "Lino.%s = Ext.extend(Ext.form.FormPanel, {" % \
-        #     dh.layout._formpanel_name
-        yield "Ext.define('Lino.%s' , { extend : 'Ext.form.FormPanel'," % \
-              dh.layout._formpanel_name
-        for k, v in dh.main.ext_options().items():
-            # ~ if k != 'items':
+        yield "Lino.%s = Ext.extend(Ext.form.FormPanel, {" % \
+            dh.layout._formpanel_name
+        for k, v in list(dh.main.ext_options().items()):
+            #~ if k != 'items':
             if not k in self.SUPPRESSED:
                 yield "  %s: %s," % (k, py2js(v))
         # ~ yield "  collapsible: true,"
@@ -1038,7 +1082,7 @@ class ExtRenderer(HtmlRenderer):
                 dh.layout._datasource, dh.layout._other_datasources)
             msg += ", main elements: %r" % dh.main.elements
             # raise Exception(msg)
-            print(20150717, msg)
+            print((20150717, msg))
         yield "    this.items = %s;" % py2js(dh.main.elements)
         yield "    this.fields = %s;" % py2js(
             [e for e in dh.main.walk()
@@ -1057,7 +1101,7 @@ class ExtRenderer(HtmlRenderer):
         #     dh.layout._formpanel_name
         yield "Ext.define('Lino.%s' , { extend : 'Lino.ActionFormPanel'," % \
               dh.layout._formpanel_name
-        for k, v in dh.main.ext_options().items():
+        for k, v in list(dh.main.ext_options().items()):
             if k != 'items':
                 yield "  %s: %s," % (k, py2js(v))
         assert tbl.action_name is not None
@@ -1200,6 +1244,9 @@ class ExtRenderer(HtmlRenderer):
         yield "  ls_url: %s," % py2js(rpt.actor_url())
         if action.action != rpt.default_action.action:
             yield "  action_name: %s," % py2js(action.action.action_name)
+        if isinstance(action.action, InsertRow):
+            yield "  default_record_id: -99999,"
+
         yield "  initComponent : function() {"
         a = rpt.detail_action
         if a:
@@ -1281,7 +1328,7 @@ class ExtRenderer(HtmlRenderer):
         kw.update(
             disabled_actions_index=rh.store.column_index('disabled_actions'))
 
-        for k, v in kw.items():
+        for k, v in list(kw.items()):
             yield "  %s : %s," % (k, py2js(v))
 
         yield "  initComponent : function() {"
@@ -1312,8 +1359,8 @@ class ExtRenderer(HtmlRenderer):
             yield "    }"
 
         yield "    this.ls_columns = %s;" % py2js([
-                                                      ext_elems.GridColumn(rh.list_layout, i, e) for i, e
-                                                      in enumerate(rh.list_layout.main.columns)])
+            ext_elems.GridColumn(rh.list_layout, i, e) for i, e
+            in enumerate(rh.list_layout.main.columns)])
 
         # yield "    Lino.%s.GridPanel.superclass.initComponent.call(this);" \
         #     % rh.actor
