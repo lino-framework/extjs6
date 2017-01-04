@@ -64,11 +64,13 @@ from lino.core.layouts import (FormLayout, ParamsLayout,
 from lino.utils.mldbc.fields import BabelCharField, BabelTextField
 from lino.core import tables
 from lino.core.gfks import GenericForeignKey
-from lino.core.site import html2text
-from lino.utils.xmlgen.html import html2rst
+from lino.utils.format_date import fds
 
 from lino.utils.xmlgen import etree
 from lino.utils.xmlgen.html import E
+
+from lino.core.site import html2text
+from lino.utils.xmlgen.html import html2rst
 
 EXT_CHAR_WIDTH = 9
 EXT_CHAR_HEIGHT = 22
@@ -251,7 +253,7 @@ class LayoutElement(VisibleComponent):
         # ~ name = layout_handle.layout._actor_name + '_' + name
         assert isinstance(layout_handle, layouts.LayoutHandle)
         opts = layout_handle.layout._element_options.get(name, {})
-        for k, v in opts.items():
+        for k, v in list(opts.items()):
             if not hasattr(self, k):
                 raise Exception("%s has no attribute %s" % (self, k))
             setattr(self, k, v)
@@ -431,9 +433,9 @@ class FieldElement(LayoutElement):
     declare_type = jsgen.DECLARE_VAR
     stored = True
     filter_type = None  # 'auto'
-    # active_change_event = 'change'
-    # declaration_order = 3
-    # ~ ext_suffix = "_field"
+    active_change_event = 'change'
+    #declaration_order = 3
+    # ext_suffix = "_field"
     zero = 0
 
     def __init__(self, layout_handle, field, **kw):
@@ -443,7 +445,7 @@ class FieldElement(LayoutElement):
         self.field = field
         self.editable = field.editable and not self.field.primary_key # and not field.primary_key
 
-        if not 'listeners' in kw:
+        if 'listeners' not in kw:
             if not isinstance(layout_handle.layout, layouts.ColumnsLayout):
                 add_help_text(
                     kw, self.field.help_text, self.field.verbose_name,
@@ -932,6 +934,14 @@ class DateTimeFieldElement(FieldElement):
             kw.update(value="<br>")
         FieldElement.__init__(self, layout_handle, field, **kw)
 
+    def value2html(self, ar, v, **cellattrs):
+        if v is None:
+            v = ''
+        else:
+            v = fds(v) + " " + v.strftime(
+                settings.SITE.time_format_strftime)
+        return E.td((v), **cellattrs)
+
 
 class DatePickerFieldElement(FieldElement):
     value_template = "Ext.create('Lino.DatePickerField',%s)"
@@ -1197,6 +1207,8 @@ class DisplayElement(FieldElement):
 
     def value2html(self, ar, v, **cellattrs):
         try:
+            if E.iselement(v) and v.tag == 'div':
+                return E.td(*[child for child in v], **cellattrs)
             return E.td(v, **cellattrs)
         except Exception as e:
             logger.error(e)
@@ -1483,8 +1495,9 @@ class Container(LayoutElement):
 
     def walk(self):
         for e in self.elements:
-            for el in e.walk():
-                yield el
+            if e.is_visible():
+                for el in e.walk():
+                    yield el
         yield self
 
     def find_by_name(self, name):
@@ -2016,6 +2029,7 @@ def field2elem(layout_handle, field, **kw):
     selector_field = field
     if isinstance(field, fields.RemoteField):
         selector_field = field.field
+        kw.update(sortable=False)
     if isinstance(selector_field, fields.VirtualField):
         selector_field = selector_field.return_type
     # remember the case of RemoteField to VirtualField
@@ -2242,7 +2256,7 @@ def create_layout_element(lh, name, **kw):
         # VirtualTables don't have a model
         model = getattr(lh.rh.actor, 'model', None)
         if getattr(model, '_lino_slaves', None):
-            l += [str(rpt) for rpt in model._lino_slaves.values()]
+            l += [str(rpt) for rpt in list(model._lino_slaves.values())]
         msg += " Possible names are %s." % ', '.join(l)
     else:
         msg = "Unknown element '%s' (%r) referred in layout <%s>." % (
@@ -2262,9 +2276,9 @@ def create_vurt_element(lh, name, vf, **kw):
 def create_meth_element(lh, name, meth, rt, **kw):
     rt.name = name
     rt._return_type_for_method = meth
-    if meth.func_code.co_argcount < 2:
+    if meth.__code__.co_argcount < 2:
         raise Exception("Method %s has %d arguments (must have at least 2)" %
-                        (meth, meth.func_code.co_argcount))
+                        (meth, meth.__code__.co_argcount))
     return create_field_element(lh, rt, **kw)
 
 
