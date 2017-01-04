@@ -2300,9 +2300,8 @@ Ext.define('Lino.FieldBoxMixin', {
 //Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
 //Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
 Ext.define('Lino.HtmlBoxPanel', {
-    extend : 'Ext.panel.Table',
+    extend : 'Ext.panel.Panel',
      mixins: [
-         //'Ext.panel.Table',
          'Lino.PanelMixin',
          'Lino.FieldBoxMixin'
      ],
@@ -2387,7 +2386,8 @@ Ext.define('Lino.HtmlBoxPanel', {
             // console.log('20140917 HtmlBox.refresh()',
             //             this.name, record.data.LinksByHuman);
             // TODO: Check whether this is optimal. In ExtJS3 we updated the el, not box.body
-            box.body.update(newcontent);
+            // box.body.update(newcontent);
+            el.update(newcontent, true);
         // } else {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
         }
@@ -2822,7 +2822,7 @@ Ext.define('Lino.FormPanel', {
           // tooltip:"{{_('Reload current record')}}",
           // scope:this}
       // ]);
-      this.tbar = this.tbar.concat([this.refresh = Ext.create('Ext.button.Button',{
+      this.tbar = this.tbar.concat([Ext.create('Ext.button.Button',{
                 tooltip:"{{_('Reload current record')}}",
                 disabled:true,
                 handler:function(){ this.do_when_clean(false,this.refresh.bind(this)) },
