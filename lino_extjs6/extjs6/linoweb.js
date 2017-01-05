@@ -812,6 +812,19 @@ Ext.define('Lino.Viewport', {
      mixins: ['Lino.MainPanel'],
   layout : "fit"
   ,is_home_page : true
+  ,initComponent : function(){
+    // Lino.Viewport.superclass.initComponent.call(this);
+    this.callSuper(arguments);
+    this.on('render',function(){
+      // this.loadMask = new Ext.LoadMask(this.el,{msg:"{{_('Please wait...')}}"});
+      //   this.loadMask = {message:"Please wait..."};
+        this.loadMask = Ext.create('Ext.LoadMask',{
+                                        msg    : 'Please wait...',
+                                        target : this,
+                                    });
+      //~ console.log("20121118 Lino.viewport.loadMask",this.loadMask);
+    },this);
+  }
   ,refresh : function() {
       var caller = this;
       // console.log("20140829 Lino.Viewport.refresh()");
@@ -882,7 +895,10 @@ Lino.load_url = function(url) {
     //~ foo.bar.baz = 2; 
     //~ console.log("20121120 Lino.load_url()");
     //~ Lino.body_loadMask.show();
-    //Lino.viewport.loadMask.show();
+    Lino.viewport.loadMask.show();
+    // if (Lino.viewport.loadMask){
+    //     Ext.Msg.show(Lino.viewport.loadMask);
+    // }
     //~ location.replace(url);
     document.location = url;
 };
@@ -1525,7 +1541,8 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
         config.message = result.message;
         config.fn = function(buttonId) {
           //  Disable by HKC
-          //panel.loadMask.show();
+            panel.loadMask.show();
+            // Ext.Msg.show(panel.loadMask);
           //~ Lino.insert_subst_user(p);
           Ext.Ajax.request({
             method: 'GET',
@@ -1790,7 +1807,7 @@ Lino.ajax_error_handler = function(panel) {
   return function(response,options) {
     console.log('Ajax failure:', response, options);
     //  Disable by HKC
-    //if (panel.loadMask) panel.loadMask.hide();
+    if (panel.loadMask) panel.loadMask.hide();
     if (response.responseText) {
       var lines = response.responseText.split('\n');
       if (lines.length > 10) {
@@ -2082,7 +2099,7 @@ Lino.call_ajax_action = function(
   
   // console.log("20140516 Lino.call_ajax_action", p, actionName, step);
   // Disabled by HKC
-  //if (panel.loadMask) panel.loadMask.show();
+  if (panel.loadMask) panel.loadMask.show();
     
   Ext.Ajax.request({
     method: method
@@ -2163,9 +2180,9 @@ Lino.run_row_action = function(
       Ext.apply(params, panel.get_base_params());
   var fn = function(panel, btn, step) {
     Lino.call_ajax_action(panel, meth, url, params, actionName, step, fn);
-  }
+  };
   fn(panel, null, null);
-}
+};
 
 Lino.put = function(requesting_panel, pk, data) {
     var panel = Ext.getCmp(requesting_panel);
@@ -2185,9 +2202,9 @@ Lino.put = function(requesting_panel, pk, data) {
     };
     req.method = 'PUT';
     req.url = '{{extjs.build_plain_url("api")}}' + panel.ls_url + '/' + pk;
-    if (panel.loadMask) panel.loadMask.show(); 
+    if (panel.loadMask) panel.loadMask.show();
     Ext.Ajax.request(req);
-}
+};
 
 
 
@@ -2387,7 +2404,8 @@ Ext.define('Lino.HtmlBoxPanel', {
             //             this.name, record.data.LinksByHuman);
             // TODO: Check whether this is optimal. In ExtJS3 we updated the el, not box.body
             // box.body.update(newcontent);
-            el.update(newcontent, true);
+            // @deprecated 5.0.0 Please use {@link #setHtml} instead.
+            el.setHtml(newcontent);
         // } else {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
         }
@@ -4585,7 +4603,7 @@ Ext.define('Lino.GridPanel', {
     }
     //~ console.log('20110406 on_afteredit',req);
     // this.loadMask.show(); // 20120211
-      Ext.Msg.show(this.loadMask);
+      this.loadMask.show();
     Ext.Ajax.request(req);
   },
 
