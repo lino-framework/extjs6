@@ -577,7 +577,7 @@ Lino.perc2width = function(perc) {
 // HKC
 //Lino.MainPanel = {
 Ext.define('Lino.MainPanel',{
-    extend: 'Ext.panel.Table',
+    extend: 'Ext.panel.Panel',
   is_home_page : false,
   setting_param_values : false,
   config_containing_window : function(wincfg) { }
@@ -1163,7 +1163,7 @@ Ext.define('Lino.TimeField', {
     completeEdit: function() {
         var me = this,
             // val = me.getValue();   original code
-            val = val = me.getRawValue();
+            val = me.getRawValue();
         me.callParent(arguments);
         // Only set the raw value if the current value is valid and is not falsy
         if (me.validateValue(val)) {
@@ -2383,7 +2383,7 @@ Ext.define('Lino.HtmlBoxPanel', {
       }
     });
   },
-  refresh : function(unused) { 
+  refresh : function(unused) {
       // this.containing_panel.refresh();
       this.refresh_with_after();
   },
@@ -2402,9 +2402,7 @@ Ext.define('Lino.HtmlBoxPanel', {
                 this.format_data(record.data[this.name]) : '';
             // console.log('20140917 HtmlBox.refresh()',
             //             this.name, record.data.LinksByHuman);
-            // TODO: Check whether this is optimal. In ExtJS3 we updated the el, not box.body
-            // box.body.update(newcontent);
-            // @deprecated 5.0.0 Please use {@link #setHtml} instead.
+            // update is @deprecated in 5.0.0 ,Please use {@link #setHtml} instead.
             el.setHtml(newcontent);
         // } else {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
@@ -2840,12 +2838,12 @@ Ext.define('Lino.FormPanel', {
           // tooltip:"{{_('Reload current record')}}",
           // scope:this}
       // ]);
-      this.tbar = this.tbar.concat([Ext.create('Ext.button.Button',{
+      this.tbar = this.tbar.concat(Ext.create('Ext.button.Button',{
                 tooltip:"{{_('Reload current record')}}",
                 disabled:true,
                 handler:function(){ this.do_when_clean(false,this.refresh.bind(this)) },
                 scope:this,
-                iconCls:'x-tbar-loading'})]);
+                iconCls:'x-tbar-loading'}));
 
       if (this.bbar) { // since 20121016
         if (this.tbar) {
@@ -3533,8 +3531,8 @@ Ext.define('Lino.GridPanel', {
         //~ },
         
         
-  loadMask: {message:"{{_('Please wait...')}}"},
-  
+  // loadMask: {message:"{{_('Please wait...')}}"},
+
   constructor : function(config){
       config.plugins = [];
       config.plugins.push({
@@ -3594,7 +3592,11 @@ Ext.define('Lino.GridPanel', {
     only after the GridPanel has been initialized.
     Workaround is to generate a line "params.containing_window = true;" 
     in the handler function.
-    */ 
+    */
+    this.loadMask = Ext.create('Ext.LoadMask',{
+                                        msg    : 'Please wait...',
+                                        target : this,
+                                    });
     if (this.is_main_window) {
         //~ console.log(20111206, 'delete title',this.title,'from',this);
         this.tools = undefined;  
@@ -4526,7 +4528,16 @@ Ext.define('Lino.GridPanel', {
             // var f = e.record.fields[k];
         //~ console.log('20101130 f = ',f);
         //~ var v = e.record.get(di);
-        if (f.type.type == 'date') {
+        if (f.__proto__.$className == 'Ext.data.field.Field') {
+        // if (f.type.type == 'date') {
+        //     p[k] = Ext.util.Format.date(v, f.dateFormat);
+            if (typeof v == "string"){
+                p[k] = v;
+            }
+            else {
+                p[k] = Ext.util.Format.date(v, '{{settings.SITE.time_format_extjs}}');
+            }
+        }else if (f.__proto__.$className == 'Ext.data.field.Date'){
             p[k] = Ext.util.Format.date(v, f.dateFormat);
         }else{
             p[k] = v;
@@ -4605,6 +4616,7 @@ Ext.define('Lino.GridPanel', {
     // this.loadMask.show(); // 20120211
       this.loadMask.show();
     Ext.Ajax.request(req);
+      this.loadMask.hide();
   },
 
   unused_afterRender : function() {
