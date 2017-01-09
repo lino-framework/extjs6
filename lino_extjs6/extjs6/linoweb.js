@@ -2327,7 +2327,7 @@ Ext.define('Lino.HtmlBoxPanel', {
   constructor : function(config,params) {
     this.before_init(config,params);
       config.viewType = 'tableview';
-    //Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
+    // Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
       this.callSuper(arguments);
   },
   //~ constructor : function(ww,config,params){
@@ -2347,7 +2347,7 @@ Ext.define('Lino.HtmlBoxPanel', {
   //~ disable : function() { var tb = this.getBottomToolbar(); if(tb) tb.disable()},
   //~ enable : function() { var tb = this.getBottomToolbar(); if(tb) tb.enable()},
   onRender : function(ct, position){
-    //Lino.HtmlBoxPanel.superclass.onRender.call(this, ct, position);
+    // Lino.HtmlBoxPanel.superclass.onRender.call(this, ct, position);
       this.callSuper(arguments);
     //~ console.log(20111125,this.containing_window);
     if (this.containing_panel) {
@@ -2404,6 +2404,9 @@ Ext.define('Lino.HtmlBoxPanel', {
             //             this.name, record.data.LinksByHuman);
             // update is @deprecated in 5.0.0 ,Please use {@link #setHtml} instead.
             el.setHtml(newcontent);
+            var newHeight = el.getHeight();
+            box.updateMaxHeight(newHeight);
+            // this.updateHeight();
         // } else {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
         }
@@ -2877,8 +2880,8 @@ Ext.define('Lino.FormPanel', {
     //~ }
 
     //  Edited by HKC
-    Lino.FormPanel.superclass.initComponent.call(this);
-    // this.callSuper();  // 20160630
+    // Lino.FormPanel.superclass.initComponent.call(this);
+    this.callSuper();  // 20160630
     // this.callParent();  // 20160630
 
     // this.on('show',
@@ -2981,7 +2984,7 @@ Ext.define('Lino.FormPanel', {
             this.set_current_record(undefined);
         }
     }
-    // this.init_focus()
+    // this.init_focus();
   }
   ,get_base_params : function() {  /* FormPanel */
     // needed for insert_action
@@ -3185,9 +3188,9 @@ if (this.disable_editing | record.data.disable_editing) {
       //~ this.disable();
       //~ this.getBottomToolbar().disable();
         //  HKC
-      //this.form.items.each(function(cmp){
-      //  cmp.disable();
-      //},this);
+      this.form.items.each(function(cmp){
+       cmp.disable();
+      },this);
       this.set_window_title(this.empty_title);
       //~ this.containing_window.window.setTitle(this.empty_title);
       if (!this.hide_navigator) {
