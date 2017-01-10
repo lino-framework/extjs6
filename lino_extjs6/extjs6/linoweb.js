@@ -1852,11 +1852,11 @@ Ext.QuickTips.init();
 Lino.quicktip_renderer = function(title,body) {
   return function(c) {
     //~ if (c instanceof Ext.Panel) var t = c.bwrap; else // 20130129
-    if (c instanceof Ext.Panel) var t = c.header; else // 20130129
+    // if (c instanceof Ext.Panel) var t = c.header; else // 20130129
     var t = c.getEl();
     //~ console.log(20130129,t,title,body);
     //~ t.dismissDelay = 0;
-    Ext.QuickTips.register({
+    Ext.tip.QuickTipManager.register({
       target: t,
       //~ cls: 'lino-quicktip-classical',
       dismissDelay: 0,
@@ -2098,7 +2098,6 @@ Lino.call_ajax_action = function(
   }
   
   // console.log("20140516 Lino.call_ajax_action", p, actionName, step);
-  // Disabled by HKC
   if (panel.loadMask) panel.loadMask.show();
     
   Ext.Ajax.request({
@@ -2108,6 +2107,7 @@ Lino.call_ajax_action = function(
     ,success: Lino.action_handler(panel, on_success, on_confirm)
     ,failure: Lino.ajax_error_handler(panel)
   });
+    if (panel.loadMask) panel.loadMask.hide();
 };
 
 
@@ -3756,9 +3756,15 @@ Ext.define('Lino.GridPanel', {
         tbar = tbar.concat(actions.bbar);
           //~ this.bbar = actions.bbar;
       }
+
+      tbar = tbar.concat(Ext.create('Ext.button.Button',{
+                tooltip:"{{_('Reload current record')}}",
+                handler:function(){ this.do_when_clean(false,this.refresh.bind(this)) },
+                scope:this,
+                iconCls:'x-tbar-loading'}));
       
       this.tbar = Ext.create('Ext.toolbar.Toolbar',{items: tbar});
-        
+
       // this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
       //   store: this.store, 
       //   prependButtons: true, 
