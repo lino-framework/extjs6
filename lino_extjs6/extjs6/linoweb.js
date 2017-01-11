@@ -1504,7 +1504,7 @@ Lino.action_handler = function (panel, on_success, on_confirm) {
           else panel = Lino.viewport;
       }
     if (panel.loadMask) {
-        Ext.MessageBox.hide(panel.loadMask);
+        panel.loadMask.hide();
     }
     if (!response.responseText) return ;
     var result = Ext.decode(response.responseText);
@@ -2107,7 +2107,6 @@ Lino.call_ajax_action = function(
     ,success: Lino.action_handler(panel, on_success, on_confirm)
     ,failure: Lino.ajax_error_handler(panel)
   });
-    if (panel.loadMask) panel.loadMask.hide();
 };
 
 
