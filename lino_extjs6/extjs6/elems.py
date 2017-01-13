@@ -597,7 +597,7 @@ class FieldElement(LayoutElement):
 
         """
         if self.field.primary_key:
-            url = ar.renderer.pk2url(ar, v)
+            url = ar.renderer.pk2url(ar.actor.model, v)
             if url is not None:
                 return E.td(E.a(self.format_value(
                     ar, v), href=url), **cellattrs)
