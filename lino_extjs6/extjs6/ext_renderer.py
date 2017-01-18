@@ -1364,7 +1364,8 @@ class ExtRenderer(JsRenderer):
                     windowConfig.update(
                         width=js_code('Lino.chars2width(%d)' % ws[0]))
                 if ws[1] == 'auto':
-                    windowConfig.update(autoHeight=True)
+                    # windowConfig.update(autoHeight=True)
+                    windowConfig.update(height=True)
                 elif isinstance(ws[1], int):
                     # ~ windowConfig.update(height=ws[1])
                     windowConfig.update(
