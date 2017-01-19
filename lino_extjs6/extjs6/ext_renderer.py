@@ -124,7 +124,7 @@ class ExtRenderer(JsRenderer):
 
         if isinstance(v, menus.MenuItem):
             if v.instance is not None:
-                h = self.instance_handler(None, v.instance)
+                h = self.instance_handler(None, v.instance, None)
                 assert h is not None
                 js = "function() {%s}" % h
                 return self.handler_item(v, js, None)
@@ -1364,7 +1364,8 @@ class ExtRenderer(JsRenderer):
                     windowConfig.update(
                         width=js_code('Lino.chars2width(%d)' % ws[0]))
                 if ws[1] == 'auto':
-                    windowConfig.update(autoHeight=True)
+                    # windowConfig.update(autoHeight=True)
+                    windowConfig.update(height=True)
                 elif isinstance(ws[1], int):
                     # ~ windowConfig.update(height=ws[1])
                     windowConfig.update(

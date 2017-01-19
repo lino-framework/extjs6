@@ -153,7 +153,7 @@ class GridColumn(jsgen.Component):
                 else:
                     ttt = ''
                 if self.editor.field.help_text \
-                   and "<" not in self.editor.field.help_text:
+                        and "<" not in self.editor.field.help_text:
                     # and '"' not in self.editor.field.help_text
                     # GridColumn tooltips don't support html
                     ttt = string_concat(ttt, self.editor.field.help_text)
@@ -434,7 +434,7 @@ class FieldElement(LayoutElement):
     stored = True
     filter_type = None  # 'auto'
     active_change_event = 'change'
-    #declaration_order = 3
+    # declaration_order = 3
     # ext_suffix = "_field"
     zero = 0
 
@@ -443,7 +443,7 @@ class FieldElement(LayoutElement):
             raise Exception("Field '%s' in %s has no name!" %
                             (field, layout_handle))
         self.field = field
-        self.editable = field.editable and not self.field.primary_key # and not field.primary_key
+        self.editable = field.editable and not self.field.primary_key  # and not field.primary_key
 
         if 'listeners' not in kw:
             if not isinstance(layout_handle.layout, layouts.ColumnsLayout):
@@ -1777,7 +1777,7 @@ class Panel(Container):
         d = Container.ext_options(self, **d)
 
         # hide scrollbars
-        # d.update(autoScroll=False)
+        d.update(autoScroll=False)
         d.update(scrollable=False)
 
         if self.is_fieldset:

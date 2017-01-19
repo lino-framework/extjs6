@@ -983,7 +983,7 @@ Lino.calling_window = function() {
 
 //Ext.define('Lino.WindowAction', {
 Ext.define('Lino.WindowAction', {
-    //extend: 'Ext.Component',
+    // extend: 'Ext.Component',
 //Lino.WindowAction = Ext.extend(Lino.WindowAction,{
     window : null,
     //~ mainItemClass: null,
