@@ -927,6 +927,9 @@ Lino.close_window = function(status_update, norestore) {
       if(!norestore) { Lino.viewport.refresh(); }
   }
   if (cw) cw.hide_really();
+  if (typeof ww.window.main_item.refresh == 'function') {
+        ww.window.main_item.refresh();
+    }
   return retval;
 };
 
@@ -5167,8 +5170,8 @@ Ext.define('Lino.Window', {
     // console.log('20140829 Lino.Window.onRender() 1');
     // Lino.Window.superclass.onRender.call(this, ct, position);
     this.callSuper(arguments);
-    //var main_area = Ext.getCmp('main_area');
-    var main_area = Ext.getBody();
+    var main_area = Ext.getCmp('main_area');
+    // var main_area = Ext.getBody();
     //~ console.log('20120110 Lino.Window.onRender() 2');
   
     this.on('show', function(win) {
