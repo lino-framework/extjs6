@@ -927,6 +927,9 @@ Lino.close_window = function(status_update, norestore) {
       if(!norestore) { Lino.viewport.refresh(); }
   }
   if (cw) cw.hide_really();
+  if (typeof ww.window.main_item.refresh == 'function') {
+        ww.window.main_item.refresh();
+    }
   return retval;
 };
 
@@ -4141,8 +4144,16 @@ Ext.define('Lino.GridPanel', {
                 e.stopEvent();
                 break;
             case e.PAGE_UP:
+            case e.INSERT:
+                if (e.ctrlKey){
+                    Lino.copyToClipboard(e.target.innerText);
+                }
+                break;
             case e.C:
-                console.log('C tapped');
+                if (e.ctrlKey){
+                    Lino.copyToClipboard(e.target.innerText);
+                }
+                break;
             case e.PAGE_DOWN:
                 break;
             default:
@@ -5167,8 +5178,8 @@ Ext.define('Lino.Window', {
     // console.log('20140829 Lino.Window.onRender() 1');
     // Lino.Window.superclass.onRender.call(this, ct, position);
     this.callSuper(arguments);
-    //var main_area = Ext.getCmp('main_area');
-    var main_area = Ext.getBody();
+    var main_area = Ext.getCmp('main_area');
+    // var main_area = Ext.getBody();
     //~ console.log('20120110 Lino.Window.onRender() 2');
   
     this.on('show', function(win) {
@@ -5326,3 +5337,12 @@ Lino.init_esteid = function() {
 
 {% endif %}
 
+Lino.copyToClipboard = function (test) {
+    // Using idea form http://stackoverflow.com/a/34050374
+    document.getElementById("body").innerHTML =
+   '<textarea id="mytmpcontent" cols="0" rows="0">'+ test +'</textarea>';
+    var mytmpcontent = document.getElementById("mytmpcontent");
+    mytmpcontent.select();
+    document.execCommand('copy');
+    document.getElementById("body").removeChild(mytmpcontent);
+};
