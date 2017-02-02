@@ -1534,18 +1534,14 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
     if (result.xcallback) {
         //~ var config = {title:"{{_('Confirmation')}}"};
         var config = {title:result.xcallback.title};
-        //config.buttons = Ext.MessageBox.YESNOCANCEL;
-        config.buttons = Ext.Msg.YESNOCANCEL;
+        config.buttons = Ext.Msg.YESNO;
         config.icon = Ext.Msg.QUESTION;
-        //~ config.buttons = Ext.MessageBox.YESNO;
         var p = {};
         Lino.insert_subst_user(p);
         //config.buttons = result.xcallback.buttons;
         config.message = result.message;
         config.fn = function(buttonId) {
-          //  Disable by HKC
             panel.loadMask.show();
-            // Ext.Msg.show(panel.loadMask);
           //~ Lino.insert_subst_user(p);
           Ext.Ajax.request({
             method: 'GET',
@@ -3052,8 +3048,7 @@ Ext.define('Lino.FormPanel', {
         } else {
           //~ console.log('20111217 do_when_clean() form is dirty',this.form);
           var config = {title:"{{_('Confirmation')}}"};
-          //config.buttons = Ext.MessageBox.YESNOCANCEL;
-          config.buttons = Ext.Msg.YESNOCANCEL;
+          config.buttons = Ext.Msg.YESNO;
           config.icon = Ext.Msg.QUESTION;
           config.message = "{{_('Save changes to current record ?')}}";
           config.fn = function(buttonId) {
