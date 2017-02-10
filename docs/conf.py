@@ -12,7 +12,7 @@ extensions = []
 extlinks = {}
 intersphinx_mapping = {}
 
-from atelier.sphinxconf import configure
+from lino.sphinxcontrib import configure
 configure(globals(), 'lino_extjs6.projects.mysite.settings.demo')
 
 from django.conf import settings
