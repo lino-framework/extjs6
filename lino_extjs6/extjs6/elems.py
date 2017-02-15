@@ -567,7 +567,7 @@ class FieldElement(LayoutElement):
 
                 kw.update(fieldLabel=label)
                 # HKC
-                kw.update(valueField=self.field.name)
+                # kw.update(valueField=self.field.name)
                 kw.update(labelAlign='top')
         if self.editable:
             if not self.field.blank:
@@ -840,6 +840,7 @@ class RemoteComboFieldElement(ComboFieldElement):
     def get_field_options(self, **kw):
         kw = ComboFieldElement.get_field_options(self, **kw)
         sto = self.store_options()
+        sto.update(autoLoad=True)
         # print repr(sto)
         kw.update(store=js_code("Ext.create('Lino.ComplexRemoteComboStore',%s)" %
                                 py2js(sto)))
@@ -1677,15 +1678,15 @@ class Panel(Container):
                 # ~ d.update(layout='form')
                 d.update(layout=dict(type='vbox', align='stretch'))
                 # if self.vflex:
-                    # d.update(layout='vbox', layoutConfig=dict(align='stretch'))
-                    # d.update(layout='anchor', layoutConfig=dict(align='stretch'), defaults=dict(anchor='100%'))
+                # d.update(layout='vbox', layoutConfig=dict(align='stretch'))
+                # d.update(layout='anchor', layoutConfig=dict(align='stretch'), defaults=dict(anchor='100%'))
                 # else:
-                    # 20100921b
-                    # ~ d.update(layout='form')
-                    # d.update(layout='form', autoHeight=True)
-                    # d.update(layout='vbox',autoHeight=True)
-                    # d.update(autoHeight=True)
-                    # d.update(layout=dict(type='vbox', align='stretch'))
+                # 20100921b
+                # ~ d.update(layout='form')
+                # d.update(layout='form', autoHeight=True)
+                # d.update(layout='vbox',autoHeight=True)
+                # d.update(autoHeight=True)
+                # d.update(layout=dict(type='vbox', align='stretch'))
             else:
                 d.update(layout='hbox', autoHeight=True)  # 20101028
 
@@ -1716,7 +1717,8 @@ class Panel(Container):
                 # d.update(layoutConfig=dict(align='stretchmax'))
                 d.update(layout=dict(type='hbox', align='stretchmax'))
 
-        elif d['layout'] in ['vbox', 'anchor'] or (type(d['layout']) is dict and d['layout'].get('type', False) in ['vbox','anchor']):
+        elif d['layout'] in ['vbox', 'anchor'] or (
+                type(d['layout']) is dict and d['layout'].get('type', False) in ['vbox', 'anchor']):
             # a vbox with 2 or 3 elements, of which at least two are
             # vflex will be implemented as a VBorderPanel.
             assert len(self.elements) > 1
