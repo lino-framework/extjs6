@@ -69,6 +69,7 @@ if settings.SITE.user_model:
 
 ONE_CHAR_LABEL = " <font size=\"4\">{}</font>"
 
+
 def prepare_label(mi):
     return mi.label
     """
@@ -984,13 +985,16 @@ class ExtRenderer(JsRenderer):
 
         yield ""
         yield "Lino.%s = Ext.extend(Ext.form.FormPanel, {" % \
-            dh.layout._formpanel_name
+              dh.layout._formpanel_name
         for k, v in list(dh.main.ext_options().items()):
-            #~ if k != 'items':
+            # ~ if k != 'items':
             if not k in self.SUPPRESSED:
                 yield "  %s: %s," % (k, py2js(v))
         # ~ yield "  collapsible: true,"
-        if dh.main.value['layout'] == 'hbox':
+        # if dh.main.value.get('layout', False):
+        if (type(dh.main.value['layout']) is str and dh.main.value['layout'] == 'hbox') or (
+            type(dh.main.value['layout']) is dict and dh.main.value['layout'].get('type', False) == 'hbox'):
+        # if dh.main.value['layout'] == 'hbox':
             yield "  layout: 'hbox',"
         else:
             yield "  layout: 'form',"
@@ -1288,8 +1292,8 @@ class ExtRenderer(JsRenderer):
             yield "    }"
 
         yield "    this.ls_columns = %s;" % py2js([
-            ext_elems.GridColumn(rh.list_layout, i, e) for i, e
-            in enumerate(rh.list_layout.main.columns)])
+                                                      ext_elems.GridColumn(rh.list_layout, i, e) for i, e
+                                                      in enumerate(rh.list_layout.main.columns)])
 
         # yield "    Lino.%s.GridPanel.superclass.initComponent.call(this);" \
         #     % rh.actor

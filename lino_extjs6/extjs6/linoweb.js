@@ -1323,6 +1323,7 @@ Lino.file_field_handler = function(panel,config) {
       return new Lino.FileField(config);
   }
 };
+
 Ext.define('Lino_Panel', {
     override : 'Ext.panel.Panel',
     // bodyStyle: 'padding:0px;width:0px;',
@@ -2310,22 +2311,18 @@ Ext.define('Lino.FieldBoxMixin', {
 });
 
 
-// HKC
-//Lino.HtmlBoxPanel = Ext.extend(Ext.Panel, Lino.PanelMixin);
-//Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, Lino.FieldBoxMixin);
-//Lino.HtmlBoxPanel = Ext.extend(Lino.HtmlBoxPanel, {
 Ext.define('Lino.HtmlBoxPanel', {
     extend : 'Ext.panel.Panel',
      mixins: [
          'Lino.PanelMixin',
          'Lino.FieldBoxMixin'
      ],
+    scrollable:true,
 
   disabled_in_insert_window : true,
   constructor : function(config,params) {
     this.before_init(config,params);
       config.viewType = 'tableview';
-    // Lino.HtmlBoxPanel.superclass.constructor.call(this, config);
       this.callSuper(arguments);
   },
   //~ constructor : function(ww,config,params){
@@ -2390,6 +2387,7 @@ Ext.define('Lino.HtmlBoxPanel', {
       // var todo = this.containing_panel.refresh();
       var box = this.items.get(0);
       var todo = function() {
+          var main_height = this.getHeight();
         if (this.disabled) { return; }
         this.set_base_params(this.containing_panel.get_master_params());
 
@@ -2402,9 +2400,15 @@ Ext.define('Lino.HtmlBoxPanel', {
             //             this.name, record.data.LinksByHuman);
             // update is @deprecated in 5.0.0 ,Please use {@link #setHtml} instead.
             el.setHtml(newcontent);
-            var newHeight = el.getHeight();
-            box.updateMaxHeight(newHeight);
-            // this.updateHeight();
+            // var newHeight = el.getHeight();
+            // el.setMaxHeight(newHeight);
+            // if (newHeight < main_height){
+            //     box.updateMaxHeight(newHeight);
+            //     }
+            // else {
+            //     box.updateMaxHeight(main_height);
+            // }
+            // box.updateMaxHeight(newHeight);
         // } else {
         //     console.log('20140502 cannot HtmlBox.refresh()',this.name);
         }

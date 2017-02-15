@@ -1555,7 +1555,6 @@ class Wrapper(VisibleComponent):
     # ~ label = None
 
     def __init__(self, e, **kw):
-        # HKC : remove this config to get labelAlign top works
         kw.update(layout='form')
         if not isinstance(e, TextFieldElement):
             kw.update(autoHeight=True)
@@ -1633,7 +1632,8 @@ class Panel(Container):
                 # vflex elements go into a vbox, the others into a form layout.
 
             else:  # not self.vertical
-                kw.update(layout='hbox', layoutConfig=dict(align='stretch'))
+                # kw.update(layout='hbox', layoutConfig=dict(align='stretch'))
+                kw.update(layout=dict(type='hbox', align='stretch'))
 
         for e in elements:
             if isinstance(e, FieldElement):
@@ -1675,17 +1675,17 @@ class Panel(Container):
                 d.update(layout='fit')
             elif self.vertical:
                 # ~ d.update(layout='form')
-                if self.vflex:
+                d.update(layout=dict(type='vbox', align='stretch'))
+                # if self.vflex:
                     # d.update(layout='vbox', layoutConfig=dict(align='stretch'))
                     # d.update(layout='anchor', layoutConfig=dict(align='stretch'), defaults=dict(anchor='100%'))
-                    d.update(layout=dict(type='vbox', align='stretch'))
-                else:
+                # else:
                     # 20100921b
                     # ~ d.update(layout='form')
                     # d.update(layout='form', autoHeight=True)
                     # d.update(layout='vbox',autoHeight=True)
-                    d.update(autoHeight=True)
-                    d.update(layout=dict(type='vbox', align='stretch'))
+                    # d.update(autoHeight=True)
+                    # d.update(layout=dict(type='vbox', align='stretch'))
             else:
                 d.update(layout='hbox', autoHeight=True)  # 20101028
 
@@ -1699,7 +1699,7 @@ class Panel(Container):
                 for e in self.elements:
                     e.update(anchor=FULLWIDTH)
 
-        elif d['layout'] == 'hbox':
+        elif d['layout'] == 'hbox' or (type(d['layout']) is dict and d['layout'].get('type', False) == 'hbox'):
             self.wrap_formlayout_elements()
             for e in self.elements:
                 # a hbox having at least one child with explicit
@@ -1713,9 +1713,10 @@ class Panel(Container):
 
             if not self.vflex:  # 20101028
                 d.update(autoHeight=True)
-                d.update(layoutConfig=dict(align='stretchmax'))
+                # d.update(layoutConfig=dict(align='stretchmax'))
+                d.update(layout=dict(type='hbox', align='stretchmax'))
 
-        elif d['layout'] in ['vbox', 'anchor']:
+        elif d['layout'] in ['vbox', 'anchor'] or (type(d['layout']) is dict and d['layout'].get('type', False) in ['vbox','anchor']):
             # a vbox with 2 or 3 elements, of which at least two are
             # vflex will be implemented as a VBorderPanel.
             assert len(self.elements) > 1
@@ -1777,7 +1778,7 @@ class Panel(Container):
         d = Container.ext_options(self, **d)
 
         # hide scrollbars
-        d.update(autoScroll=False)
+        # d.update(autoScroll=False)
         d.update(scrollable=False)
 
         if self.is_fieldset:
