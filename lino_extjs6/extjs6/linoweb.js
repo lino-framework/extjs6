@@ -4813,6 +4813,16 @@ Ext.define('Lino.ComboBox', {
       // this.callParent();  // 20160630
   },
 
+    findRecordByValue: function(value) {
+        var result = this.store.byText.get(value),
+            ret = false;
+        // If there are duplicate keys, tested behaviour is to return the *first* match.
+        if (result) {
+            ret = result[0] || result;
+        }
+        return ret;
+    },
+
     updateValue: function() {
         // modified copy of the original ComboBox.updateValue defined
         // in `ext-all-debug.js`. We additionally store the selected
