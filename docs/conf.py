@@ -164,7 +164,7 @@ if False:
     #~ todo_include_todos = True
 
 extlinks.update(
-    ticket=('http://bugs.lino-framework.org/tickets/Ticket/%s', '#'))
+    ticket=('http://bugs.saffre-rumma.net/tickets/Ticket/%s', '#'))
 
 extlinks.update(
     srcref=(lino_extjs6.srcref_url, ''))
