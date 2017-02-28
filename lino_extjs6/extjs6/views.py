@@ -61,6 +61,9 @@ from lino.core.views import json_response, json_response_kw
 from lino.core import constants
 from lino.core.requests import BaseRequest
 
+from lino.modlib.extjs.views import Authenticate, RunJasmine, EidAppletService, Callbacks
+
+
 MAX_ROW_COUNT = 300
 
 
@@ -144,63 +147,6 @@ class MainHtml(View):
         return ui.render_action_response(ar)
 
 
-class Authenticate(View):
-    """This view is being used when :setting:`remote_user_header` is
-    empty (and :setting:`user_model` not).
-    :class:`lino.core.auth.SessionUserMiddleware`
-
-    """
-
-    def get(self, request, *args, **kw):
-        action_name = request.GET.get(constants.URL_PARAM_ACTION_NAME)
-        if action_name == 'logout':
-            username = request.session.pop('username', None)
-            request.session.pop('password', None)
-            # ~ username = request.session['username']
-            # ~ del request.session['password']
-
-            ar = BaseRequest(request)
-            ar.success("User %r logged out." % username)
-            return settings.SITE.kernel.render_action_response(ar)
-        raise http.Http404()
-
-    def post(self, request, *args, **kw):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = auth.authenticate(username, password, request)
-        ar = BaseRequest(request)
-        if user is None:
-            ar.error("Could not authenticate %r" % username)
-        else:
-            request.session['username'] = username
-            request.session['password'] = password
-            ar.success(("Now logged in as %r" % username))
-            # print "20150428 Now logged in as %r (%s)" % (username, user)
-        return settings.SITE.kernel.render_action_response(ar)
-
-
-class RunJasmine(View):
-    """
-    """
-
-    def get(self, request, *args, **kw):
-        ui = settings.SITE.kernel
-        return http.HttpResponse(
-            ui.extjs_renderer.html_page(request, run_jasmine=True))
-
-
-class EidAppletService(View):
-    """
-    """
-
-    def post(self, request, *args, **kw):
-        ui = settings.SITE.kernel
-        return ui.success(html='Hallo?')
-
-
-class Callbacks(View):
-    def get(self, request, thread_id, button_id):
-        return settings.SITE.kernel.run_callback(request, thread_id, button_id)
 
 
 def choices_for_field(request, holder, field):
