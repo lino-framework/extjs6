@@ -26,15 +26,11 @@ lino_extjs6.extjs6.views
       AdminIndex
       ApiElement
       ApiList
-      Authenticate
-      Callbacks
       Choices
-      EidAppletService
       GridConfig
       HttpResponseDeleted
       MainHtml
       Restful
-      RunJasmine
    
    
 
