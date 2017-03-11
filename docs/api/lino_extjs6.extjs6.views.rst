@@ -12,7 +12,6 @@ lino_extjs6.extjs6.views
       choices_for_field
       choices_response
       delete_element
-      elem2rec_empty
    
    
 

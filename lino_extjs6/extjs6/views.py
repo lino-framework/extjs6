@@ -61,7 +61,7 @@ from lino.core.views import json_response, json_response_kw
 from lino.core import constants
 from lino.core.requests import BaseRequest
 
-from lino.modlib.extjs.views import Authenticate, RunJasmine, EidAppletService, Callbacks
+from lino.modlib.extjs.views import Authenticate, RunJasmine, EidAppletService, Callbacks, elem2rec_empty
 
 
 MAX_ROW_COUNT = 300
@@ -69,25 +69,6 @@ MAX_ROW_COUNT = 300
 
 class HttpResponseDeleted(http.HttpResponse):
     status_code = 204
-
-
-def elem2rec_empty(ar, ah, elem, **rec):
-    """
-    Returns a dict of this record, designed for usage by an EmptyTable.
-    """
-    # ~ rec.update(data=rh.store.row2dict(ar,elem))
-    rec.update(data=elem._data)
-    # ~ rec = elem2rec1(ar,ah,elem)
-    # ~ rec.update(title=_("Insert into %s...") % ar.get_title())
-    rec.update(title=ar.get_action_title())
-    rec.update(id=-99998)
-    # ~ rec.update(id=elem.pk) or -99999)
-    if ar.actor.parameters:
-        # ~ rec.update(param_values=ar.ah.store.pv2dict(ar.ui,ar.param_values))
-        rec.update(
-            param_values=ar.actor.params_layout.params_store.pv2dict(
-                ar.param_values))
-    return rec
 
 
 def delete_element(ar, elem):
@@ -513,7 +494,7 @@ class ApiList(View):
             if ar.actor.parameters:
                 kw.update(
                     param_values=ar.actor.params_layout.params_store.pv2dict(
-                        ar.param_values))
+                        ar, ar.param_values))
             return json_response(kw)
 
         if fmt == constants.URL_FORMAT_HTML:
