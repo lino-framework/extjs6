@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2016 Luc Saffre
+# Copyright 2009-2017 Luc Saffre
 # License: BSD (see file COPYING for details)
 
 """
@@ -61,7 +61,7 @@ from lino.core.views import json_response, json_response_kw
 from lino.core import constants
 from lino.core.requests import BaseRequest
 
-from lino.modlib.extjs.views import Authenticate, RunJasmine, EidAppletService, Callbacks, elem2rec_empty
+from lino.modlib.extjs.views import Authenticate, RunJasmine, EidAppletService, Callbacks, elem2rec_empty, choices_for_field, choices_response
 
 
 MAX_ROW_COUNT = 300
@@ -130,98 +130,6 @@ class MainHtml(View):
 
 
 
-def choices_for_field(request, holder, field):
-    # Return the choices for the given field and the given web request
-    # (whose requesting holder is given as `holder`).
-    # holder is either a Model, an Actor or an Action.
-    # model = holder.get_chooser_model()
-    chooser = holder.get_chooser_for_field(field.name)
-    # logger.info('20140822 choices_for_field(%s.%s) --> %s',
-    #             holder, field.name, chooser)
-    if chooser:
-        qs = chooser.get_request_choices(request, holder)
-        if not isiterable(qs):
-            raise Exception("%s.%s_choices() returned non-iterable %r" % (
-                holder.model, field.name, qs))
-        if chooser.simple_values:
-            def row2dict(obj, d):
-                d[constants.CHOICES_TEXT_FIELD] = str(obj)
-                d[constants.CHOICES_VALUE_FIELD] = obj
-                return d
-        elif chooser.instance_values:
-            # same code as for ForeignKey
-            def row2dict(obj, d):
-                d[constants.CHOICES_TEXT_FIELD] = holder.get_choices_text(
-                    obj, request, field)
-                d[constants.CHOICES_VALUE_FIELD] = obj.pk
-                return d
-        else:  # values are (value,text) tuples
-            def row2dict(obj, d):
-                d[constants.CHOICES_TEXT_FIELD] = str(obj[1])
-                d[constants.CHOICES_VALUE_FIELD] = obj[0]
-                return d
-
-    elif field.choices:
-        qs = field.choices
-
-        def row2dict(obj, d):
-            if type(obj) is list or type(obj) is tuple:
-                d[constants.CHOICES_TEXT_FIELD] = str(obj[1])
-                d[constants.CHOICES_VALUE_FIELD] = obj[0]
-            else:
-                d[constants.CHOICES_TEXT_FIELD] = holder.get_choices_text(
-                    obj, request, field)
-                d[constants.CHOICES_VALUE_FIELD] = str(obj)
-            return d
-
-    elif isinstance(field, models.ForeignKey):
-        m = field.rel.model
-        t = m.get_default_table()
-        qs = t.request(request=request).data_iterator
-
-        # logger.info('20120710 choices_view(FK) %s --> %s', t, qs.query)
-
-        def row2dict(obj, d):
-            d[constants.CHOICES_TEXT_FIELD] = holder.get_choices_text(
-                obj, request, field)
-            d[constants.CHOICES_VALUE_FIELD] = obj.pk
-            return d
-    else:
-        raise http.Http404("No choices for %s" % field)
-    return (qs, row2dict)
-
-
-def choices_response(actor, request, qs, row2dict, emptyValue):
-    quick_search = request.GET.get(constants.URL_PARAM_FILTER, None)
-    if quick_search and isinstance(qs, models.QuerySet):
-        qs = qs.filter(qs.model.quick_search_filter(quick_search))
-
-    count = len(qs)
-
-    offset = request.GET.get(constants.URL_PARAM_START, None)
-    if offset:
-        qs = qs[int(offset):]
-        # ~ kw.update(offset=int(offset))
-    limit = request.GET.get(constants.URL_PARAM_LIMIT, None)
-    if limit:
-        # ~ kw.update(limit=int(limit))
-        qs = qs[:int(limit)]
-
-    rows = [row2dict(row, {}) for row in qs]
-
-    if quick_search and isinstance(qs, list):
-        txt = quick_search.lower()
-        rows = [row for row in rows
-                if txt in row[constants.CHOICES_TEXT_FIELD].lower()]
-
-    if emptyValue and not quick_search:
-        empty = dict()
-        empty[constants.CHOICES_TEXT_FIELD] = emptyValue
-        empty[constants.CHOICES_VALUE_FIELD] = None
-        rows.insert(0, empty)
-    return json_response_kw(count=count, rows=rows)
-    # ~ return json_response_kw(count=len(rows),rows=rows)
-    # ~ return json_response_kw(count=len(rows),rows=rows,title=_('Choices for %s') % fldname)
 
 
 class ActionParamChoices(View):
