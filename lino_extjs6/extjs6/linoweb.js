@@ -1923,8 +1923,8 @@ Ext.define('Lino.NavigationModel', {
             eval(detail_panel).run(null,{record_id:params});
         }
         else {
-            var targetEl = mousedownEvent.getTarget(null, null, true);
-            targetEl.focus();
+            // var targetEl = mousedownEvent.getTarget(null, null, true);
+            // targetEl.focus();
             this.callParent(arguments);
         }
     },
@@ -4259,16 +4259,17 @@ Ext.define('Lino.GridPanel', {
             case e.LEFT:
                 newCell = walk('left');
                 break;
-            case e.F2:
+            case e.F2 && false:
                 if (!e.hasModifier()) {
                     // https://gist.github.com/zerkms/2572486 to add a key trigger.
                     if (!g.editingPlugin.editing) {
                         var columnId = g.getSelectionModel().getCurrentPosition().column,
-                            record = g.getSelectionModel().selection.record,
+                            // record = g.getSelectionModel().selection.record,
+                            record = g.getSelectionModel().selected.items[0],
                             header = g.getHeaderAtIndex(columnId);
 
                         // me.startEdit(record, header);
-                        g.editingPlugin.startEdit(record, header);
+                        g.editingPlugin.startEditByPosition(g.getSelectionModel().getCurrentPosition());
                         // editor.startEdit(e.position.cellElement);
                         e.stopEvent();
                         return;
