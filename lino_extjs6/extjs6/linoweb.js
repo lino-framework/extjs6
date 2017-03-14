@@ -927,7 +927,7 @@ Lino.close_window = function(status_update, norestore) {
       if(!norestore) { Lino.viewport.refresh(); }
   }
   if (cw) cw.hide_really();
-  if (typeof ww.window.main_item.refresh == 'function') {
+  if (ww && (typeof ww.window.main_item.refresh == 'function')) {
         ww.window.main_item.refresh();
     }
   return retval;
@@ -1912,19 +1912,41 @@ Ext.define('Lino.NullNumberColumn', {
     }
 });
 
+Ext.define('Lino.NavigationModel', {
+    override : 'Ext.grid.NavigationModel',
+    onCellMouseDown: function(view, cell, cellIndex, record, row, recordIndex, mousedownEvent) {
+        if (mousedownEvent.target.text == '➚'){
+            mousedownEvent.preventDefault(true);
+            var href = mousedownEvent.target.pathname;
+            var detail_panel = href.split('-')[0];
+            var params = href.split('-')[1];
+            eval(detail_panel).run(null,{record_id:params});
+        }
+        else {
+            // var targetEl = mousedownEvent.getTarget(null, null, true);
+            // targetEl.focus();
+            this.callParent(arguments);
+        }
+    },
+    });
 
 Lino.link_button = function(url) {
     // return '<a href="' + url + '"><img src="{{settings.SITE.build_media_url('lino', 'extjs', 'images', 'xsite', 'link.png')}}" alt="link_button"></a>'
-    return '<a href="' + url + '" style="text-decoration:none;">&#10138;</a>'
+    return Ext.String.format('<a href="' + url + '" style="z-index: 1000">&#10138;</a>');
+};
+
+Lino.link_button_with_value = function(url,value) {
+    // return '<a href="' + url + '"><img src="{{settings.SITE.build_media_url('lino', 'extjs', 'images', 'xsite', 'link.png')}}" alt="link_button"></a>'
+    return Ext.String.format('   <a href="' + url + '" style="z-index: 1000">' + value + '</a>');
 };
 
 Lino.fk_renderer = function(fkname,handlername) {
   //~ console.log('Lino.fk_renderer handler=',handler);
-  return function(value, metaData, record, rowIndex, colIndex, store) {
+  return function(value, metaData, record, rowIndex, colIndex, store,view) {
     //~ console.log('Lino.fk_renderer',fkname,rowIndex,colIndex,record,metaData,store);
     //~ if (record.phantom) return '';
     if (value) {
-        return Lino.link_button('javascript:'+handlername + '.run(null,{record_id:\'' + String(record.data[fkname]) + '\'})")') + value;
+        return Lino.link_button('javascript:'+handlername + '-' + String(record.data[fkname])) + Lino.link_button_with_value('',value);
         // until 20140822 (clickable foreign keys):
         // var s = '<a href="javascript:' ;
         // s += handlername + '.run(null,{record_id:\'' + String(record.data[fkname]) + '\'})">';
@@ -4242,11 +4264,12 @@ Ext.define('Lino.GridPanel', {
                     // https://gist.github.com/zerkms/2572486 to add a key trigger.
                     if (!g.editingPlugin.editing) {
                         var columnId = g.getSelectionModel().getCurrentPosition().column,
-                            record = g.getSelectionModel().selection.record,
+                            // record = g.getSelectionModel().selection.record,
+                            record = g.getSelectionModel().selected.items[0],
                             header = g.getHeaderAtIndex(columnId);
 
                         // me.startEdit(record, header);
-                        g.editingPlugin.startEdit(record, header);
+                        g.editingPlugin.startEditByPosition(g.getSelectionModel().getCurrentPosition());
                         // editor.startEdit(e.position.cellElement);
                         e.stopEvent();
                         return;
