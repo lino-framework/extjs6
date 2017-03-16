@@ -9,8 +9,6 @@ lino_extjs6.extjs6.views
 
    .. autosummary::
    
-      choices_for_field
-      choices_response
       delete_element
    
    
