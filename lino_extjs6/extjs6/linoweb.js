@@ -5092,6 +5092,7 @@ http://www.sencha.com/forum/showthread.php?15842-2.0-SOLVED-Combobox-twintrigger
 
 Ext.define('Lino.TwinCombo',{
   extend:'Lino.RemoteComboFieldElement',
+    forceSelection : false,
     trigger2Class : 'x-form-search-trigger',
     triggers: {
         search: {
