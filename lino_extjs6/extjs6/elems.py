@@ -1794,6 +1794,7 @@ class Panel(Container):
             d.update(frame=True)
             d.update(bodyBorder=False)
             d.update(border=False)
+            d.update(layout=dict(type='vbox', align='stretch'))
             # d.update(style=dict(padding='0px'),color='green')
         else:
             d.update(frame=False)

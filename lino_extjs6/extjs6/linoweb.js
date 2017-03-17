@@ -1,5 +1,5 @@
 /*
- Copyright 2009-2016 Luc Saffre
+ Copyright 2009-2017 Luc Saffre
  License: BSD (see file COPYING for details)
 */
 
@@ -1923,8 +1923,8 @@ Ext.define('Lino.NavigationModel', {
             eval(detail_panel).run(null,{record_id:params});
         }
         else {
-            // var targetEl = mousedownEvent.getTarget(null, null, true);
-            // targetEl.focus();
+            var targetEl = mousedownEvent.getTarget(null, null, true);
+            targetEl.focus();
             this.callParent(arguments);
         }
     },
@@ -4133,10 +4133,10 @@ Ext.define('Lino.GridPanel', {
     }
 
     ,on_cellkeydown : function ( view , td , cellIndex , record , tr , rowIndex , e , eOpts ) {
-        this.handleKeyDown(e,cellIndex,rowIndex,view);
+        this.handleKeyDown(e,cellIndex,rowIndex,view,record,tr,td);
 
     },
-    handleKeyDown : function(e,c, r,g){
+    handleKeyDown : function(e,c, r,g,record,tr,td){
         /* removed because F2 wouldn't pass
         if(!e.isNavKeyPress()){
             return;
@@ -4161,7 +4161,7 @@ Ext.define('Lino.GridPanel', {
 
         switch(k){
             case e.ESC:
-                this.containing_window.hide();
+                this.get_containing_window().hide();
                 e.stopEvent();
                 break;
             case e.PAGE_UP:
@@ -4259,17 +4259,27 @@ Ext.define('Lino.GridPanel', {
             case e.LEFT:
                 newCell = walk('left');
                 break;
-            case e.F2 && false:
+            case e.F2:
                 if (!e.hasModifier()) {
                     // https://gist.github.com/zerkms/2572486 to add a key trigger.
                     if (!g.editingPlugin.editing) {
                         var columnId = g.getSelectionModel().getCurrentPosition().column,
                             // record = g.getSelectionModel().selection.record,
                             record = g.getSelectionModel().selected.items[0],
-                            header = g.getHeaderAtIndex(columnId);
+                            header = g.getHeaderAtIndex(columnId),
+                            view = g,
+                            cell = td,
+                            cellIndex = c,
+                            record = record,
+                            row = tr,
+                            recordIndex = r,
+                            mousedownEvent = e;
+
+
+                        g.getSelectionModel().navigationModel.onCellMouseDown(view, cell, cellIndex, record, row, recordIndex, mousedownEvent);
 
                         // me.startEdit(record, header);
-                        g.editingPlugin.startEditByPosition(g.getSelectionModel().getCurrentPosition());
+                        // g.editingPlugin.startEditByPosition(g.getSelectionModel().getCurrentPosition());
                         // editor.startEdit(e.position.cellElement);
                         e.stopEvent();
                         return;
