@@ -4161,7 +4161,7 @@ Ext.define('Lino.GridPanel', {
 
         switch(k){
             case e.ESC:
-                this.containing_window.hide();
+                this.get_containing_window().hide();
                 e.stopEvent();
                 break;
             case e.PAGE_UP:
