@@ -11,7 +11,7 @@ env:
 install:
   - pip install -U setuptools
   - pip install coveralls
-  - pip install -r requirements.txt
+  - test -e "requirements.$TRAVIS_BRANCH.txt" && ( pip install -r "requirements.$TRAVIS_BRANCH.txt" ) || ( pip install -r requirements.txt )
   - pip install Django==$DJANGO
   - pip install -e .
 script:

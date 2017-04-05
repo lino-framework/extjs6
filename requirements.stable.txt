@@ -1,0 +1,4 @@
+-e git+https://github.com/lino-framework/atelier.git@stable#egg=atelier
+-e git+https://github.com/lino-framework/lino.git@stable#egg=lino
+-e git+https://github.com/lino-framework/xl.git@stable#egg=lino_xl
+-e git+https://github.com/lino-framework/noi.git@stable#egg=lino_noi
