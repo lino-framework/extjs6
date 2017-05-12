@@ -1925,9 +1925,14 @@ Ext.define('Lino.NavigationModel', {
             var params = href.split('-')[1];
             eval(detail_panel).run(null,{record_id:params});
         }
-        else {
+        if (mousedownEvent.target.text != undefined){
             var targetEl = mousedownEvent.getTarget(null, null, true);
             targetEl.focus();
+            this.callParent(arguments);
+        }
+        else {
+            // var targetEl = mousedownEvent.getTarget(null, null, true);
+            // targetEl.focus();
             this.callParent(arguments);
         }
     },
@@ -3566,7 +3571,7 @@ Ext.define('Lino.GridPanel', {
       config.plugins = [];
       config.plugins.push({
           ptype: 'cellediting',
-          clicksToEdit: 2
+          clicksToEdit: 1
       });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
@@ -4604,6 +4609,7 @@ Ext.define('Lino.GridPanel', {
     // add value used by ForeignKeyStoreField CHOICES_HIDDEN_SUFFIX
     // not sure whether this is still needed:
     p[e.field+'{{constants.CHOICES_HIDDEN_SUFFIX}}'] = e.value;
+    p[e.field] = e.value;
     //~ p.{{constants.URL_PARAM_SUBST_USER}} = Lino.subst_user;
     Lino.insert_subst_user(p);
     // this one is needed so that this field can serve as choice context:

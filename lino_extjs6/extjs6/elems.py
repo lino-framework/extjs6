@@ -1243,8 +1243,8 @@ class BooleanFieldElement(FieldElement):
     value_template = "Ext.create('Ext.form.Checkbox',%s)"
     # ~ xtype = 'checkbox'
     # ~ data_type = 'boolean'
-    filter_type = 'boolean'
-    gridfilters_settings = dict(type='boolean')
+    # filter_type = 'boolean'
+    # gridfilters_settings = dict(type='boolean')
 
     # ~ grid_column_template = "new Ext.grid.BooleanColumn(%s)"
     # ~ def __init__(self,*args,**kw):
@@ -1302,6 +1302,7 @@ class BooleanFieldElement(FieldElement):
     def get_column_options(self, **kw):
         kw = FieldElement.get_column_options(self, **kw)
         kw.update(xtype='checkcolumn')
+        kw.update(editor=dict(field=dict(xtype='checkboxfield')))
         return kw
 
     def get_from_form(self, instance, values):
@@ -1725,7 +1726,7 @@ class Panel(Container):
                 d.update(layout=dict(type='hbox', align='stretchmax'))
 
         elif d['layout'] in ['vbox', 'anchor'] or (
-                type(d['layout']) is dict and d['layout'].get('type', False) in ['vbox', 'anchor']):
+                        type(d['layout']) is dict and d['layout'].get('type', False) in ['vbox', 'anchor']):
             # a vbox with 2 or 3 elements, of which at least two are
             # vflex will be implemented as a VBorderPanel.
             assert len(self.elements) > 1
