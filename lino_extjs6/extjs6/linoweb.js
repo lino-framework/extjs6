@@ -4609,7 +4609,6 @@ Ext.define('Lino.GridPanel', {
     // add value used by ForeignKeyStoreField CHOICES_HIDDEN_SUFFIX
     // not sure whether this is still needed:
     p[e.field+'{{constants.CHOICES_HIDDEN_SUFFIX}}'] = e.value;
-    p[e.field] = e.value;
     //~ p.{{constants.URL_PARAM_SUBST_USER}} = Lino.subst_user;
     Lino.insert_subst_user(p);
     // this one is needed so that this field can serve as choice context:
