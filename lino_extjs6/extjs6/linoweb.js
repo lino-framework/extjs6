@@ -1079,23 +1079,26 @@ Lino.VinylFoxPlugins = function(){
   - react on dblclcik, not on single click
 
  */
-Lino.CheckColumn = Ext.extend(Ext.grid.Column, {
+Ext.define('Lino.CheckColumn',{
+    override : 'Ext.grid.column.Check',
 
-    processEvent : function(name, e, grid, rowIndex, colIndex){
+    // processEvent : function(name, e, grid, rowIndex, colIndex){
+    processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
         //~ console.log('20110713 Lino.CheckColumn.processEvent',name)
-        if (name == 'click') {
+        if (type == 'click') {
         //~ if (name == 'mousedown') {
         //~ if (name == 'dblclick') {
-            return this.toggleValue(grid, rowIndex, colIndex);
+            return this.toggleValue(view.grid, recordIndex, cellIndex,record);
         } else {
             //return Ext.grid.ActionColumn.superclass.processEvent.apply(this, arguments);
              this.callSuper(arguments);
         }
     },
     
-    toggleValue : function (grid,rowIndex,colIndex) {
-        var record = grid.store.getAt(rowIndex);
-        var dataIndex = grid.colModel.getDataIndex(colIndex);
+    toggleValue : function (grid,rowIndex,colIndex,record) {
+        // var record = grid.store.getAt(rowIndex);
+        // var dataIndex = grid.colModel.getDataIndex(colIndex);
+        var dataIndex = this.dataIndex;
         // 20120514
         //~ if(record.data.disabled_fields && record.data.disabled_fields[dataIndex]) {
           //~ Lino.notify("{{_("This field is disabled")}}");
@@ -1119,20 +1122,26 @@ Lino.CheckColumn = Ext.extend(Ext.grid.Column, {
             column: colIndex,
             cancel: false
         };
-        if(grid.fireEvent("beforeedit", e) !== false && !e.cancel){
+        // record.set(dataIndex, value);
+        // if(grid.fireEvent("beforeedit", e) !== false && !e.cancel){
         //~ if(grid.fireEvent("validateedit", e) !== false && !e.cancel){
-            record.set(dataIndex, value);
-            delete e.cancel;
-            grid.fireEvent("afteredit", e);
-        }
+        record.set(dataIndex, value);
+        delete e.cancel;
+        grid.fireEvent("edit",grid, e);
+        // grid.on_afteredit(grid, e);
+        // Ext.fireEvent("edit",grid, e);
+        // }
         return false; // Cancel event propagation
     },
 
-    renderer : function(v, p, record){
+    renderer_unused : function(v, p, record){
         if (record.phantom) return '';
         p.css += ' x-grid3-check-col-td'; 
         return String.format('<div class="x-grid3-check-col{0}">&#160;</div>', v ? '-on' : '');
-    }
+    },
+    checkchange : function(rowIndex, checked, record, e, eOpts ) {
+        console.log('Ext.field.Checkbox get changes');
+},
 
     // Deprecate use as a plugin. Remove in 4.0
     // init: Ext.emptyFn
@@ -1146,7 +1155,7 @@ Lino.CheckColumn = Ext.extend(Ext.grid.Column, {
 
 // Disable by HKC (Migratio to Exjts6)
 // register Column xtype
-//Ext.grid.Column.types.checkcolumn = Lino.CheckColumn;
+Ext.grid.column.Check = Lino.CheckColumn;
 
 
 /* 20110725 : 
@@ -2706,6 +2715,13 @@ Ext.define('Lino.form.field.HtmlEditor',{
         return null;
     }()),
 });
+
+// Ext.define('Lino.grid.column.Check',{
+//     override : 'Ext.grid.column.Check',
+//     checkchange : function(rowIndex, checked, record, e, eOpts ) {
+//         console.log('Ext.field.Checkbox get changes');
+// },
+// });
 //Edited by HKC
 //    Ext.define('Lino.PanelMixin', {
 //    extend: 'Ext.panel.Table',
@@ -4191,11 +4207,11 @@ Ext.define('Lino.GridPanel', {
         }
 
         if(!s){
-            cell = walk('up');
-            if(cell){
-                this.select(cell[0], cell[1]);
-            }
-            return;
+            newCell = walk('up');
+            // if(cell){
+            //     this.select(cell[0], cell[1]);
+            // }
+            // return;
         }
 
         cell = s.cell;
