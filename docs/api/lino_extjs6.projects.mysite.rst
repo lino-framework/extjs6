@@ -1,5 +1,5 @@
-lino_extjs6.projects.mysite
-===========================
+lino\_extjs6\.projects\.mysite
+==============================
 
 .. automodule:: lino_extjs6.projects.mysite
 
