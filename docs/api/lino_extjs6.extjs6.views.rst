@@ -1,5 +1,5 @@
-lino_extjs6.extjs6.views
-========================
+lino\_extjs6\.extjs6\.views
+===========================
 
 .. automodule:: lino_extjs6.extjs6.views
 
@@ -9,16 +9,7 @@ lino_extjs6.extjs6.views
 
    .. autosummary::
    
-      action_request
-      choices_for_field
-      choices_response
       delete_element
-      elem2rec_empty
-      force_text
-      isiterable
-      json_response
-      json_response_kw
-      requested_actor
    
    
 
@@ -32,18 +23,11 @@ lino_extjs6.extjs6.views
       AdminIndex
       ApiElement
       ApiList
-      Authenticate
-      BaseRequest
-      Callbacks
       Choices
-      EidAppletService
       GridConfig
       HttpResponseDeleted
       MainHtml
       Restful
-      RunJasmine
-      View
-      str
    
    
 
