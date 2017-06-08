@@ -723,28 +723,29 @@ Ext.define('Lino.MainPanel',{
           }
         });
         tbar = tbar.concat([this.toggle_params_panel_btn]);
-        var refresh = function() {
-            if (!t.setting_param_values) {
+        var refresh = function(newValue, oldValue, eOpts) {
+            if (!t.setting_param_values && this.isValid()) {
                 t._force_dirty = true;
                 t.refresh();
             }
         };
         Ext.each(this.params_panel.fields,function(f) {
+            f.on('change',refresh);
           //~ f.on('valid',function() {t.refresh()});
-          if (f instanceof Ext.form.Checkbox) {
-              f.on('check',refresh);
-          } else if (f instanceof Ext.DatePicker) {
-              f.on('select',refresh);
-          } else if (f instanceof Ext.form.TriggerField) {
-              f.on('select',refresh);
+          // if (f instanceof Ext.form.Checkbox) {
+          //     f.on('check',refresh);
+          // } else if (f instanceof Ext.form.field.Date) {
+          //     f.on('select',refresh);
+          // } else if (f instanceof Ext.form.TriggerField) {
+          //     f.on('select',refresh);
               //~ f.on('change',refresh);
               //~ f.on('valid',refresh);
-          } else {
-              if (! f.on)
-                  console.log("20121010 no method 'on'",f);
-              else
-                  f.on('change',refresh);
-            }
+          // } else {
+          //     if (! f.on)
+          //         console.log("20121010 no method 'on'",f);
+          //     else
+          //         f.on('change',refresh);
+          //   }
           });
       }
       return tbar;
