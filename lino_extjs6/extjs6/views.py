@@ -51,7 +51,7 @@ E = xghtml.E
 from lino.utils import ucsv
 from lino.utils import isiterable
 from lino.utils import dblogger
-from lino.core import auth
+# from lino.core import auth
 
 from lino.core import actions
 
@@ -111,7 +111,7 @@ class AdminIndex(View):
         # if settings.SITE.user_model is not None:
         #     user = request.subst_user or request.user
         #     a = settings.SITE.get_main_action(user)
-        #     if a is not None and a.get_view_permission(user.profile):
+        #     if a is not None and a.get_view_permission(user.user_type):
         #         kw.update(on_ready=renderer.action_call(request, a, {}))
         return http.HttpResponse(renderer.html_page(request, **kw))
 
