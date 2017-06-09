@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from lino.api import dd
 
-from lino.modlib.users.desktop import Users, UserDetail
+from lino.modlib.auth.desktop import Users, UserDetail
 from django.db import models
 
 EXTJS6_THEMES_CHOICES = (
@@ -33,15 +33,15 @@ EXTJS6_THEMES_CHOICES = (
 
 if dd.plugins.extjs6.select_theme:
     dd.inject_field(
-        'users.User', 'preferred_theme',
+        'auth.User', 'preferred_theme',
         models.CharField(_("Preferred theme"), choices=EXTJS6_THEMES_CHOICES, default="", blank=True, max_length=25))
 else:
-    dd.inject_field('users.User', 'preferred_theme', dd.DummyField())
+    dd.inject_field('auth.User', 'preferred_theme', dd.DummyField())
 
 
 class ThemedUserDetail(UserDetail):
     box1 = """
-        username profile:20 partner
+        username user_type:20 partner
         first_name last_name initials
         email language timezone preferred_theme
         id created modified

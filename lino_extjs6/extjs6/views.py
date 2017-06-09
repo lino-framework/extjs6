@@ -51,7 +51,7 @@ E = xghtml.E
 from lino.utils import ucsv
 from lino.utils import isiterable
 from lino.utils import dblogger
-from lino.core import auth
+# from lino.core import auth
 
 from lino.core import actions
 
@@ -77,7 +77,7 @@ def delete_element(ar, elem):
     msg = ar.actor.disable_delete(elem, ar)
     if msg is not None:
         ar.error(None, msg, alert=True)
-        return settings.SITE.kernel.render_action_response(ar)
+        return ar.renderer.render_action_response(ar)
 
     # ~ dblogger.log_deleted(ar.request,elem)
 
@@ -93,7 +93,7 @@ def delete_element(ar, elem):
                 ) % dict(record=dd.obj2unicode(elem), error=e)
         # ~ msg = "Failed to delete %s." % element_name(elem)
         ar.error(None, msg)
-        return settings.SITE.kernel.render_action_response(ar)
+        return ar.renderer.render_action_response(ar)
         # ~ raise Http404(msg)
 
     return HttpResponseDeleted()
@@ -111,7 +111,7 @@ class AdminIndex(View):
         # if settings.SITE.user_model is not None:
         #     user = request.subst_user or request.user
         #     a = settings.SITE.get_main_action(user)
-        #     if a is not None and a.get_view_permission(user.profile):
+        #     if a is not None and a.get_view_permission(user.user_type):
         #         kw.update(on_ready=renderer.action_call(request, a, {}))
         return http.HttpResponse(renderer.html_page(request, **kw))
 
@@ -120,12 +120,11 @@ class MainHtml(View):
     def get(self, request, *args, **kw):
         # ~ logger.info("20130719 MainHtml")
         settings.SITE.startup()
-        ui = settings.SITE.kernel
         # ~ raise Exception("20131023")
         ar = BaseRequest(request)
         ar.success(html=settings.SITE.get_main_html(
             request, extjs=settings.SITE.plugins.extjs6))
-        return ui.render_action_response(ar)
+        return ar.renderer.render_action_response(ar)
 
 
 
