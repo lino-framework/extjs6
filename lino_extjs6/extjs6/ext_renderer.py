@@ -513,10 +513,10 @@ class ExtRenderer(JsRenderer):
 
                     login_menu_items.insert(0, act_as)
 
+                if site.remote_user_header is None:
+                    login_menu_items.append(
+                        dict(text=_("Log out"), handler=js_code('Lino.logout')))
                 # the following was never used
-                # if site.remote_user_header is None:
-                #     login_menu_items.append(
-                #         dict(text=_("Log out"), handler=js_code('Lino.logout')))
                 #     if auth.get_auth_middleware().can_change_password(request, request.user):
                 #         login_menu_items.append(
                 #             dict(text=_("Change password"), handler=js_code('Lino.change_password')))
