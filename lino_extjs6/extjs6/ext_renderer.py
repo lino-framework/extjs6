@@ -62,10 +62,10 @@ else:
 
 from . import elems as ext_elems
 
-from lino.modlib.auth.choicelists import UserTypes
+from lino.modlib.users.choicelists import UserTypes
 
 # if settings.SITE.user_model:
-#     from lino.modlib.auth import models as users
+#     from lino.modlib.users import models as users
 
 ONE_CHAR_LABEL = " <font size=\"4\">{}</font>"
 
@@ -455,7 +455,7 @@ class ExtRenderer(JsRenderer):
 
     def html_page_user(self, request, site):
 
-        # TODO: move the following to lino.modlib.auth?
+        # TODO: move the following to lino.modlib.users?
         if settings.SITE.user_model is not None:
 
             if request.user.user_type.has_required_roles([SiteUser]):
@@ -486,7 +486,7 @@ class ExtRenderer(JsRenderer):
                         for u in settings.SITE.user_model.objects.exclude(
                             user_type='').exclude(id=user.id)]
                 else:
-                    qs = rt.models.auth.Authority.objects.filter(
+                    qs = rt.models.users.Authority.objects.filter(
                         authorized=user).exclude(user__user_type='')
                     qs = qs.order_by(
                         'user__last_name', 'user__first_name',
