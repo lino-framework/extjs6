@@ -494,7 +494,7 @@ class ExtRenderer(JsRenderer):
                     authorities = [
                         (a.user.id, usertext(a.user)) for a in qs]
 
-                a = rt.actors.auth.MySettings.default_action
+                a = rt.actors.users.MySettings.default_action
                 handler = self.action_call(None, a, dict(record_id=user.pk))
                 handler = "function(){%s}" % handler
                 mysettings = dict(text=_("My settings"),
