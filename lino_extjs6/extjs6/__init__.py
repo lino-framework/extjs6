@@ -117,7 +117,7 @@ class Plugin(Plugin):
     Default `False`.
 
     Note that setting this to `True` will inject a field into the
-    :class:`lino.modlib.auth.User` model with the result that
+    :class:`lino.modlib.users.User` model with the result that
     switching between :mod:`lino.modlib.extjs` and
     :mod:`lino_extjs6.extjs6` requires a database migration
 
