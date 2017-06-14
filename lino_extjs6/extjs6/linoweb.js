@@ -4509,8 +4509,8 @@ Ext.define('Lino.GridPanel', {
   },
   
   get_current_grid_config : function () {
-    //var cm = this.getColumns();
-    var cm = this.getView().getHeaderCt().getGridColumns();
+    var cm = this.getColumns();
+    // var cm = this.getView().getHeaderCt().getGridColumns();
     var widths = Array(cm.length);
     var hiddens = Array(cm.length);
     //~ var hiddens = Array(cm.config.length);
@@ -4519,13 +4519,17 @@ Ext.define('Lino.GridPanel', {
     //~ var hidden_cols = [];
     //~ var filters = this.filters.getFilterValues();
     // var p = this.filters.buildQuery(this.filters.getFilterData())
-      var p = this.filters.store.filters.filterBy(this.filters.store.filters);
+    //   var p = this.filters.store.filters.filterBy(this.filters.store.filters);
+      var p = {};
+      // var p = this.store.proxy.encodeFilters(this.store.getFilters().items);
     for (var i = 0; i < cm.length; i++) {
+
       var col = cm[i];
-      columns[i] = col.dataIndex;
-      //~ hiddens[i] = col.hidden;
-      widths[i] = col.width;
-      hiddens[i] = col.hidden;
+          columns[i] = col.dataIndex;
+          //~ hiddens[i] = col.hidden;
+          widths[i] = col.cellWidth;
+          hiddens[i] = col.hidden;
+
       //~ if (col.hidden) hidden_cols.push(col.dataIndex);
     }
     //~ p['hidden_cols'] = hidden_cols;
