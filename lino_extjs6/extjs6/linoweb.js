@@ -1933,9 +1933,12 @@ Ext.define('Lino.NavigationModel', {
             var href = mousedownEvent.target.pathname;
             var detail_panel = href.split('-')[0];
             var params = href.split('-')[1];
-            eval(detail_panel).run(null,{record_id:params});
+            var record_id = parseInt(params);
+            // Lino.run_detail_handler(eval(detail_panel),params);
+            var detail_panel_object = eval(detail_panel);
+            detail_panel_object.run(null,{record_id:record_id});
         }
-        if (mousedownEvent.target.text != undefined){
+        else if  (mousedownEvent.target.text != undefined){
             var targetEl = mousedownEvent.getTarget(null, null, true);
             targetEl.focus();
             this.callParent(arguments);
@@ -3524,6 +3527,8 @@ Ext.define('Lino.GridStore', {
     // this.grid_panel.paging_toolbar.store.load(options.params);
     //     this.grid_panel.paging_toolbar.store.proxy.config.reader.limit = options.limit;
     //     this.grid_panel.paging_toolbar.store.proxy.config.reader.start = options.start;
+        options.params['idParam'] = this.idParam;
+        options.params['id'] = this.idParam;
     this.grid_panel.add_param_values(options.params);
     //~ Lino.insert_subst_user(options.params);
     // console.log("20160701 GridStore.load()", options.params, this.baseParams);
@@ -3665,11 +3670,13 @@ Ext.define('Lino.GridPanel', {
       // 20120814 
       url: '{{extjs.build_plain_url("api")}}' + this.ls_url
       ,method: "GET"
+      ,idParam : this.ls_id_property
       ,reader: {
           type: 'json',
           rootProperty: 'rows',
           totalProperty: "count", 
-          idProperty: this.ls_id_property, 
+          idProperty: this.ls_id_property,
+          idParam : this.ls_id_property,
           keepRawData: true // LS 20151221
       }
         //type: 'ajax',
@@ -3692,7 +3699,8 @@ Ext.define('Lino.GridPanel', {
       ,idIndex: this.pk_index
       //~ ,baseParams: bp
       ,fields: this.ls_store_fields
-      ,idProperty: this.ls_id_property 
+      ,idProperty: this.ls_id_property
+        ,idParam : this.ls_id_property
       // 20120814
       //~ ,writer : new Ext.data.JsonWriter({
         //~ writeAllFields: false
