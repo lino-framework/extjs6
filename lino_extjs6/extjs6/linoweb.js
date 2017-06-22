@@ -573,6 +573,13 @@ Lino.perc2width = function(perc) {
     return w * perc / 100;
 };
 
+Ext.define("Lino.data.Model", {
+    override: "Ext.data.Model",
+    getId: function () {
+        return this.ls_id_property;
+    },
+});
+
 
 // HKC
 //Lino.MainPanel = {
@@ -3553,6 +3560,13 @@ Lino.auto_height_cell_template = Ext.create('Ext.Template',
 '</td>'
 );
 
+Ext.define('Lino.dataview.Abstract',{
+    override : 'Ext.dataview.Abstract',
+    config: {
+        enableTextSelection: true
+            },
+});
+
 // Edited by HKC (Migration to Exjts6)
 // EditorGridPanel does not exist any more. replaced by Ext.grid.plugin.CellEditing
 //Lino.GridPanel = Ext.extend(Ext.grid.EditorGridPanel, Lino.MainPanel);
@@ -3665,7 +3679,7 @@ Ext.define('Lino.GridPanel', {
     /* e.g. when slave gridwindow called from a permalink */
     //~ if (this.base_params) Ext.apply(bp,this.base_params);  
     
-    var proxy = Ext.create('Ext.data.HttpProxy',{
+    var proxy = Ext.create('Ext.data.proxy.Ajax',{
     //var proxy = {
       // 20120814 
       url: '{{extjs.build_plain_url("api")}}' + this.ls_url
