@@ -316,3 +316,7 @@ http://www.sencha.com/forum/showthread.php?70195-NumberField-and-Right-Alignment
 	padding: 0px 0 0px 0px;
 	/*background-color: #48acff;*/
 }
+
+.x-selectable {
+	user-select: text !important;
+}
