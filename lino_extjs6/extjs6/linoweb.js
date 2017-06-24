@@ -1930,7 +1930,7 @@ Ext.define('Lino.NavigationModel', {
     onCellMouseDown: function(view, cell, cellIndex, record, row, recordIndex, mousedownEvent) {
         if (mousedownEvent.target.text == '➚'){
             mousedownEvent.preventDefault(true);
-            var href = mousedownEvent.target.pathname;
+            var href = mousedownEvent.target.href;
             var detail_panel = href.split('-')[0];
             var params = href.split('-')[1];
             var record_id = parseInt(params);
