@@ -2607,14 +2607,16 @@ Ext.define('Lino.ActionFormPanel', {
             //key: Ext.EventObject.ENTER,
             key : Ext.event.Event.ENTER,
             fn: this.on_ok }
-      ]
+      ];
       
-      if (!wincfg.defaultButton) this.getForm().items.each(function(f){
-          if(f.isFormField){ 
+      if (!wincfg.defaultButton) {
+          var f = this.getForm();
+
+          if(f.isFormField){
               wincfg.defaultButton = f;
               return false;
           }
-      });
+      }
 
   }
 });
