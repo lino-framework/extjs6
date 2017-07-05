@@ -796,7 +796,9 @@ Ext.define('Lino.MainPanel',{
                 var current_field = this.params_panel.fields[field];
                 if (current_field instanceof Lino.ComboBox){
                     pv[current_field.hiddenName] = current_field.getValue();
-                    // current_field.hiddenvalue_id = current_field.getValue();
+                    if (current_field.isDirty()){
+                        current_field.hiddenvalue_id = current_field.getValue();
+                    }
                     pv[current_field.name] = current_field.rawValue;
                 }
                 else {
@@ -2632,7 +2634,12 @@ Lino.fields2array = function(fields,values) {
         else 
           var v = f.getValue();
         if (f instanceof Lino.ComboBox && (!Number.isInteger(v) || v == null )){
-            pv[i] = f.hiddenvalue_id;
+            if (f.rawValue == ""){
+                pv[i] = null;
+            }
+            else {
+                pv[i] = f.hiddenvalue_id;
+            }
             // v = f.rawValue;
             // var data = f.config.store;
             // var index = 1;
