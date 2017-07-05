@@ -790,6 +790,20 @@ Ext.define('Lino.MainPanel',{
   },
   set_param_values : function(pv) {
     if (this.params_panel) {
+        if (this._force_dirty){
+            pv = {};
+            for (var field in this.params_panel.fields){
+                var current_field = this.params_panel.fields[field];
+                if (current_field instanceof Lino.ComboBox){
+                    pv[current_field.hiddenName] = current_field.getValue();
+                    // current_field.hiddenvalue_id = current_field.getValue();
+                    pv[current_field.name] = current_field.rawValue;
+                }
+                else {
+                    pv[current_field.name] = current_field.getValue();
+                }
+            }
+        }
       //~ console.log('20120203 MainPanel.set_param_values', pv);
       this.status_param_values = pv;
       //~ this.params_panel.form.suspendEvents(false);
