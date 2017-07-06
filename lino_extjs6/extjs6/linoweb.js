@@ -4975,7 +4975,12 @@ Ext.define('Lino.ComboBox', {
       /* `record_data` is used to get the text corresponding to this value */
       //~ if(this.name == 'city')
       //~ console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
-      var text = v;
+        if (v !== null && v.crudState){
+            var text = v.data.field2;
+        }
+        else {
+            var text = v;
+        }
       if(this.valueField){
         if(v == null || v == '') {
             //~ if (this.name == 'birth_country')
@@ -5020,7 +5025,7 @@ Ext.define('Lino.ComboBox', {
           var r = this.findRecord(this.valueField, v);
           if(r){
               text = r.data[this.displayField];
-          }else if(this.valueNotFoundText !== undefined){
+          }else if(this.valueNotFoundText !== undefined && this.valueNotFoundText !== null ){
               text = this.valueNotFoundText;
           }
         }
