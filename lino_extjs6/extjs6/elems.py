@@ -1206,7 +1206,7 @@ class DisplayElement(FieldElement):
     value_template = "Ext.create('Ext.form.DisplayField',%s)"
 
     def __init__(self, *args, **kw):
-        kw.setdefault('value', '<br/>')  # see blog/2012/0527
+        kw.setdefault('value', '')  # see blog/2012/0527
         kw.update(always_enabled=True)
         FieldElement.__init__(self, *args, **kw)
         self.preferred_height = self.field.preferred_height

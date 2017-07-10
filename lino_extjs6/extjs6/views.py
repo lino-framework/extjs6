@@ -141,7 +141,7 @@ class ActionParamChoices(View):
         field = ba.action.get_param_elem(field)
         qs, row2dict = choices_for_field(request, ba.action, field)
         if field.blank:
-            emptyValue = '<br/>'
+            emptyValue = ''
         else:
             emptyValue = None
         return choices_response(actor, request, qs, row2dict, emptyValue)
@@ -187,7 +187,7 @@ class Choices(View):
                 field = rpt.get_data_elem(fldname)
             if field.blank:
                 # ~ logger.info("views.Choices: %r is blank",field)
-                emptyValue = '<br/>'
+                emptyValue = ''
             qs, row2dict = choices_for_field(request, rpt, field)
 
         return choices_response(rpt, request, qs, row2dict, emptyValue)
