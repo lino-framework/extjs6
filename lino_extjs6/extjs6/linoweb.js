@@ -4888,6 +4888,8 @@ Ext.define('Lino.ComboBox', {
   // forceSelection: true,
   triggerAction: 'all',
   minListWidth:280, // 20131022
+//  width:235,
+
   autoSelect: false,
   selectOnFocus: false, // select any existing text in the field immediately on focus.
   submitValue: true,
@@ -5051,9 +5053,12 @@ Ext.define('Lino.ComboBox', {
         p[param] = q;
     }
     if(this.pageSize){
-        p['{{constants.URL_PARAM_START}}'] = 0;
         p['{{constants.URL_PARAM_LIMIT}}'] = this.pageSize;
-    }
+        //p['{{constants.URL_PARAM_START}}'] = 0;
+        // This is being run on every query, causing start search value to always be 0, seems that it sets it correctly later if not set.
+        // ticket #1879
+        // p['{{constants.URL_PARAM_START}}'] = (pageNum - 1) * this.pageSize;
+}
     // now my code:
     if(this.contextParams) Ext.apply(p, this.contextParams);
     return p;
@@ -5123,6 +5128,7 @@ Ext.define('Lino.RemoteComboFieldElement',{
   extend:'Lino.ComboBox',
   mode: 'remote',
   queryMode : 'remote',
+  width:235,
   //~ forceSelection:false,
   minChars: 2, // default 4 is too much
   queryDelay: 300, // default 500 is maybe slow
