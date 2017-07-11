@@ -3162,7 +3162,7 @@ Ext.define('Lino.FormPanel', {
     var p = Ext.apply({}, this.get_base_params());
     if (this.action_name)
         p.{{constants.URL_PARAM_ACTION_NAME}} = this.action_name;
-    p.{{constants.URL_PARAM_REQUESTING_PANEL}} = record_id;
+    p.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.getId();
     p.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
     this.add_param_values(p);
     if (this.loadMask) this.loadMask.show();
