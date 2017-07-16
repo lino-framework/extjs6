@@ -4821,7 +4821,49 @@ Ext.define('Lino.GridPanel', {
   
 });
   
+Ext.define('Lino.selection.CellModel', {
+    override : 'Ext.selection.CellModel',
 
+    onSelectChange: function(record, isSelected, suppressEvent, commitFn) {
+        var me = this,
+            pos, eventName, view;
+
+        if (isSelected) {
+            pos = me.nextSelection;
+            eventName = 'select';
+        } else {
+            // Ticket #1962 Seems that there is some half-finished deselection when opening a detail view. Causing this.selection to be nul, and thus has no pos.
+            // I tested and it seems that this.view === pos.view when extjs is working correctly. This might have be changed on other selection models. if errors arise.
+            // It seems that the events later in this function are fired, with pos.row
+            pos = me.selection === null ? {view : this.view} : me.selection;
+            eventName = 'deselect';
+
+        }
+
+        // CellModel may be shared between two sides of a Lockable.
+        // The position must include a reference to the view in which the selection is current.
+        // Ensure we use the view specified by the position.
+
+
+
+        view = pos.view || me.primaryView;
+
+        if ((suppressEvent || me.fireEvent('before' + eventName, me, record, pos.rowIdx, pos.colIdx)) !== false &&
+                commitFn() !== false) {
+
+            if (isSelected) {
+                view.onCellSelect(pos);
+            } else {
+                view.onCellDeselect(pos);
+                delete me.selection;
+            }
+
+            if (!suppressEvent) {
+                me.fireEvent(eventName, me, record, pos.rowIdx, pos.colIdx);
+            }
+        }
+    },
+    })
 //~ Lino.MainPanelMixin = {
   //~ tbar_items : function() {
       //~ return ;
@@ -4850,7 +4892,10 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   //~ grid.getView().focusCell(row,col);
   //  HKC
   //grid.getSelectionModel().select(row,col);
-  grid.getSelectionModel().select(rowIndex,cellIndex);
+  grid.getSelectionModel().select({
+                row: rowIndex,
+                column: cellIndex
+            });
     //this.getSelectionModel().select(row,col);
   //~ console.log(grid.store.getAt(row));
   //~ grid.getView().focusRow(row);
@@ -4863,7 +4908,9 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   }
   //~ if(e.record.data.disabled_fields) {
   
-  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
+//  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
+// seems that the proxy reader data can sometimes only include the last 10 records collected by infinite scroll
+  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_actions
   if (da) {
       this.cmenu.cascade(function(item){ 
         //~ console.log(20120531, item.itemId, da[item.itemId]);
