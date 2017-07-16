@@ -3193,7 +3193,7 @@ Ext.define('Lino.FormPanel', {
   }
 
   ,set_current_record : function(record, after) {
-      // console.log('20150905 set_current_record', record);
+       console.log('20150905 set_current_record', record);
     if (this.record_selector) {
         // HKC: disable this line to avoid getting "Save or not the record" when closing and IsDirty() is True
         //this.record_selector.clearValue();
@@ -3293,7 +3293,7 @@ if (this.disable_editing | record.data.disable_editing) {
 
   get_selected : function() { return [ this.current_record ] },
   get_current_record : function() {
-    //~ console.log(20100714,this.current_record);
+    console.log(20100714,this.current_record);
     return this.current_record
   },
 
@@ -3614,10 +3614,10 @@ Ext.define('Lino.GridPanel', {
 
   constructor : function(config){
       config.plugins = [];
-      config.plugins.push({
-          ptype: 'cellediting',
-          clicksToEdit: 1
-      });
+//      config.plugins.push({
+//          ptype: 'cellediting',
+//          clicksToEdit: 1
+//      });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
     config.plugins.push(Ext.create('Lino.GridFilters',{}));
@@ -3871,9 +3871,13 @@ Ext.define('Lino.GridPanel', {
               return [ this.selModel.selection.record ];
           return [this.store.getAt(0)];
       };
-      this.get_current_record = function() { 
-          if (this.getSelectionModel().selection) 
-              return this.selModel.selection.record;
+      this.get_current_record = function() {
+      // This is being called when you try to enter the detail of a ticket while editing a cell.
+      // Otherwise the default get_current_record is called which returns the first item
+          if (this.getSelectionModel().selection){
+               console.log(20170714, this.selModel.selection.record,'this.selModel.selection.record');
+              return this.selModel.selection.record;}
+          console.log(20170714, this.store.getAt(0), "this.store.getAt(0)");
           return this.store.getAt(0);
       };
     } else { 
@@ -3897,7 +3901,7 @@ Ext.define('Lino.GridPanel', {
       //~ console.log("20120213 resize",arguments)
       this.refresh();
       },this);
-    this.on('viewready', function(){
+    this.on('viewready', function(){ // tdb: Possible thing?
       //~ console.log("20120213 resize",arguments);
       this.view_is_ready = true;
       this.refresh(); // removed 20130911
@@ -4181,6 +4185,7 @@ Ext.define('Lino.GridPanel', {
   },
 
     on_celldblclick : function(view, record, item, index, e, eOpts ){
+      // This is being called when you double click, however it will only return the correct value if the cell is highlighted in Blue
       if (this.ls_detail_handler) {
           //~ Lino.notify('show detail');
           Lino.show_detail(this);
@@ -4363,7 +4368,7 @@ Ext.define('Lino.GridPanel', {
 
             case e.ENTER:
                 e.stopEvent();
-                g.onCellDblClick(r,c);
+                g.onCellDblClick(r,c); //on_celldblclick ?
                 break;
 
             default:
