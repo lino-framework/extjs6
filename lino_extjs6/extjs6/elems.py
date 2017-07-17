@@ -199,7 +199,9 @@ class GridColumn(jsgen.Component):
         kw = jsgen.Component.ext_options(self, **kw)
         if self.editor.field is not None:
             if is_hidden_babel_field(self.editor.field):
-                kw.update(hidden=True)
+                pass
+                # kw.update(hidden=True)
+
         return kw
 
 
@@ -903,6 +905,7 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
         if actor.model is not None:
             kw.update(emptyText=_('Select a %s...') %
                                 actor.model._meta.verbose_name)
+            kw.update(hidden=False)
         return kw
 
     def cell_html(self, ui, row):
