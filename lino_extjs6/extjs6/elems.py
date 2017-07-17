@@ -199,8 +199,7 @@ class GridColumn(jsgen.Component):
         kw = jsgen.Component.ext_options(self, **kw)
         if self.editor.field is not None:
             if is_hidden_babel_field(self.editor.field):
-                pass
-                # kw.update(hidden=True)
+                kw.update(hidden=True)
 
         return kw
 
