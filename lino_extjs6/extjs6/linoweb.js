@@ -4700,7 +4700,11 @@ Ext.define('Lino.GridPanel', {
               */
               //~ self.getStore().commitChanges(); // get rid of the red triangles
               // self.getStore().commitChanges(); // get rid of the red triangles
-              self.getStore().reload();        // reload our datastore.
+//              self.getStore().reload();        // reload our datastore.
+              // Thanks to http://vadimpopa.com/reload-a-single-record-and-refresh-its-extjs-grid-row/
+              e.record.set(r.records[0].getData());
+              self.getView().refreshNode(self.getStore().indexOfId(e.record.id));
+              e.record.commit();
           } else {
               self.getStore().commitChanges(); // get rid of the red triangles
               self.getStore().reload();        // reload our datastore.
