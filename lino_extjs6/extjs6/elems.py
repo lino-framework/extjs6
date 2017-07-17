@@ -540,7 +540,9 @@ class FieldElement(LayoutElement):
             kw.update(xtype=self.xtype)
 
         if is_hidden_babel_field(self.field):
-            kw.update(hidden=True)
+            # 1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
+            pass
+        kw.update(hidden=False)
 
         # When used as editor of an EditorGridPanel, don't set the
         # name attribute because it is not needed for grids and might
