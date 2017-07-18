@@ -200,6 +200,7 @@ class GridColumn(jsgen.Component):
         if self.editor.field is not None:
             if is_hidden_babel_field(self.editor.field):
                 kw.update(hidden=True)
+
         return kw
 
 
@@ -539,7 +540,9 @@ class FieldElement(LayoutElement):
             kw.update(xtype=self.xtype)
 
         if is_hidden_babel_field(self.field):
-            kw.update(hidden=True)
+            # 1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
+            pass
+        kw.update(hidden=False)
 
         # When used as editor of an EditorGridPanel, don't set the
         # name attribute because it is not needed for grids and might
@@ -903,6 +906,7 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
         if actor.model is not None:
             kw.update(emptyText=_('Select a %s...') %
                                 actor.model._meta.verbose_name)
+            kw.update(hidden=False)
         return kw
 
     def cell_html(self, ui, row):
