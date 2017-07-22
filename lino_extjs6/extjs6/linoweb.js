@@ -1025,7 +1025,9 @@ Ext.define('Lino.WindowAction', {
     },
     run : function(requesting_panel, status) {
       // console.log('20140829 window_action.run()', this)
-      Lino.open_window(this.get_window(), status, requesting_panel);
+      var f = Lino.open_window.bind(this ,this.get_window(), status, requesting_panel);
+      var panel = Ext.getCmp(requesting_panel);
+        if(panel) panel.do_when_clean(true, f); else f();
     }
   
 });
