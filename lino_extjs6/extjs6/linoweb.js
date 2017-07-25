@@ -5023,78 +5023,81 @@ Ext.define('Lino.ComboBox', {
         me.checkChange();
         // me.applyEmptyText();  Remove with Extjs 6.2.0
     },
-    setValue : function(v,record_data){
-      /*
-      Based on feature request developed in http://extjs.net/forum/showthread.php?t=75751
-      */
-      /* `record_data` is used to get the text corresponding to this value */
-      //~ if(this.name == 'city')
-      //~ console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
-        if (v !== null && v.crudState){
-            var text = v.data.field2;
-        }
-        else {
-            var text = v;
-        }
-      if(this.valueField){
-        if(v == null || v == '') {
-            //~ if (this.name == 'birth_country')
-                //~ console.log(this.name,'.setValue',v,'no lookup needed, value is empty');
-            //~ v = undefined;
-            v = '';
-            //~ text = '';
-        } else if (Ext.isDefined(record_data)) {
-          text = record_data[this.name];
-            this.hiddenvalue_id = record_data[this.hiddenName];
-        } else {
-          // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
-          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
-              //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
-              // HKC
-              //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
-              this.store.on('load', this.setValue.bind(this,[arguments]), null, {single: true});
-              if(this.store.lastOptions === null || this.lastQuery === null){
-                  var params;
-                  if(this.valueParam){
-                      params = {};
-                      params[this.valueParam] = v;
-                  }else{
-                      var q = this.allQuery;
-                      this.lastQuery = q;
-                      // this.store.setBaseParam(this.queryParam, q);
-                      this.store.getProxy().setExtraParam(this.queryParam, q);
-                      params = this.getParams(q);
-                  }
-                  //~ if (this.name == 'birth_country')
-                    //~ console.log(this.name,'.setValue',v,' : call load() with params ',params);
-                  this.store.load({params: params});
-              //~ }else{
-                  //~ if (this.name == 'birth_country')
-                    //~ console.log(this.name,'.setValue',v,' : but store is loading',this.store.lastOptions);
-              }
-              return;
-          //~ }else{
-              //~ if (this.name == 'birth_country')
-                //~ console.log(this.name,'.setValue',v,' : store is loaded, lastQuery is "',this.lastQuery,'"');
-          }
-          var r = this.findRecord(this.valueField, v);
-          if(r){
-              text = r.data[this.displayField];
-          }else if(this.valueNotFoundText !== undefined && this.valueNotFoundText !== null ){
-              text = this.valueNotFoundText;
-          }
-        }
-      }
-      this.lastSelectionText = text;
-      if(this.hiddenField){
-          //~ this.hiddenField.originalValue = v;
-          this.hiddenField.value = v;
-      }
-      this.value = v; // needed for grid.afteredit
-      Ext.form.ComboBox.superclass.setValue.call(this, text);
-      // this.callSuper(text);
-      // this.callParent(arguments);  // 20160701
-  },
+//    setValue : function(v,record_data){
+//      /*
+//      Based on feature request developed in http://extjs.net/forum/showthread.php?t=75751
+//      Commented out for ticket #1974, feature for this method was to allow for comboboxes that
+//      are dependent on the choice of another combo-box, as of extjs6 and 2017-07-25 that feature
+//      works with the default method of Ext.form.ComboBox. 
+//
+//      /* `record_data` is used to get the text corresponding to this value */
+//      //~ if(this.name == 'city')
+//      //~ console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
+//        if (v !== null && v.crudState){
+//            var text = v.data.field2;
+//        }
+//        else {
+//            var text = v;
+//        }
+//      if(this.valueField){
+//        if(v == null || v == '') {
+//            //~ if (this.name == 'birth_country')
+//                //~ console.log(this.name,'.setValue',v,'no lookup needed, value is empty');
+//            //~ v = undefined;
+//            v = '';
+//            //~ text = '';
+//        } else if (Ext.isDefined(record_data)) {
+//          text = record_data[this.name];
+//            this.hiddenvalue_id = record_data[this.hiddenName];
+//        } else {
+//          // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
+//          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
+//              //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
+//              // HKC
+//              //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
+//              this.store.on('load', this.setValue.bind(this,[arguments]), null, {single: true});
+//              if(this.store.lastOptions === null || this.lastQuery === null){
+//                  var params;
+//                  if(this.valueParam){
+//                      params = {};
+//                      params[this.valueParam] = v;
+//                  }else{
+//                      var q = this.allQuery;
+//                      this.lastQuery = q;
+//                      // this.store.setBaseParam(this.queryParam, q);
+//                      this.store.getProxy().setExtraParam(this.queryParam, q);
+//                      params = this.getParams(q);
+//                  }
+//                  //~ if (this.name == 'birth_country')
+//                    //~ console.log(this.name,'.setValue',v,' : call load() with params ',params);
+//                  this.store.load({params: params});
+//              //~ }else{
+//                  //~ if (this.name == 'birth_country')
+//                    //~ console.log(this.name,'.setValue',v,' : but store is loading',this.store.lastOptions);
+//              }
+//              return;
+//          //~ }else{
+//              //~ if (this.name == 'birth_country')
+//                //~ console.log(this.name,'.setValue',v,' : store is loaded, lastQuery is "',this.lastQuery,'"');
+//          }
+//          var r = this.findRecord(this.valueField, v);
+//          if(r){
+//              text = r.data[this.displayField];
+//          }else if(this.valueNotFoundText !== undefined && this.valueNotFoundText !== null ){
+//              text = this.valueNotFoundText;
+//          }
+//        }
+//      }
+//      this.lastSelectionText = text;
+//      if(this.hiddenField){
+//          //~ this.hiddenField.originalValue = v;
+//          this.hiddenField.value = v;
+//      }
+//      this.value = v; // needed for grid.afteredit
+//      Ext.form.ComboBox.superclass.setValue.call(this, text);
+//      // this.callSuper(text);
+//      // this.callParent(arguments);  // 20160701
+//  },
   
   getParams : function(q){
     // p = Ext.form.ComboBox.superclass.getParams.call(this, q);
