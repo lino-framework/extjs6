@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2015 Luc Saffre
+# Copyright 2009-2017 Luc Saffre
 # License: BSD (see file COPYING for details)
 """Defines "layout elements" (widgets).
 
@@ -49,6 +49,7 @@ from lino.core.gfks import GenericRelation
 
 from lino.utils.ranges import constrain
 from lino.utils import jsgen
+from lino.modlib.users.utils import get_user_profile
 from lino.utils import mti
 from lino.core import choicelists
 from lino.utils.jsgen import py2js, js_code
@@ -144,7 +145,7 @@ class GridColumn(jsgen.Component):
                 kw.update(filter=editor.gridfilters_settings)
         if isinstance(editor, FieldElement):
             if settings.SITE.use_quicktips:
-                # ~ if jsgen._for_user_profile.expert:
+                # ~ if get_user_profile().expert:
                 if settings.SITE.show_internal_field_names:
                     ttt = "(%s.%s) " % (layout_handle.layout._datasource,
                                         self.editor.field.name)
@@ -164,7 +165,7 @@ class GridColumn(jsgen.Component):
                 rpt = fld.rel.model.get_default_table()
                 if rpt.detail_action is not None:
                     if rpt.detail_action.get_view_permission(
-                            jsgen._for_user_profile):
+                            get_user_profile()):
                         return "Lino.fk_renderer('%s','Lino.%s')" % (
                             name + constants.CHOICES_HIDDEN_SUFFIX,
                             rpt.detail_action.full_name())
@@ -414,11 +415,12 @@ def is_hidden_babel_field(fld):
     lng = getattr(fld, '_babel_language', None)
     if lng is None:
         return False
-    if jsgen._for_user_profile is None:
+    user_type = get_user_profile()
+    if user_type is None:
         return False
-    if jsgen._for_user_profile.hidden_languages is None:
+    if user_type.hidden_languages is None:
         return False
-    if lng in jsgen._for_user_profile.hidden_languages:
+    if lng in user_type.hidden_languages:
         return True
     return False
 

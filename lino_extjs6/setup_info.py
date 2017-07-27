@@ -50,4 +50,5 @@ lino_extjs6.extjs6
 lino_extjs6.projects
 lino_extjs6.projects.mysite
 lino_extjs6.projects.mysite.settings
+lino_extjs6.projects.mysite.tests
 """.splitlines() if n])
