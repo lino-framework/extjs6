@@ -2782,6 +2782,12 @@ Ext.define('Lino.form.Panel', {
             for(id in values){
                 if(!Ext.isFunction(values[id]) && (field = this.findField(id))){
                     field.setValue(values[id],values);
+                    //TFP #1974
+                    if (values[field.hiddenName]){
+                        field.hiddenvalue_tosubmit =values[field.hiddenName];
+                        field.hiddenvalue_id =values[field.hiddenName];
+//                        field.changed = true;
+                        field.setHiddenValue(values[field.hiddenName])}
                     if(this.trackResetOnLoad){
                         field.originalValue = field.getValue();
                         //~ if (field.hiddenField) {
@@ -4624,7 +4630,7 @@ Ext.define('Lino.GridPanel', {
     //~ var p = e.record.getChanges();
     //~ console.log('20101130 getChanges: ',e.record.getChanges());
     //~ this.before_row_edit(e.record);
-
+    if (e.value === e.originalValue){return;}
     for(k in e.record.getChanges()) {
         var v = e.record.get(k);
     //~ for(k in e.record.modified) {
@@ -4985,6 +4991,7 @@ Ext.define('Lino.ComboBox', {
             inputEl = me.inputEl,
             i, record;
         // Loop through values, matching each from the Store, and collecting matched records
+//        console.log('20120203 updateValue', this.name,);
         displayTplData.length = 0;
         if (len == 0){
             me.hiddenvalue_tosubmit = "Mynull";
@@ -4992,6 +4999,7 @@ Ext.define('Lino.ComboBox', {
         }
         for (i = 0; i < len; i++) {
             record = selectedRecords[i];
+//            console.log('20120203', this.name,'.updateValue() this=', this, 'record=',record);
             displayTplData.push(me.getRecordDisplayData(record));
             // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
             if (record !== me.valueNotFoundRecord) {
@@ -5029,9 +5037,17 @@ Ext.define('Lino.ComboBox', {
       */
       /* `record_data` is used to get the text corresponding to this value */
       //~ if(this.name == 'city')
-      //~ console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
+//      console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
+      if (!(this.valueField && Ext.isDefined(record_data))){
+//        console.log("Calling Parrent");
+             return this.callSuper(arguments);
+             //this.callParent(arguments);  // 20160701
+        }
+//      console.log("Calling our Thing");
+
+
         if (v !== null && v.crudState){
-            var text = v.data.field2;
+            var text = v.get(this.displayField);
         }
         else {
             var text = v;
@@ -5048,7 +5064,7 @@ Ext.define('Lino.ComboBox', {
             this.hiddenvalue_id = record_data[this.hiddenName];
         } else {
           // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
-          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
+          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!this.store.data.length))){
               //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
               // HKC
               //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
@@ -5078,6 +5094,8 @@ Ext.define('Lino.ComboBox', {
                 //~ console.log(this.name,'.setValue',v,' : store is loaded, lastQuery is "',this.lastQuery,'"');
           }
           var r = this.findRecord(this.valueField, v);
+//          console.log("FR- r=",r," this.valueField=",this.valueField," v=(",v,")" );
+
           if(r){
               text = r.data[this.displayField];
           }else if(this.valueNotFoundText !== undefined && this.valueNotFoundText !== null ){
@@ -5094,6 +5112,7 @@ Ext.define('Lino.ComboBox', {
       Ext.form.ComboBox.superclass.setValue.call(this, text);
       // this.callSuper(text);
       // this.callParent(arguments);  // 20160701
+//      console.log("SetValue end this=",this);
   },
   
   getParams : function(q){
