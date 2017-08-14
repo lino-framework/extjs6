@@ -3922,7 +3922,8 @@ Ext.define('Lino.GridPanel', {
     //    the 'afteredit' event doesn't exist any more. We use the 'edit' event instead.
     this.on('edit', this.on_afteredit); // 20120814
     this.on('beforeedit', this.on_beforeedit);
-    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
+    this.on('beforeedit',function(e) { this.before_row_edit(e.grid.get_current_record())},this); //e is cell_editor
+//    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
     if (this.cell_edit) {
         this.on('cellcontextmenu', Lino.cell_context_menu, this);
         //this.on({
