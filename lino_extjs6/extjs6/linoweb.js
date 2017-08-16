@@ -4722,15 +4722,20 @@ Ext.define('Lino.GridPanel', {
               // Thanks to http://vadimpopa.com/reload-a-single-record-and-refresh-its-extjs-grid-row/
               var store = self.getStore();
               var recToUpdate = store.getById(e.record.id);
-              recToUpdate.set(e.record.getData());
+              recToUpdate.set(r.records[0].getData());
               recToUpdate.commit(false,e.field);
-              // self.getView().refreshNode(store.indexOfId(e.record.id));
-              store.reload();
+               self.getView().refreshNode(store.indexOfId(e.record.id));
+//              store.reload();
+//
+//              // self.getStore().sync(); // get rid of the red triangles
+//              // self.getStore().reload();        // reload our datastore.
 
-              // self.getStore().sync(); // get rid of the red triangles
-              // self.getStore().reload();        // reload our datastore.
+//              e.record.set(r.records[0].getData());
+//              self.getView().refreshNode(self.getStore().indexOfId(e.record.id));
+//              e.record.commit();
           } else {
               self.getStore().sync(); // get rid of the red triangles
+//              self.getStore().commitChanges(); // get rid of the red triangles
               self.getStore().reload();        // reload our datastore.
           }
           }),
