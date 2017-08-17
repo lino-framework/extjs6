@@ -3236,18 +3236,16 @@ Ext.define('Lino.FormPanel', {
           });
       };
 if (this.disable_editing | record.data.disable_editing) {
-          //~ console.log("20120202 disable_editing",record.title);
-        //  HKC
-          //this.form.items.each(function(cmp){
-          //  if (!cmp.always_enabled) cmp.disable();
-          //},this);
+          console.log("20120202 disable_editing",record.title);
+          this.form.getFields().each(function(cmp){
+            if (!cmp.always_enabled) cmp.disable();
+          },this);
       } else {
-            //  HKC
-          //this.form.items.each(function(cmp){
-            //~ console.log("20120202",cmp);
-            //if (record.data.disabled_fields[cmp.name]) cmp.disable();
-            //else cmp.enable();
-          //},this);
+          this.form.getFields().each(function(cmp){
+            console.log("20120202");
+            if (record.data.disabled_fields[cmp.name]) cmp.disable();
+            else cmp.enable();
+          },this);
 
           //~ if (record.data.disabled_fields) {
               //~ for (i = 0; i < record.data.disabled_fields.length; i++) {
@@ -4216,7 +4214,7 @@ Ext.define('Lino.GridPanel', {
             return;
         }
         */
-        //~ console.log('handleKeyDown',e)
+        console.log('handleKeyDown',e)
         var k = e.getKey(),
             // g = this.grid,
             s = this.selection,
