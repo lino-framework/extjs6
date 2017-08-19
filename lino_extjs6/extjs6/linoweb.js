@@ -3236,18 +3236,16 @@ Ext.define('Lino.FormPanel', {
           });
       };
 if (this.disable_editing | record.data.disable_editing) {
-          //~ console.log("20120202 disable_editing",record.title);
-        //  HKC
-          //this.form.items.each(function(cmp){
-          //  if (!cmp.always_enabled) cmp.disable();
-          //},this);
+          console.log("20120202 disable_editing",record.title);
+          this.form.getFields().each(function(cmp){
+            if (!cmp.always_enabled) cmp.disable();
+          },this);
       } else {
-            //  HKC
-          //this.form.items.each(function(cmp){
-            //~ console.log("20120202",cmp);
-            //if (record.data.disabled_fields[cmp.name]) cmp.disable();
-            //else cmp.enable();
-          //},this);
+          this.form.getFields().each(function(cmp){
+            console.log("20120202");
+            if (record.data.disabled_fields[cmp.name]) cmp.disable();
+            else cmp.enable();
+          },this);
 
           //~ if (record.data.disabled_fields) {
               //~ for (i = 0; i < record.data.disabled_fields.length; i++) {
@@ -3922,7 +3920,8 @@ Ext.define('Lino.GridPanel', {
     //    the 'afteredit' event doesn't exist any more. We use the 'edit' event instead.
     this.on('edit', this.on_afteredit); // 20120814
     this.on('beforeedit', this.on_beforeedit);
-    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
+    this.on('beforeedit',function(e) { this.before_row_edit(e.grid.get_current_record())},this); //e is cell_editor
+//    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
     if (this.cell_edit) {
         this.on('cellcontextmenu', Lino.cell_context_menu, this);
         //this.on({
@@ -4215,7 +4214,7 @@ Ext.define('Lino.GridPanel', {
             return;
         }
         */
-        //~ console.log('handleKeyDown',e)
+        console.log('handleKeyDown',e)
         var k = e.getKey(),
             // g = this.grid,
             s = this.selection,
@@ -4721,15 +4720,20 @@ Ext.define('Lino.GridPanel', {
               // Thanks to http://vadimpopa.com/reload-a-single-record-and-refresh-its-extjs-grid-row/
               var store = self.getStore();
               var recToUpdate = store.getById(e.record.id);
-              recToUpdate.set(e.record.getData());
+              recToUpdate.set(r.records[0].getData());
               recToUpdate.commit(false,e.field);
-              // self.getView().refreshNode(store.indexOfId(e.record.id));
-              store.reload();
+               self.getView().refreshNode(store.indexOfId(e.record.id));
+//              store.reload();
+//
+//              // self.getStore().sync(); // get rid of the red triangles
+//              // self.getStore().reload();        // reload our datastore.
 
-              // self.getStore().sync(); // get rid of the red triangles
-              // self.getStore().reload();        // reload our datastore.
+//              e.record.set(r.records[0].getData());
+//              self.getView().refreshNode(self.getStore().indexOfId(e.record.id));
+//              e.record.commit();
           } else {
               self.getStore().sync(); // get rid of the red triangles
+//              self.getStore().commitChanges(); // get rid of the red triangles
               self.getStore().reload();        // reload our datastore.
           }
           }),

@@ -852,7 +852,8 @@ class RemoteComboFieldElement(ComboFieldElement):
         sto = self.store_options()
         sto.update(autoLoad=True)
         # print repr(sto)
-        kw.update(store=js_code("Ext.create('Lino.ComplexRemoteComboStore',%s)" %
+        if self.editable:
+            kw.update(store=js_code("Ext.create('Lino.ComplexRemoteComboStore',%s)" %
                                 py2js(sto)))
         return kw
 
