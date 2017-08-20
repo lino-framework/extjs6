@@ -3236,13 +3236,13 @@ Ext.define('Lino.FormPanel', {
           });
       };
 if (this.disable_editing | record.data.disable_editing) {
-          console.log("20120202 disable_editing",record.title);
+//          console.log("20120202 disable_editing",record.title);
           this.form.getFields().each(function(cmp){
             if (!cmp.always_enabled) cmp.disable();
           },this);
       } else {
           this.form.getFields().each(function(cmp){
-            console.log("20120202");
+//            console.log("20120202");
             if (record.data.disabled_fields[cmp.name]) cmp.disable();
             else cmp.enable();
           },this);
@@ -5021,7 +5021,7 @@ Ext.define('Lino.ComboBox', {
 //            console.log('20120203', this.name,'.updateValue() this=', this, 'record=',record);
             displayTplData.push(me.getRecordDisplayData(record));
             // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
-            if (record !== me.valueNotFoundRecord) {
+            if (record !== me.valueNotFoundRecord && !record.phantom) {
                 // valueArray.push(record.get(me.valueField)); original code
                 var selector = me.valueField;
                 if (me instanceof Lino.RemoteComboFieldElement){
