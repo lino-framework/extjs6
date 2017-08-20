@@ -3236,13 +3236,13 @@ Ext.define('Lino.FormPanel', {
           });
       };
 if (this.disable_editing | record.data.disable_editing) {
-          console.log("20120202 disable_editing",record.title);
+//          console.log("20120202 disable_editing",record.title);
           this.form.getFields().each(function(cmp){
             if (!cmp.always_enabled) cmp.disable();
           },this);
       } else {
           this.form.getFields().each(function(cmp){
-            console.log("20120202");
+//            console.log("20120202");
             if (record.data.disabled_fields[cmp.name]) cmp.disable();
             else cmp.enable();
           },this);
