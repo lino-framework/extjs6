@@ -5021,7 +5021,7 @@ Ext.define('Lino.ComboBox', {
 //            console.log('20120203', this.name,'.updateValue() this=', this, 'record=',record);
             displayTplData.push(me.getRecordDisplayData(record));
             // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
-            if (record !== me.valueNotFoundRecord) {
+            if (record !== me.valueNotFoundRecord && !record.phantom) {
                 // valueArray.push(record.get(me.valueField)); original code
                 var selector = me.valueField;
                 if (me instanceof Lino.RemoteComboFieldElement){
