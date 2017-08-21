@@ -2021,6 +2021,9 @@ def field2elem(layout_handle, field, **kw):
     if ch:
         if ch.can_create_choice or not ch.force_selection:
             kw.update(forceSelection=False)
+        else:
+            # Ticket #2006, even with ch.force_selection == True for timezone, the js defaults to False
+            kw.update(forceSelection=True)
         if ch.simple_values:
             return SimpleRemoteComboFieldElement(layout_handle, field, **kw)
         else:
