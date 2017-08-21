@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2015 Luc Saffre
+# Copyright 2009-2017 Luc Saffre
 # License: BSD (see file COPYING for details)
 """Defines "layout elements" (widgets).
 
@@ -49,6 +49,7 @@ from lino.core.gfks import GenericRelation
 
 from lino.utils.ranges import constrain
 from lino.utils import jsgen
+from lino.modlib.users.utils import get_user_profile
 from lino.utils import mti
 from lino.core import choicelists
 from lino.utils.jsgen import py2js, js_code
@@ -80,8 +81,6 @@ EXT_CHAR_HEIGHT = 22
 
 FULLWIDTH = '-20'
 FULLHEIGHT = '-10'
-
-USED_NUMBER_FORMATS = dict()
 
 DEFAULT_PADDING = 2
 
@@ -146,7 +145,7 @@ class GridColumn(jsgen.Component):
                 kw.update(filter=editor.gridfilters_settings)
         if isinstance(editor, FieldElement):
             if settings.SITE.use_quicktips:
-                # ~ if jsgen._for_user_profile.expert:
+                # ~ if get_user_profile().expert:
                 if settings.SITE.show_internal_field_names:
                     ttt = "(%s.%s) " % (layout_handle.layout._datasource,
                                         self.editor.field.name)
@@ -166,7 +165,7 @@ class GridColumn(jsgen.Component):
                 rpt = fld.rel.model.get_default_table()
                 if rpt.detail_action is not None:
                     if rpt.detail_action.get_view_permission(
-                            jsgen._for_user_profile):
+                            get_user_profile()):
                         return "Lino.fk_renderer('%s','Lino.%s')" % (
                             name + constants.CHOICES_HIDDEN_SUFFIX,
                             rpt.detail_action.full_name())
@@ -202,6 +201,7 @@ class GridColumn(jsgen.Component):
         if self.editor.field is not None:
             if is_hidden_babel_field(self.editor.field):
                 kw.update(hidden=True)
+
         return kw
 
 
@@ -415,11 +415,12 @@ def is_hidden_babel_field(fld):
     lng = getattr(fld, '_babel_language', None)
     if lng is None:
         return False
-    if jsgen._for_user_profile is None:
+    user_type = get_user_profile()
+    if user_type is None:
         return False
-    if jsgen._for_user_profile.hidden_languages is None:
+    if user_type.hidden_languages is None:
         return False
-    if lng in jsgen._for_user_profile.hidden_languages:
+    if lng in user_type.hidden_languages:
         return True
     return False
 
@@ -541,7 +542,9 @@ class FieldElement(LayoutElement):
             kw.update(xtype=self.xtype)
 
         if is_hidden_babel_field(self.field):
-            kw.update(hidden=True)
+            # 1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
+            pass
+        kw.update(hidden=False)
 
         # When used as editor of an EditorGridPanel, don't set the
         # name attribute because it is not needed for grids and might
@@ -849,7 +852,8 @@ class RemoteComboFieldElement(ComboFieldElement):
         sto = self.store_options()
         sto.update(autoLoad=True)
         # print repr(sto)
-        kw.update(store=js_code("Ext.create('Lino.ComplexRemoteComboStore',%s)" %
+        if self.editable:
+            kw.update(store=js_code("Ext.create('Lino.ComplexRemoteComboStore',%s)" %
                                 py2js(sto)))
         return kw
 
@@ -905,6 +909,7 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
         if actor.model is not None:
             kw.update(emptyText=_('Select a %s...') %
                                 actor.model._meta.verbose_name)
+            kw.update(hidden=False)
         return kw
 
     def cell_html(self, ui, row):
@@ -1070,19 +1075,60 @@ class NumberFieldElement(FieldElement):
 
     def get_column_options(self, **kw):
         kw = FieldElement.get_column_options(self, **kw)
-        # ~ kw.update(xtype='numbercolumn')
-        # ~ kw.update(align='right')
-        # ~ if settings.SITE.decimal_group_separator:
-        # ~ fmt = '0' + settings.SITE.decimal_group_separator + '000'
-        # ~ else:
-        # Ext.utils.format.number() is not able to specify ' ' as group separator,
-        # so we don't use grouping at all.
-        if self.number_format != settings.SITE.default_number_format_extjs:
+        kw.update(align='right')
+        if self.number_format:
+            kw.update(xtype='numbercolumn')
             kw.update(format=self.number_format)
-        n = USED_NUMBER_FORMATS.get(self.number_format, 0)
-        USED_NUMBER_FORMATS[self.number_format] = n + 1
+        
         # ~ kw.update(format='') # 20130125
         # ~ kw.update(renderer=js_code('Lino.nullnumbercolumn_renderer')) # 20130125
+        return kw
+
+
+class DecimalFieldElement(NumberFieldElement):
+    zero = decimal.Decimal(0)
+
+    # ~ value_template = "new Ext.form.NumberField(%s)"
+    # ~ filter_type = 'numeric'
+    # ~ gridfilters_settings = dict(type='numeric')
+    # ~ xtype = 'numberfield'
+    # ~ sortable = True
+    # ~ data_type = 'float'
+
+    def __init__(self, *args, **kw):
+        FieldElement.__init__(self, *args, **kw)
+        self.preferred_width = max(5, self.field.max_digits) \
+                               + self.field.decimal_places
+        # fmt = '0,000'
+        # fmt = '0.0'
+        # if self.field.decimal_places > 0:
+        #     fmt += ',' + ("0" * self.field.decimal_places)
+        if len(settings.SITE.decimal_group_separator):
+            # Ext.utils.format.number() is not able to specify
+            # anything else than '.' or ',' as group separator,
+            if settings.SITE.decimal_separator == ',':
+                fmt = "0.000"
+            else:
+                fmt = "0,000"
+        else:
+                fmt = "0"
+        if self.field.decimal_places > 0:
+            fmt += settings.SITE.decimal_separator
+            fmt += "0" * self.field.decimal_places
+        if settings.SITE.decimal_separator == ',':
+            fmt += "/i"
+        self.number_format = fmt
+
+    def get_field_options(self, **kw):
+        kw = FieldElement.get_field_options(self, **kw)
+        if self.field.decimal_places:
+            kw.update(decimalPrecision=self.field.decimal_places)
+            # ~ kw.update(decimalPrecision=-1)
+            kw.update(decimalSeparator=settings.SITE.decimal_separator)
+        else:
+            kw.update(allowDecimals=False)
+        if self.editable:
+            kw.update(allowBlank=self.field.blank)
         return kw
 
 
@@ -1140,41 +1186,6 @@ class RequestFieldElement(IntegerFieldElement):
         return E.b(str(sums[self.name]))
 
 
-class DecimalFieldElement(NumberFieldElement):
-    zero = decimal.Decimal(0)
-
-    # ~ value_template = "new Ext.form.NumberField(%s)"
-    # ~ filter_type = 'numeric'
-    # ~ gridfilters_settings = dict(type='numeric')
-    # ~ xtype = 'numberfield'
-    # ~ sortable = True
-    # ~ data_type = 'float'
-
-    def __init__(self, *args, **kw):
-        FieldElement.__init__(self, *args, **kw)
-        self.preferred_width = max(5, self.field.max_digits) \
-                               + self.field.decimal_places
-        fmt = '0'
-        if self.field.decimal_places > 0:
-            fmt += settings.SITE.decimal_separator + \
-                   ("0" * self.field.decimal_places)
-        if settings.SITE.decimal_separator == ',':
-            fmt += "/i"
-        self.number_format = fmt
-
-    def get_field_options(self, **kw):
-        kw = FieldElement.get_field_options(self, **kw)
-        if self.field.decimal_places:
-            kw.update(decimalPrecision=self.field.decimal_places)
-            # ~ kw.update(decimalPrecision=-1)
-            kw.update(decimalSeparator=settings.SITE.decimal_separator)
-        else:
-            kw.update(allowDecimals=False)
-        if self.editable:
-            kw.update(allowBlank=self.field.blank)
-        return kw
-
-
 class QuantityFieldElement(CharFieldElement):
     def get_column_options(self, **kw):
         # ~ print 20130125, self.field.name
@@ -1202,7 +1213,7 @@ class DisplayElement(FieldElement):
     value_template = "Ext.create('Ext.form.DisplayField',%s)"
 
     def __init__(self, *args, **kw):
-        kw.setdefault('value', '<br/>')  # see blog/2012/0527
+        kw.setdefault('value', '')  # see blog/2012/0527
         kw.update(always_enabled=True)
         FieldElement.__init__(self, *args, **kw)
         self.preferred_height = self.field.preferred_height
@@ -2010,6 +2021,9 @@ def field2elem(layout_handle, field, **kw):
     if ch:
         if ch.can_create_choice or not ch.force_selection:
             kw.update(forceSelection=False)
+        else:
+            # Ticket #2006, even with ch.force_selection == True for timezone, the js defaults to False
+            kw.update(forceSelection=True)
         if ch.simple_values:
             return SimpleRemoteComboFieldElement(layout_handle, field, **kw)
         else:

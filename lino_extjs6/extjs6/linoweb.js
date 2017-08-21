@@ -797,6 +797,22 @@ Ext.define('Lino.MainPanel',{
   },
   set_param_values : function(pv) {
     if (this.params_panel) {
+        if (this._force_dirty){
+            pv = {};
+            for (var field in this.params_panel.fields){
+                var current_field = this.params_panel.fields[field];
+                if (current_field instanceof Lino.ComboBox){
+                    pv[current_field.hiddenName] = current_field.getValue();
+                    if (current_field.isDirty()){
+                        current_field.hiddenvalue_id = current_field.getValue();
+                    }
+                    pv[current_field.name] = current_field.rawValue;
+                }
+                else {
+                    pv[current_field.name] = current_field.getValue();
+                }
+            }
+        }
       //~ console.log('20120203 MainPanel.set_param_values', pv);
       this.status_param_values = pv;
       //~ this.params_panel.form.suspendEvents(false);
@@ -1016,7 +1032,9 @@ Ext.define('Lino.WindowAction', {
     },
     run : function(requesting_panel, status) {
       // console.log('20140829 window_action.run()', this)
-      Lino.open_window(this.get_window(), status, requesting_panel);
+      var f = Lino.open_window.bind(this ,this.get_window(), status, requesting_panel);
+      var panel = Ext.getCmp(requesting_panel);
+        if(panel) panel.do_when_clean(true, f); else f();
     }
   
 });
@@ -1937,7 +1955,7 @@ Ext.define('Lino.NavigationModel', {
     onCellMouseDown: function(view, cell, cellIndex, record, row, recordIndex, mousedownEvent) {
         if (mousedownEvent.target.text == '➚'){
             mousedownEvent.preventDefault(true);
-            var href = mousedownEvent.target.pathname;
+            var href = mousedownEvent.target.href;
             var detail_panel = href.split('-')[0];
             var params = href.split('-')[1];
             var record_id = parseInt(params);
@@ -2215,23 +2233,32 @@ Lino.param_action_handler = function(window_action) { // 20121012
 
 
 Lino.run_row_action = function(
-    requesting_panel, url, meth, pk, actionName, params, preprocessor) {
+    requesting_panel, is_on_main_actor, url, meth, pk,
+    actionName, params, preprocessor) {
   //~ var panel = action.get_window().main_item;
   // console.log("20140930 Lino.run_row_action", params);
   url = '{{extjs.build_plain_url("api")}}' + url  + '/' + pk;
   var panel = Ext.getCmp(requesting_panel);
+  // var params = {}
+  // if (init_params) Ext.apply(params, init_params);
   if (!params) params = {};
   if (preprocessor) {
-      var p = preprocessor(); 
+      var p = preprocessor();
       Ext.apply(params, p);
   }
-  if (panel) 
-      Ext.apply(params, panel.get_base_params());
+  if (panel && is_on_main_actor) {
+      Ext.apply(params, panel.get_base_params())
+  } else {
+      // 20170731
+      // params.{{constants.URL_PARAM_PARAM_VALUES}} = Array();
+      // delete params.{{constants.URL_PARAM_PARAM_VALUES}};
+      Lino.insert_subst_user(params);
+  }
   var fn = function(panel, btn, step) {
     Lino.call_ajax_action(panel, meth, url, params, actionName, step, fn);
-  };
+  }
   fn(panel, null, null);
-};
+}
 
 Lino.put = function(requesting_panel, pk, data) {
     var panel = Ext.getCmp(requesting_panel);
@@ -2600,14 +2627,16 @@ Ext.define('Lino.ActionFormPanel', {
             //key: Ext.EventObject.ENTER,
             key : Ext.event.Event.ENTER,
             fn: this.on_ok }
-      ]
+      ];
       
-      if (!wincfg.defaultButton) this.getForm().items.each(function(f){
-          if(f.isFormField){ 
+      if (!wincfg.defaultButton) {
+          var f = this.getForm();
+
+          if(f.isFormField){
               wincfg.defaultButton = f;
               return false;
           }
-      });
+      }
 
   }
 });
@@ -2623,7 +2652,12 @@ Lino.fields2array = function(fields,values) {
         else 
           var v = f.getValue();
         if (f instanceof Lino.ComboBox && (!Number.isInteger(v) || v == null )){
-            pv[i] = f.hiddenvalue_id;
+            if (f.rawValue == ""){
+                pv[i] = null;
+            }
+            else {
+                pv[i] = f.hiddenvalue_id;
+            }
             // v = f.rawValue;
             // var data = f.config.store;
             // var index = 1;
@@ -2764,6 +2798,12 @@ Ext.define('Lino.form.Panel', {
             for(id in values){
                 if(!Ext.isFunction(values[id]) && (field = this.findField(id))){
                     field.setValue(values[id],values);
+                    //TFP #1974
+                    if (values[field.hiddenName]){
+                        field.hiddenvalue_tosubmit =values[field.hiddenName];
+                        field.hiddenvalue_id =values[field.hiddenName];
+//                        field.changed = true;
+                        field.setHiddenValue(values[field.hiddenName])}
                     if(this.trackResetOnLoad){
                         field.originalValue = field.getValue();
                         //~ if (field.hiddenField) {
@@ -3146,7 +3186,7 @@ Ext.define('Lino.FormPanel', {
     var p = Ext.apply({}, this.get_base_params());
     if (this.action_name)
         p.{{constants.URL_PARAM_ACTION_NAME}} = this.action_name;
-    p.{{constants.URL_PARAM_REQUESTING_PANEL}} = record_id;
+    p.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.getId();
     p.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
     this.add_param_values(p);
     if (this.loadMask) this.loadMask.show();
@@ -3203,18 +3243,16 @@ Ext.define('Lino.FormPanel', {
           });
       };
 if (this.disable_editing | record.data.disable_editing) {
-          //~ console.log("20120202 disable_editing",record.title);
-        //  HKC
-          //this.form.items.each(function(cmp){
-          //  if (!cmp.always_enabled) cmp.disable();
-          //},this);
+//          console.log("20120202 disable_editing",record.title);
+          this.form.getFields().each(function(cmp){
+            if (!cmp.always_enabled) cmp.disable();
+          },this);
       } else {
-            //  HKC
-          //this.form.items.each(function(cmp){
-            //~ console.log("20120202",cmp);
-            //if (record.data.disabled_fields[cmp.name]) cmp.disable();
-            //else cmp.enable();
-          //},this);
+          this.form.getFields().each(function(cmp){
+//            console.log("20120202");
+            if (record.data.disabled_fields[cmp.name]) cmp.disable();
+            else cmp.enable();
+          },this);
 
           //~ if (record.data.disabled_fields) {
               //~ for (i = 0; i < record.data.disabled_fields.length; i++) {
@@ -3896,7 +3934,8 @@ Ext.define('Lino.GridPanel', {
     //    the 'afteredit' event doesn't exist any more. We use the 'edit' event instead.
     this.on('edit', this.on_afteredit); // 20120814
     this.on('beforeedit', this.on_beforeedit);
-    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
+    this.on('beforeedit',function(e) { this.before_row_edit(e.grid.get_current_record())},this); //e is cell_editor
+//    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
     if (this.cell_edit) {
         this.on('cellcontextmenu', Lino.cell_context_menu, this);
         //this.on({
@@ -4189,7 +4228,7 @@ Ext.define('Lino.GridPanel', {
             return;
         }
         */
-        //~ console.log('handleKeyDown',e)
+        console.log('handleKeyDown',e)
         var k = e.getKey(),
             // g = this.grid,
             s = this.selection,
@@ -4237,7 +4276,7 @@ Ext.define('Lino.GridPanel', {
             // return;
         }
 
-        cell = s.cell;
+        // cell = s.cell;
         // r = cell[0];
         // c = cell[1];
 
@@ -4613,7 +4652,7 @@ Ext.define('Lino.GridPanel', {
     //~ var p = e.record.getChanges();
     //~ console.log('20101130 getChanges: ',e.record.getChanges());
     //~ this.before_row_edit(e.record);
-
+    if (e.value === e.originalValue){return;}
     for(k in e.record.getChanges()) {
         var v = e.record.get(k);
     //~ for(k in e.record.modified) {
@@ -4691,9 +4730,24 @@ Ext.define('Lino.GridPanel', {
               */
               //~ self.getStore().commitChanges(); // get rid of the red triangles
               // self.getStore().commitChanges(); // get rid of the red triangles
-              self.getStore().reload();        // reload our datastore.
+//              self.getStore().reload();        // reload our datastore.
+              // Thanks to http://vadimpopa.com/reload-a-single-record-and-refresh-its-extjs-grid-row/
+              var store = self.getStore();
+              var recToUpdate = store.getById(e.record.id);
+              recToUpdate.set(r.records[0].getData());
+              recToUpdate.commit(false,e.field);
+               self.getView().refreshNode(store.indexOfId(e.record.id));
+//              store.reload();
+//
+//              // self.getStore().sync(); // get rid of the red triangles
+//              // self.getStore().reload();        // reload our datastore.
+
+//              e.record.set(r.records[0].getData());
+//              self.getView().refreshNode(self.getStore().indexOfId(e.record.id));
+//              e.record.commit();
           } else {
-              self.getStore().commitChanges(); // get rid of the red triangles
+              self.getStore().sync(); // get rid of the red triangles
+//              self.getStore().commitChanges(); // get rid of the red triangles
               self.getStore().reload();        // reload our datastore.
           }
           }),
@@ -4807,7 +4861,49 @@ Ext.define('Lino.GridPanel', {
   
 });
   
+Ext.define('Lino.selection.CellModel', {
+    override : 'Ext.selection.CellModel',
 
+    onSelectChange: function(record, isSelected, suppressEvent, commitFn) {
+        var me = this,
+            pos, eventName, view;
+
+        if (isSelected) {
+            pos = me.nextSelection;
+            eventName = 'select';
+        } else {
+            // Ticket #1962 Seems that there is some half-finished deselection when opening a detail view. Causing this.selection to be nul, and thus has no pos.
+            // I tested and it seems that this.view === pos.view when extjs is working correctly. This might have be changed on other selection models. if errors arise.
+            // It seems that the events later in this function are fired, with pos.row
+            pos = me.selection === null ? {view : this.view} : me.selection;
+            eventName = 'deselect';
+
+        }
+
+        // CellModel may be shared between two sides of a Lockable.
+        // The position must include a reference to the view in which the selection is current.
+        // Ensure we use the view specified by the position.
+
+
+
+        view = pos.view || me.primaryView;
+
+        if ((suppressEvent || me.fireEvent('before' + eventName, me, record, pos.rowIdx, pos.colIdx)) !== false &&
+                commitFn() !== false) {
+
+            if (isSelected) {
+                view.onCellSelect(pos);
+            } else {
+                view.onCellDeselect(pos);
+                delete me.selection;
+            }
+
+            if (!suppressEvent) {
+                me.fireEvent(eventName, me, record, pos.rowIdx, pos.colIdx);
+            }
+        }
+    },
+    })
 //~ Lino.MainPanelMixin = {
   //~ tbar_items : function() {
       //~ return ;
@@ -4836,7 +4932,10 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   //~ grid.getView().focusCell(row,col);
   //  HKC
   //grid.getSelectionModel().select(row,col);
-  grid.getSelectionModel().select(rowIndex,cellIndex);
+  grid.getSelectionModel().select({
+                row: rowIndex,
+                column: cellIndex
+            });
     //this.getSelectionModel().select(row,col);
   //~ console.log(grid.store.getAt(row));
   //~ grid.getView().focusRow(row);
@@ -4849,7 +4948,9 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   }
   //~ if(e.record.data.disabled_fields) {
   
-  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
+//  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
+// seems that the proxy reader data can sometimes only include the last 10 records collected by infinite scroll
+  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_actions
   if (da) {
       this.cmenu.cascade(function(item){ 
         //~ console.log(20120531, item.itemId, da[item.itemId]);
@@ -4879,6 +4980,8 @@ Ext.define('Lino.ComboBox', {
   // forceSelection: true,
   triggerAction: 'all',
   minListWidth:280, // 20131022
+//  width:235,
+
   autoSelect: false,
   selectOnFocus: false, // select any existing text in the field immediately on focus.
   submitValue: true,
@@ -4921,6 +5024,7 @@ Ext.define('Lino.ComboBox', {
             inputEl = me.inputEl,
             i, record;
         // Loop through values, matching each from the Store, and collecting matched records
+//        console.log('20120203 updateValue', this.name,);
         displayTplData.length = 0;
         if (len == 0){
             me.hiddenvalue_tosubmit = "Mynull";
@@ -4928,9 +5032,10 @@ Ext.define('Lino.ComboBox', {
         }
         for (i = 0; i < len; i++) {
             record = selectedRecords[i];
+//            console.log('20120203', this.name,'.updateValue() this=', this, 'record=',record);
             displayTplData.push(me.getRecordDisplayData(record));
             // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
-            if (record !== me.valueNotFoundRecord) {
+            if (record !== me.valueNotFoundRecord && !record.phantom) {
                 // valueArray.push(record.get(me.valueField)); original code
                 var selector = me.valueField;
                 if (me instanceof Lino.RemoteComboFieldElement){
@@ -4965,8 +5070,21 @@ Ext.define('Lino.ComboBox', {
       */
       /* `record_data` is used to get the text corresponding to this value */
       //~ if(this.name == 'city')
-      //~ console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
-      var text = v;
+//      console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
+      if (!(this.valueField && Ext.isDefined(record_data))){
+//        console.log("Calling Parrent");
+             return this.callSuper(arguments);
+             //this.callParent(arguments);  // 20160701
+        }
+//      console.log("Calling our Thing");
+
+
+        if (v !== null && v.crudState){
+            var text = v.get(this.displayField);
+        }
+        else {
+            var text = v;
+        }
       if(this.valueField){
         if(v == null || v == '') {
             //~ if (this.name == 'birth_country')
@@ -4979,7 +5097,7 @@ Ext.define('Lino.ComboBox', {
             this.hiddenvalue_id = record_data[this.hiddenName];
         } else {
           // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
-          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!Ext.isDefined(this.store.totalLength)))){
+          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!this.store.data.length))){
               //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
               // HKC
               //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
@@ -5009,9 +5127,11 @@ Ext.define('Lino.ComboBox', {
                 //~ console.log(this.name,'.setValue',v,' : store is loaded, lastQuery is "',this.lastQuery,'"');
           }
           var r = this.findRecord(this.valueField, v);
+//          console.log("FR- r=",r," this.valueField=",this.valueField," v=(",v,")" );
+
           if(r){
               text = r.data[this.displayField];
-          }else if(this.valueNotFoundText !== undefined){
+          }else if(this.valueNotFoundText !== undefined && this.valueNotFoundText !== null ){
               text = this.valueNotFoundText;
           }
         }
@@ -5025,6 +5145,7 @@ Ext.define('Lino.ComboBox', {
       Ext.form.ComboBox.superclass.setValue.call(this, text);
       // this.callSuper(text);
       // this.callParent(arguments);  // 20160701
+//      console.log("SetValue end this=",this);
   },
   
   getParams : function(q){
@@ -5037,9 +5158,12 @@ Ext.define('Lino.ComboBox', {
         p[param] = q;
     }
     if(this.pageSize){
-        p['{{constants.URL_PARAM_START}}'] = 0;
         p['{{constants.URL_PARAM_LIMIT}}'] = this.pageSize;
-    }
+        //p['{{constants.URL_PARAM_START}}'] = 0;
+        // This is being run on every query, causing start search value to always be 0, seems that it sets it correctly later if not set.
+        // ticket #1879
+        // p['{{constants.URL_PARAM_START}}'] = (pageNum - 1) * this.pageSize;
+}
     // now my code:
     if(this.contextParams) Ext.apply(p, this.contextParams);
     return p;
@@ -5109,6 +5233,7 @@ Ext.define('Lino.RemoteComboFieldElement',{
   extend:'Lino.ComboBox',
   mode: 'remote',
   queryMode : 'remote',
+  width:235,
   //~ forceSelection:false,
   minChars: 2, // default 4 is too much
   queryDelay: 300, // default 500 is maybe slow
