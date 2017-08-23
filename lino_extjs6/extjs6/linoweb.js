@@ -1884,7 +1884,7 @@ Lino.quicktip_renderer = function(title,body) {
   return function(c) {
     //~ if (c instanceof Ext.Panel) var t = c.bwrap; else // 20130129
     // if (c instanceof Ext.Panel) var t = c.header; else // 20130129
-    var t = c.getEl();
+    var t = c.getId();
     //~ console.log(20130129,t,title,body);
     //~ t.dismissDelay = 0;
     Ext.tip.QuickTipManager.register({
