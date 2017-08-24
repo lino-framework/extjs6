@@ -1307,7 +1307,7 @@ class BooleanFieldElement(FieldElement):
     def get_column_options(self, **kw):
         kw = FieldElement.get_column_options(self, **kw)
         kw.update(xtype='checkcolumn')
-        kw.update(editor=dict(field=dict(xtype='checkboxfield')))
+        # kw.update(editor=dict(field=dict(xtype='checkboxfield')))
         return kw
 
     def get_from_form(self, instance, values):
