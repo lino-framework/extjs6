@@ -1884,7 +1884,7 @@ Lino.quicktip_renderer = function(title,body) {
   return function(c) {
     //~ if (c instanceof Ext.Panel) var t = c.bwrap; else // 20130129
     // if (c instanceof Ext.Panel) var t = c.header; else // 20130129
-    var t = c.getEl();
+    var t = c.getId();
     //~ console.log(20130129,t,title,body);
     //~ t.dismissDelay = 0;
     Ext.tip.QuickTipManager.register({
@@ -3704,6 +3704,7 @@ Ext.define('Lino.GridPanel', {
     //~ if (this.base_params) Ext.apply(bp,this.base_params);  
     
     var proxy = Ext.create('Ext.data.HttpProxy',{
+
     //var proxy = {
       // 20120814 
       url: '{{extjs.build_plain_url("api")}}' + this.ls_url
@@ -5288,6 +5289,13 @@ Ext.define('Lino.Window', {
   draggable: false,
   width: 700,
   height: 500,
+  listeners:
+        {
+        show: function()
+        {
+            this.removeCls("x-unselectable");
+        }
+        }  ,
   constructor : function (config) {
     if (config.main_item.params_panel) {
         config.layout = 'border';

@@ -145,19 +145,13 @@ class GridColumn(jsgen.Component):
                 kw.update(filter=editor.gridfilters_settings)
         if isinstance(editor, FieldElement):
             if settings.SITE.use_quicktips:
-                # ~ if get_user_profile().expert:
-                if settings.SITE.show_internal_field_names:
-                    ttt = "(%s.%s) " % (layout_handle.layout._datasource,
-                                        self.editor.field.name)
-                else:
-                    ttt = ''
-                if self.editor.field.help_text \
-                        and "<" not in self.editor.field.help_text:
-                    # and '"' not in self.editor.field.help_text
-                    # GridColumn tooltips don't support html
-                    ttt = string_concat(ttt, self.editor.field.help_text)
-                if ttt:
-                    kw.update(tooltip=ttt)
+                add_help_text(kw,
+                              # GridColumn tooltips don't support html
+                              self.editor.field.help_text if self.editor.field.help_text and "<" not in self.editor.field.help_text else "",
+                              "", #Title
+                              layout_handle.layout._datasource,
+                              self.editor.field.name)
+
 
             def fk_renderer(fld, name):
                 # FK fields are clickable only if their target has a
@@ -1313,7 +1307,7 @@ class BooleanFieldElement(FieldElement):
     def get_column_options(self, **kw):
         kw = FieldElement.get_column_options(self, **kw)
         kw.update(xtype='checkcolumn')
-        kw.update(editor=dict(field=dict(xtype='checkboxfield')))
+        # kw.update(editor=dict(field=dict(xtype='checkboxfield')))
         return kw
 
     def get_from_form(self, instance, values):
@@ -2021,6 +2015,9 @@ def field2elem(layout_handle, field, **kw):
     if ch:
         if ch.can_create_choice or not ch.force_selection:
             kw.update(forceSelection=False)
+        else:
+            # Ticket #2006, even with ch.force_selection == True for timezone, the js defaults to False
+            kw.update(forceSelection=True)
         if ch.simple_values:
             return SimpleRemoteComboFieldElement(layout_handle, field, **kw)
         else:
