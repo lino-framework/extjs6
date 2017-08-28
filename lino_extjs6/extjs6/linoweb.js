@@ -1153,6 +1153,19 @@ Ext.define('Lino.CheckColumn',{
         return false; // Cancel event propagation
     },
 
+    renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+        if (record.data.disabled_fields && record.data.disabled_fields[this.dataIndex]) {
+            metaData.tdCls += ' ' + this.disabledCls;
+        }
+        return r = this.defaultRenderer(value, metaData);
+
+        // // This is how you can edit the default render of a checkbox. Commented out since not needed.
+        // var p = new DOMParser();
+        // var d = p.parseFromString(r,"text/html");
+        // d.body.firstChild.classList.add(this.disabledCls);
+        // return d.body.innerHTML
+
+    },
     renderer_unused : function(v, p, record){
         if (record.phantom) return '';
         p.css += ' x-grid3-check-col-td'; 

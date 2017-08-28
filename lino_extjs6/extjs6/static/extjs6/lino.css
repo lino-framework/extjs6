@@ -52,9 +52,14 @@ e.g. welfare.jobs.NewJobsOverview needs
 */
 .x-item-disabled {
   color: blue; 
-  /*   opacity: 1;  
+  /*   opacity: 1;
   font-weight: bold; */
 }
+
+.x-item-disabled .x-grid-checkcolumn {
+    opacity: .5;
+}
+
 .x-form-readonly{
 	color: blue !important;
 	/*background-color :blue !important;*/
