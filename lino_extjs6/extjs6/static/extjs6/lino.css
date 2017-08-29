@@ -50,29 +50,48 @@ e.g. welfare.jobs.NewJobsOverview needs
 /* 
 .x-item-disabled, .x-tree-node-disabled, .x-date-disabled
 */
-.x-item-disabled {
-  color: blue; 
-  /*   opacity: 1;
-  font-weight: bold; */
-}
+.x-item-disabled label {
+/*   color: blue ;  */
+/*   opacity: 1 !important;   */
+/*   font-weight: bold; */
+} 
+.x-item-disabled.x-form-item{
+/*   color: blue ;  */
+  opacity: 1 !important; 
+/*   font-weight: bold; */
+} 
 
-.x-item-disabled .x-grid-checkcolumn {
+.x-item-disabled.x-grid-checkcolumn { 
     opacity: .5;
-}
+} 
 
-.x-form-readonly{
+.x-item-disabled .x-form-checkbox {
+	opacity: .3 !important;;
+}
+.x-item-disabled input,textarea,{
+/*! color: blue ; */
+/*! opacity: 1 !important; */
+/*   font-weight: bold; */
+	background-image: none !important;
+/* background-color: #d0dce8; */
+	background-color: #d5e2ef !important;
+/*! background-color: #d0dde8; */
+	background: #fffde8;
+} 
+
+ .x-form-readonly{
 	color: blue !important;
 	/*background-color :blue !important;*/
 	/*background-image : none;*/
-}
+} 
 .x-form-item {
 	padding: 2px;
 }
-.x-item-disabled * {
+/* .x-item-disabled * {
   color: blue !important; 
   /*font-weight: bold !important; */
 }
-
+ */
 .x-btn-noicon {
 	color: red; font-style:italic;
 }
@@ -320,8 +339,4 @@ http://www.sencha.com/forum/showthread.php?70195-NumberField-and-Right-Alignment
 .x-toolbar-default{
 	padding: 0px 0 0px 0px;
 	/*background-color: #48acff;*/
-}
-
-.x-selectable {
-	user-select: text !important;
 }
