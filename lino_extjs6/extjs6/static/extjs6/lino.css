@@ -68,7 +68,7 @@ e.g. welfare.jobs.NewJobsOverview needs
 .x-item-disabled .x-form-checkbox {
 	opacity: .3 !important;;
 }
-.x-item-disabled input,textarea{
+.x-item-disabled input ,.x-item-disabled textarea{
 /*! color: blue ; */
 /*! opacity: 1 !important; */
 /*   font-weight: bold; */
@@ -76,7 +76,7 @@ e.g. welfare.jobs.NewJobsOverview needs
 /* background-color: #d0dce8; */
 	background-color: #d5e2ef !important;
 /*! background-color: #d0dde8; */
-	background: #fffde8;
+/*	background: #fffde8;*/
 } 
 
  .x-form-readonly{
