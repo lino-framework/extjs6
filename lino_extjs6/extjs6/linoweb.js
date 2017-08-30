@@ -1162,7 +1162,8 @@ Ext.define('Lino.CheckColumn',{
     },
 
     renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
-        if (record.data.disabled_fields && record.data.disabled_fields[this.dataIndex]) {
+        if (record.data.disabled_fields && (record.data.disabled_fields[this.dataIndex]
+                                            || record.data.disable_editing)) {
             metaData.tdCls += ' ' + this.disabledCls;
         }
         return r = this.defaultRenderer(value, metaData);
