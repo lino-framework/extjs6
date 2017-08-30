@@ -2923,7 +2923,8 @@ Ext.define('Lino.FormPanel', {
                 this.goto_record_id(record.data.value);
             }
           },
-          emptyText: "{{_('Go to record')}}"
+          emptyText: "{{_('Go to record')}}",
+          always_enabled: true,
         });
         this.tbar = this.tbar.concat([this.record_selector]);
 
