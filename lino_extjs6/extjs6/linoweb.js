@@ -1022,9 +1022,13 @@ Ext.define('Lino.WindowAction', {
           this.window = Ext.create('Lino.Window',this.windowConfig);
       }
       else {
-      this.windowConfig.items.forEach(
-        function(i){if (i.refresh != null) {i.refresh();}})
-      }
+        if (Array.isArray(this.windowConfig.items)){
+                this.windowConfig.items.forEach(
+                    function(i){if (i.refresh != null) {i.refresh();}}
+                    );
+                }
+           }
+
       return this.window;
     },
     run : function(requesting_panel, status) {
