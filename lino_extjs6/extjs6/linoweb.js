@@ -2361,6 +2361,30 @@ if (Ext.grid.filters.Filters !== undefined) {
     });
 };
 
+// https://stackoverflow.com/questions/26589495/extjs-remote-filtering-determine-filter-data-type-on-the-server-side
+
+Ext.define('Ext.override.grid.filters.filter.Base', {
+override: 'Ext.grid.filters.filter.Base',
+createFilter: function(config, key) {
+    var me = this,
+        filter = me.callParent(arguments),
+        type = me.getInitialConfig('type');
+    filter.type = type;
+    return filter;
+}
+});
+Ext.define('Ext.override.util.Filter', {
+override: 'Ext.util.Filter',
+getState: function() {
+    var me = this,
+        state = this.callParent(arguments);
+    if (me.type) {
+        state.type = me.type;
+    }
+    return state;
+}
+});
+
 {% endif %}
 
 //    HKC Ext.data.field.Field
@@ -4168,7 +4192,7 @@ Ext.define('Lino.GridPanel', {
              var cells = cellTemplate.apply({
                  value: row_content,
                  itemClasses: [],
-                 column: { cellWidth: 'foo', 
+                 column: { cellWidth: 'foo',
                            getItemId : function() {} }
              });
              var markup = rowTemplate.apply({

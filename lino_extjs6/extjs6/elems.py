@@ -1252,8 +1252,8 @@ class BooleanFieldElement(FieldElement):
     value_template = "Ext.create('Ext.form.Checkbox',%s)"
     # ~ xtype = 'checkbox'
     # ~ data_type = 'boolean'
-    # filter_type = 'boolean'
-    # gridfilters_settings = dict(type='boolean')
+    filter_type = 'boolean'
+    gridfilters_settings = dict(type='boolean')
 
     # ~ grid_column_template = "new Ext.grid.BooleanColumn(%s)"
     # ~ def __init__(self,*args,**kw):
