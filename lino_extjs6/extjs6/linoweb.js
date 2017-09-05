@@ -3958,7 +3958,7 @@ Ext.define('Lino.GridPanel', {
 
     this.on('resize', function(){
       //~ console.log("20120213 resize",arguments)
-      this.refresh();
+//      this.refresh();
       },this);
     this.on('viewready', function(){
       //~ console.log("20120213 resize",arguments);
