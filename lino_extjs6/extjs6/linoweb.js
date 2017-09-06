@@ -4768,9 +4768,10 @@ Ext.define('Lino.GridPanel', {
 //              self.getStore().reload();        // reload our datastore.
               // Thanks to http://vadimpopa.com/reload-a-single-record-and-refresh-its-extjs-grid-row/
               var store = self.getStore();
-              var recToUpdate = store.getById(e.record.id);
-              recToUpdate.set(r.records[0].getData());
-              recToUpdate.commit(false,e.field);
+              var recToUpdate = store.getById(r.records[0].id);
+//              var recToUpdate = store.getById(this.e.record.id);  // #2041 Editor might change before ajax return
+              recToUpdate.set(r.records[0].getData());  
+              recToUpdate.commit(false);
                self.getView().refreshNode(store.indexOfId(e.record.id));
 //              store.reload();
 //
