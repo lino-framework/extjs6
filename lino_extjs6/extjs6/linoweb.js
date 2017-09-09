@@ -2850,8 +2850,8 @@ Ext.define('Lino.form.Panel', {
                     if (values[field.hiddenName]){
                         field.hiddenvalue_tosubmit =values[field.hiddenName];
                         field.hiddenvalue_id =values[field.hiddenName];
-//                        field.changed = true;
                         field.setHiddenValue(values[field.hiddenName])}
+                        field.changed = true;
                     if(this.trackResetOnLoad){
                         field.originalValue = field.getValue();
                         //~ if (field.hiddenField) {
