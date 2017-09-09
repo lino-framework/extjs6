@@ -1022,11 +1022,19 @@ Ext.define('Lino.WindowAction', {
           this.window = Ext.create('Lino.Window',this.windowConfig);
       }
       else {
+        // Refresh existing grid windows,
         if (Array.isArray(this.windowConfig.items)){
                 this.windowConfig.items.forEach(
                     function(i){if (i.refresh != null) {i.refresh();}}
-                    );
+                    );                }
+        // Always have first tab open on detail windows
+        if (this.windowConfig.items != null &&
+            this.windowConfig.items.items != null &&
+            Array.isArray(this.windowConfig.items.items.items) &&
+            this.windowConfig.items.items.items[0].isXType("tabpanel")) {
+                this.windowConfig.items.items.items[0].setActiveTab(this.windowConfig.items.items.items[0].items.items[0]);
                 }
+
            }
 
       return this.window;
@@ -2842,8 +2850,8 @@ Ext.define('Lino.form.Panel', {
                     if (values[field.hiddenName]){
                         field.hiddenvalue_tosubmit =values[field.hiddenName];
                         field.hiddenvalue_id =values[field.hiddenName];
-//                        field.changed = true;
                         field.setHiddenValue(values[field.hiddenName])}
+                        field.changed = true;
                     if(this.trackResetOnLoad){
                         field.originalValue = field.getValue();
                         //~ if (field.hiddenField) {
