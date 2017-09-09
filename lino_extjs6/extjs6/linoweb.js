@@ -3271,7 +3271,7 @@ Ext.define('Lino.FormPanel', {
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
       //  console.log("HKC disable getBottomToolbar");
-      var da = record.data.disabled_actions;
+      var da = record.data.disabled_fields;
       if (da) {
           //~ console.log('20120528 disabled_actions =',da,this.getBottomToolbar());
           //~ 20121016 this.getBottomToolbar().items.each(function(item,index,length){
@@ -4986,7 +4986,7 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   
 //  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
 // seems that the proxy reader data can sometimes only include the last 10 records collected by infinite scroll
-  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_actions
+  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_fields;
   if (da) {
       this.cmenu.cascade(function(item){ 
         //~ console.log(20120531, item.itemId, da[item.itemId]);
