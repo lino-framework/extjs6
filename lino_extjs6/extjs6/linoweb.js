@@ -4778,9 +4778,14 @@ Ext.define('Lino.GridPanel', {
               var store = self.getStore();
               var recToUpdate = store.getById(r.records[0].id);
 //              var recToUpdate = store.getById(this.e.record.id);  // #2041 Editor might change before ajax return
-              recToUpdate.set(r.records[0].getData());  
-              recToUpdate.commit(false);
-               self.getView().refreshNode(store.indexOfId(e.record.id));
+              if (recToUpdate != null){
+                  recToUpdate.set(r.records[0].getData());
+                  recToUpdate.commit(false);
+                  self.getView().refreshNode(store.indexOfId(e.record.id));
+              }
+              else{
+              self.items.items[0].grid.refresh_with_after()
+              }
 //              store.reload();
 //
 //              // self.getStore().sync(); // get rid of the red triangles
