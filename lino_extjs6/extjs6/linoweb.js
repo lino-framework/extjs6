@@ -1022,11 +1022,19 @@ Ext.define('Lino.WindowAction', {
           this.window = Ext.create('Lino.Window',this.windowConfig);
       }
       else {
+        // Refresh existing grid windows,
         if (Array.isArray(this.windowConfig.items)){
                 this.windowConfig.items.forEach(
                     function(i){if (i.refresh != null) {i.refresh();}}
-                    );
+                    );                }
+        // Always have first tab open on detail windows
+        if (this.windowConfig.items != null &&
+            this.windowConfig.items.items != null &&
+            Array.isArray(this.windowConfig.items.items.items) &&
+            this.windowConfig.items.items.items[0].isXType("tabpanel")) {
+                this.windowConfig.items.items.items[0].setActiveTab(this.windowConfig.items.items.items[0].items.items[0]);
                 }
+
            }
 
       return this.window;
@@ -2007,7 +2015,8 @@ Lino.fk_renderer = function(fkname,handlername) {
     //~ console.log('Lino.fk_renderer',fkname,rowIndex,colIndex,record,metaData,store);
     //~ if (record.phantom) return '';
     if (value) {
-        return Lino.link_button('javascript:'+handlername + '-' + String(record.data[fkname])) + Lino.link_button_with_value('',value);
+        var url = 'javascript:'+handlername + '.run(null,{\'record_id\':' + String(record.data[fkname]) + '})'
+        return Lino.link_button(url) + Lino.link_button_with_value(url,value);
         // until 20140822 (clickable foreign keys):
         // var s = '<a href="javascript:' ;
         // s += handlername + '.run(null,{record_id:\'' + String(record.data[fkname]) + '\'})">';
@@ -2360,6 +2369,30 @@ if (Ext.grid.filters.Filters !== undefined) {
       init : function() {}
     });
 };
+
+// https://stackoverflow.com/questions/26589495/extjs-remote-filtering-determine-filter-data-type-on-the-server-side
+
+Ext.define('Ext.override.grid.filters.filter.Base', {
+override: 'Ext.grid.filters.filter.Base',
+createFilter: function(config, key) {
+    var me = this,
+        filter = me.callParent(arguments),
+        type = me.getInitialConfig('type');
+    filter.type = type;
+    return filter;
+}
+});
+Ext.define('Ext.override.util.Filter', {
+override: 'Ext.util.Filter',
+getState: function() {
+    var me = this,
+        state = this.callParent(arguments);
+    if (me.type) {
+        state.type = me.type;
+    }
+    return state;
+}
+});
 
 {% endif %}
 
@@ -2817,8 +2850,8 @@ Ext.define('Lino.form.Panel', {
                     if (values[field.hiddenName]){
                         field.hiddenvalue_tosubmit =values[field.hiddenName];
                         field.hiddenvalue_id =values[field.hiddenName];
-//                        field.changed = true;
                         field.setHiddenValue(values[field.hiddenName])}
+                        field.changed = true;
                     if(this.trackResetOnLoad){
                         field.originalValue = field.getValue();
                         //~ if (field.hiddenField) {
@@ -3246,7 +3279,7 @@ Ext.define('Lino.FormPanel', {
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
       //  console.log("HKC disable getBottomToolbar");
-      var da = record.data.disabled_actions;
+      var da = record.data.disabled_fields;
       if (da) {
           //~ console.log('20120528 disabled_actions =',da,this.getBottomToolbar());
           //~ 20121016 this.getBottomToolbar().items.each(function(item,index,length){
@@ -3934,7 +3967,7 @@ Ext.define('Lino.GridPanel', {
 
     this.on('resize', function(){
       //~ console.log("20120213 resize",arguments)
-      this.refresh();
+//      this.refresh();
       },this);
     this.on('viewready', function(){
       //~ console.log("20120213 resize",arguments);
@@ -4168,7 +4201,7 @@ Ext.define('Lino.GridPanel', {
              var cells = cellTemplate.apply({
                  value: row_content,
                  itemClasses: [],
-                 column: { cellWidth: 'foo', 
+                 column: { cellWidth: 'foo',
                            getItemId : function() {} }
              });
              var markup = rowTemplate.apply({
@@ -4743,10 +4776,16 @@ Ext.define('Lino.GridPanel', {
 //              self.getStore().reload();        // reload our datastore.
               // Thanks to http://vadimpopa.com/reload-a-single-record-and-refresh-its-extjs-grid-row/
               var store = self.getStore();
-              var recToUpdate = store.getById(e.record.id);
-              recToUpdate.set(r.records[0].getData());
-              recToUpdate.commit(false,e.field);
-               self.getView().refreshNode(store.indexOfId(e.record.id));
+              var recToUpdate = store.getById(r.records[0].id);
+//              var recToUpdate = store.getById(this.e.record.id);  // #2041 Editor might change before ajax return
+              if (recToUpdate != null){
+                  recToUpdate.set(r.records[0].getData());
+                  recToUpdate.commit(false);
+                  self.getView().refreshNode(store.indexOfId(e.record.id));
+              }
+              else{
+              self.items.items[0].grid.refresh_with_after()
+              }
 //              store.reload();
 //
 //              // self.getStore().sync(); // get rid of the red triangles
@@ -4960,7 +4999,7 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   
 //  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
 // seems that the proxy reader data can sometimes only include the last 10 records collected by infinite scroll
-  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_actions
+  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_fields;
   if (da) {
       this.cmenu.cascade(function(item){ 
         //~ console.log(20120531, item.itemId, da[item.itemId]);

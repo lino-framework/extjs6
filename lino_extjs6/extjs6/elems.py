@@ -142,7 +142,8 @@ class GridColumn(jsgen.Component):
         if settings.SITE.use_gridfilters and editor.gridfilters_settings:
             if isinstance(editor, FieldElement) \
                     and not isinstance(editor.field, fields.VirtualField):
-                kw.update(filter=editor.gridfilters_settings)
+                kw = editor.get_gridfilters_settings(kw)
+
         if isinstance(editor, FieldElement):
             if settings.SITE.use_quicktips:
                 add_help_text(kw,
@@ -316,6 +317,11 @@ class LayoutElement(VisibleComponent):
         return self.parent.get_property(name)
 
     def get_column_options(self, **kw):
+        return kw
+
+    def get_gridfilters_settings(self, kw):
+        if self.gridfilters_settings:
+            kw.update(filter=dict(self.gridfilters_settings))
         return kw
 
     def set_parent(self, parent):
@@ -513,10 +519,14 @@ class FieldElement(LayoutElement):
         kw.update(dataIndex=self.name)
         if self.label is None:
             kw.update(header=self.name)
-        elif self.label:
-            kw.update(header=self.label)
         else:
             kw.update(header=self.label)
+        # if self.label is None:
+        #     kw.update(header=self.name)
+        # elif self.label:
+        #     kw.update(header=self.label)
+        # else:
+        #     kw.update(header=self.label)
         if not self.editable:
             kw.update(editable=False)
         if not self.sortable:
@@ -809,7 +819,8 @@ class ChoiceListFieldElement(ChoicesFieldElement):
     dynamicaly add a blank choice to the the choicelist.
 
     """
-
+    filter_type = 'list'
+    gridfilters_settings = dict(type='list')
     def __init__(self, layout_handle, field, **kw):
         pw = field.choicelist.preferred_foreignkey_width
         if pw is not None:
@@ -825,6 +836,10 @@ class ChoiceListFieldElement(ChoicesFieldElement):
         kw.update(store=js_code(js))
         return kw
 
+    def get_gridfilters_settings(self, kw):
+        kw = super(ChoicesFieldElement, self).get_gridfilters_settings(kw)
+        kw['filter'].update(options = [str(c[1]) for c in self.field.choices])
+        return kw
 
 class RemoteComboFieldElement(ComboFieldElement):
     value_template = "Ext.create('Lino.RemoteComboFieldElement',%s)"
@@ -1248,8 +1263,8 @@ class BooleanFieldElement(FieldElement):
     value_template = "Ext.create('Ext.form.Checkbox',%s)"
     # ~ xtype = 'checkbox'
     # ~ data_type = 'boolean'
-    # filter_type = 'boolean'
-    # gridfilters_settings = dict(type='boolean')
+    filter_type = 'boolean'
+    gridfilters_settings = dict(type='boolean')
 
     # ~ grid_column_template = "new Ext.grid.BooleanColumn(%s)"
     # ~ def __init__(self,*args,**kw):
