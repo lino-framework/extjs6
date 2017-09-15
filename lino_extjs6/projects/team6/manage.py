@@ -3,6 +3,6 @@ import os
 import sys
 if __name__ == "__main__":
     os.environ['DJANGO_SETTINGS_MODULE'] = \
-        'lino_extjs6.projects.mysite.settings.demo'
+        'lino_extjs6.projects.team6.settings.demo'
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)
