@@ -9,6 +9,9 @@ class PackagesTests(TestCase):
 
 class ProjectsTests(TestCase):
     
-    def test_mysite(self):
-        self.run_django_manage_test("lino_extjs6/projects/mysite")
+    def test_team(self):
+        self.run_django_manage_test("lino_extjs6/projects/team6")
+
+    def test_lydia(self):
+        self.run_django_manage_test("lino_extjs6/projects/lydia6")
 
