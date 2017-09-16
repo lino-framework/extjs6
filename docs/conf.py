@@ -13,10 +13,10 @@ extlinks = {}
 intersphinx_mapping = {}
 
 from lino.sphinxcontrib import configure
-configure(globals(), 'lino_extjs6.projects.mysite.settings.demo')
+configure(globals(), 'lino_extjs6.projects.team6.settings.demo')
 
-from django.conf import settings
-settings.SITE.title = "Lino ExtJS 6 Documentation"
+#from django.conf import settings
+#settings.SITE.title = "Lino ExtJS 6 Documentation"
 
 extensions += ['lino.sphinxcontrib.logo']
 # extensions += ['sphinx.ext.autosummary']
@@ -25,7 +25,7 @@ autosummary_generate = True
 
 
 from importlib import import_module
-for n in 'atelier lino'.split():
+for n in 'atelier lino lino_xl'.split():
     m = import_module(n)
     intersphinx_mapping[n] = (m.intersphinx_urls['docs'], None)
 
@@ -35,8 +35,8 @@ import lino_extjs6
 # ---------------------
 
 # General information about the project.
-project = settings.SITE.title
-copyright = '2015-2016, Luc Saffre & Hamza Khchine'
+project = "Lino ExtJS 6 Documentation"
+copyright = '2015-2017, Luc Saffre & Hamza Khchine'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

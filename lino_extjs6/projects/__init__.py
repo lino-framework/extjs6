@@ -3,6 +3,7 @@
 .. autosummary::
    :toctree:
 
-    mysite
+    team6
+    lydia6
 
 """
