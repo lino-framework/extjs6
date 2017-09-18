@@ -3569,8 +3569,11 @@ Ext.override(Ext.grid.plugin.CellEditing, {
                 view.onCellFocus = me.beforeViewCellFocus.bind(me);
             }
 
+            // We want to have an option to disable click-editing, as we use double for detail open, and single for selection
+            if (me.clicksToEdit) {
             // Listen for whichever click event we are configured to use
             me.mon(view, me.triggerEvent || ('cell' + (me.clicksToEdit === 1 ? 'click' : 'dblclick')), me.onCellClick, me);
+            }
         }
 
         // add/remove header event listeners need to be added immediately because
@@ -3841,7 +3844,7 @@ Ext.define('Lino.GridPanel', {
       config.plugins = [];
       config.plugins.push({
           ptype: 'cellediting',
-          clicksToEdit: 1
+          clicksToEdit: 0 // disabled
       });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
