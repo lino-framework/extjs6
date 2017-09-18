@@ -3721,8 +3721,8 @@ Ext.define('Lino.GridStore', {
     // ,mixins: ['Ext.data.BufferedStore']
     //extend : 'Ext.data.ArrayStore'
     ,autoLoad: true // 20160915
-    ,leadingBufferZone: 5
-     ,pageSize: 10 // 20160915
+    ,leadingBufferZone: 20
+     ,pageSize: 35 // 20160915
     // ,buffered: true // 20160915
   ,prefetch: function(options) {
     //~ foo.bar = baz; // 20120213
