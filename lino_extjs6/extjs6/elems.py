@@ -575,7 +575,7 @@ class FieldElement(LayoutElement):
                 kw.update(fieldLabel=label)
                 # HKC
                 # kw.update(valueField=self.field.name)
-                kw.update(labelAlign='top')
+                # kw.update(labelAlign='top')
         if self.editable:
             if not self.field.blank:
                 kw.update(allowBlank=False)
@@ -1478,6 +1478,7 @@ class Container(LayoutElement):
     declare_type = jsgen.DECLARE_VAR
 
     def __init__(self, layout_handle, name, *elements, **kw):
+        self.label_align = kw.pop('label_align', layouts.LABEL_ALIGN_TOP)
         self.active_children = []
         self.elements = elements
         if elements:
@@ -1545,6 +1546,7 @@ class Container(LayoutElement):
 
     def ext_options(self, **kw):
         kw = LayoutElement.ext_options(self, **kw)
+        kw.update(labelAlign=self.label_align)
         # not necessary to filter elements here, jsgen does that
         kw.update(items=self.elements)
         # if all my children are hidden, i am myself hidden
@@ -2101,7 +2103,9 @@ def create_layout_panel(lh, name, vertical, elems, **kwargs):
     like `label_align` to their ExtJS equivalent `labelAlign`.
     """
     pkw = dict()
-    pkw.update(labelAlign=kwargs.pop('label_align', 'top'))
+    # pkw.update(labelAlign=kwargs.pop('label_align', 'top'))
+    pkw.update(label_align=kwargs.pop(
+        'label_align', lh.layout.label_align))
     pkw.update(hideCheckBoxLabels=kwargs.pop('hideCheckBoxLabels', True))
     pkw.update(label=kwargs.pop('label', None))
     pkw.update(width=kwargs.pop('width', None))

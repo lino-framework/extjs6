@@ -61,7 +61,7 @@ from lino.core.views import json_response, json_response_kw
 from lino.core import constants
 from lino.core.requests import BaseRequest
 
-from lino.modlib.extjs.views import Authenticate, RunJasmine, EidAppletService, Callbacks, elem2rec_empty, choices_for_field, choices_response
+from lino.modlib.extjs.views import RunJasmine, EidAppletService, Callbacks, elem2rec_empty, choices_for_field, choices_response
 
 
 MAX_ROW_COUNT = 300

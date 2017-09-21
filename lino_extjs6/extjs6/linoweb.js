@@ -420,8 +420,6 @@ Lino.insert_subst_user = function(p){
     //~ console.log('20120714 insert_subst_user -->',Lino.subst_user,p);
 }
 
-Lino.login_window = null;
-
 {% if extjs.autorefresh_seconds -%}
 Lino.autorefresh = function() {
   if (Lino.current_window == null) {
@@ -434,116 +432,6 @@ Lino.autorefresh = function() {
   }
 }
 {%- endif %}
-
-Lino.show_login_window = function(on_login,username, password ) {
-  //~ console.log('20121103 show_login_window',arguments);
-  //~ var current_window = Lino.current_window;
-  if (typeof username != 'string') username = '';
-  if (typeof password != 'string') password = '';
-  if (Lino.login_window == null) {
-    
-      function do_login() { 
-            Lino.viewport.mask();
-            //Ext.getBody().mask();
-            login_panel.getForm().submit({
-                method:'POST', 
-                waitTitle:'Connecting', 
-                waitMsg:'Sending data...',
-                success:function(){ 
-                  Lino.login_window.hide();
-                  Lino.handle_home_button();
-                  Lino.viewport.unmask();
-                    //Ext.getBody().unmask();
-                  if (typeof on_login == 'string') {
-                      Lino.load_url(on_login);
-                  } 
-                },
-                failure: function(form,action) { 
-                  Lino.on_submit_failure(form, action);
-                  //Lino.viewport.loadMask.hide()
-                  Lino.viewport.unmask();
-                    //Ext.getBody().unmask();
-                }
-            }); 
-      };
-    
-      var login_button = Ext.create('Ext.Button',{
-          text:"{{_('Log in')}}",
-          formBind: true,
-          handler: do_login
-      });
-
-       Ext.define('Login.Controller', {
-       extend: 'Ext.app.ViewController',
-       alias: 'controller.login',
-        // handler for specialkey event
-       onSpecialKey: function(field, e, eOpts) {
-           if (e.getKey() == e.ENTER) {
-               do_login();
-           }
-            }
-        });
-      var login_panel = Ext.create('Ext.form.FormPanel',{
-        //~ inspired by http://www.sencha.com/learn/a-basic-login/
-        autoHeight:true,
-        labelWidth:90,
-        url:'{{extjs.build_plain_url("auth")}}', 
-        frame:true, 
-        defaultType:'textfield',
-        monitorValid:true,
-        resizable: false,
-          controller: 'login',
-          defaults: {
-                listeners: {
-                    specialkey: 'onSpecialKey'
-                }
-            },
-        items:[{ 
-            fieldLabel:"{{_('Username')}}", 
-            id: 'username',
-            name:'username',
-            value: username,
-            autoHeight:true,
-            allowBlank:false
-        },{
-            fieldLabel:"{{_('Password')}}",
-            id:'password',
-            name:'password',
-            value: password,
-            inputType:'password', 
-            autoHeight:true,
-            allowBlank:false 
-        }],        
-        buttons:[ login_button ]});
-        //Edited by HKC Ext.window  -> Ext.window.Window
-      //Lino.login_window = new Ext.Window({
-      Lino.login_window = Ext.create('Ext.window.Window',{
-          layout:'fit',
-          defaultButton: 'username',
-          width:300,
-          title:"{{_('Log in')}}", 
-          autoHeight:true,
-          modal: true,
-          closeAction: "hide",
-          focusOnToFront: false,
-          defaultFocus : login_panel.form.findField('username'),
-          items: [login_panel] });
-  }else {
-      var fld = Lino.login_window.items.first().form.findField('username');
-      fld.setValue(username);
-      var fld = Lino.login_window.items.first().form.findField('password');
-      fld.setValue(password);
-  };
-  Lino.login_window.show();
-};
-
-Lino.logout = function(id,name) {
-    Lino.call_ajax_action(
-        Lino.viewport, 'GET', 
-        '{{extjs.build_plain_url("auth")}}',
-        {}, 'logout', undefined, undefined,
-        function(){Lino.reload();})
-};
 
 Lino.set_subst_user = function(id, name) {
     //~ console.log(20130723,'Lino.set_subst_user',id,name,Lino.current_window,Lino.viewport);
@@ -1760,6 +1648,7 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
        Lino.davlink_open(result.open_davlink_url);
     }
     {%- endif -%}
+    if (result.goto_url) document.location = result.goto_url;
     if (result.open_url) {
         //~ console.log(20111126,result.open_url);
         //~ if (!result.message)
@@ -2564,7 +2453,7 @@ Ext.define('Lino.ActionFormPanel', {
   //~ ,frame: true
   window_title : "Action Parameters",
   constructor : function(config){
-    config.bbar = [
+    config.buttons = [
         {text: 'OK', handler: this.on_ok, scope: this},
         {text: 'Cancel', handler: this.on_cancel, scope: this}
     ];
@@ -2588,8 +2477,10 @@ Ext.define('Lino.ActionFormPanel', {
         pk = panel.get_current_record().id;
     }
     if (pk == undefined) {
-        Lino.alert("Sorry, dialog action without base_params.mk");
-        return;
+        // list actions e.g. VerifyUser, SignIn
+        pk = '-99998';
+        // Lino.alert("Sorry, dialog action without base_params.mk");
+        // return;
     }
     var self = this;
     // function on_success() { self.get_containing_window().close(); };
@@ -2674,7 +2565,7 @@ Ext.define('Lino.ActionFormPanel', {
         {   // HKC
             //key: Ext.EventObject.ENTER,
             key : Ext.event.Event.ENTER,
-            fn: this.on_ok }
+            fn: this.on_ok, scope: this }
       ];
       
       if (!wincfg.defaultButton) {
