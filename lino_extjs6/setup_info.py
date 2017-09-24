@@ -48,7 +48,10 @@ SETUP_INFO.update(packages=[str(n) for n in """
 lino_extjs6
 lino_extjs6.extjs6
 lino_extjs6.projects
-lino_extjs6.projects.mysite
-lino_extjs6.projects.mysite.settings
-lino_extjs6.projects.mysite.tests
+lino_extjs6.projects.team6
+lino_extjs6.projects.team6.settings
+lino_extjs6.projects.team6.tests
+lino_extjs6.projects.lydia6
+lino_extjs6.projects.lydia6.settings
+lino_extjs6.projects.lydia6.tests
 """.splitlines() if n])

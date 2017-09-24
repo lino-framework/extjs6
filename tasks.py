@@ -1,4 +1,4 @@
-from lino.invlib.ns import ns
+from atelier.invlib.ns import ns
 ns.setup_from_tasks(
     globals(), "lino_extjs6",
     languages="en de fr et".split(),
@@ -7,4 +7,6 @@ ns.setup_from_tasks(
     revision_control_system='git',
     # locale_dir='lino_extjs/extjs/locale',
     cleanable_files=['docs/api/lino_extjs6.*'],
-    demo_projects=['lino_extjs6.projects.mysite.settings.demo'])
+    demo_projects=[
+        'lino_extjs6/projects/team6',
+        'lino_extjs6/projects/lydia6'])

@@ -420,8 +420,6 @@ Lino.insert_subst_user = function(p){
     //~ console.log('20120714 insert_subst_user -->',Lino.subst_user,p);
 }
 
-Lino.login_window = null;
-
 {% if extjs.autorefresh_seconds -%}
 Lino.autorefresh = function() {
   if (Lino.current_window == null) {
@@ -434,116 +432,6 @@ Lino.autorefresh = function() {
   }
 }
 {%- endif %}
-
-Lino.show_login_window = function(on_login,username, password ) {
-  //~ console.log('20121103 show_login_window',arguments);
-  //~ var current_window = Lino.current_window;
-  if (typeof username != 'string') username = '';
-  if (typeof password != 'string') password = '';
-  if (Lino.login_window == null) {
-    
-      function do_login() { 
-            Lino.viewport.mask();
-            //Ext.getBody().mask();
-            login_panel.getForm().submit({
-                method:'POST', 
-                waitTitle:'Connecting', 
-                waitMsg:'Sending data...',
-                success:function(){ 
-                  Lino.login_window.hide();
-                  Lino.handle_home_button();
-                  Lino.viewport.unmask();
-                    //Ext.getBody().unmask();
-                  if (typeof on_login == 'string') {
-                      Lino.load_url(on_login);
-                  } 
-                },
-                failure: function(form,action) { 
-                  Lino.on_submit_failure(form, action);
-                  //Lino.viewport.loadMask.hide()
-                  Lino.viewport.unmask();
-                    //Ext.getBody().unmask();
-                }
-            }); 
-      };
-    
-      var login_button = Ext.create('Ext.Button',{
-          text:"{{_('Log in')}}",
-          formBind: true,
-          handler: do_login
-      });
-
-       Ext.define('Login.Controller', {
-       extend: 'Ext.app.ViewController',
-       alias: 'controller.login',
-        // handler for specialkey event
-       onSpecialKey: function(field, e, eOpts) {
-           if (e.getKey() == e.ENTER) {
-               do_login();
-           }
-            }
-        });
-      var login_panel = Ext.create('Ext.form.FormPanel',{
-        //~ inspired by http://www.sencha.com/learn/a-basic-login/
-        autoHeight:true,
-        labelWidth:90,
-        url:'{{extjs.build_plain_url("auth")}}', 
-        frame:true, 
-        defaultType:'textfield',
-        monitorValid:true,
-        resizable: false,
-          controller: 'login',
-          defaults: {
-                listeners: {
-                    specialkey: 'onSpecialKey'
-                }
-            },
-        items:[{ 
-            fieldLabel:"{{_('Username')}}", 
-            id: 'username',
-            name:'username',
-            value: username,
-            autoHeight:true,
-            allowBlank:false
-        },{
-            fieldLabel:"{{_('Password')}}",
-            id:'password',
-            name:'password',
-            value: password,
-            inputType:'password', 
-            autoHeight:true,
-            allowBlank:false 
-        }],        
-        buttons:[ login_button ]});
-        //Edited by HKC Ext.window  -> Ext.window.Window
-      //Lino.login_window = new Ext.Window({
-      Lino.login_window = Ext.create('Ext.window.Window',{
-          layout:'fit',
-          defaultButton: 'username',
-          width:300,
-          title:"{{_('Log in')}}", 
-          autoHeight:true,
-          modal: true,
-          closeAction: "hide",
-          focusOnToFront: false,
-          defaultFocus : login_panel.form.findField('username'),
-          items: [login_panel] });
-  }else {
-      var fld = Lino.login_window.items.first().form.findField('username');
-      fld.setValue(username);
-      var fld = Lino.login_window.items.first().form.findField('password');
-      fld.setValue(password);
-  };
-  Lino.login_window.show();
-};
-
-Lino.logout = function(id,name) {
-    Lino.call_ajax_action(
-        Lino.viewport, 'GET', 
-        '{{extjs.build_plain_url("auth")}}',
-        {}, 'logout', undefined, undefined,
-        function(){Lino.reload();})
-};
 
 Lino.set_subst_user = function(id, name) {
     //~ console.log(20130723,'Lino.set_subst_user',id,name,Lino.current_window,Lino.viewport);
@@ -1760,6 +1648,7 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
        Lino.davlink_open(result.open_davlink_url);
     }
     {%- endif -%}
+    if (result.goto_url) document.location = result.goto_url;
     if (result.open_url) {
         //~ console.log(20111126,result.open_url);
         //~ if (!result.message)
@@ -2564,7 +2453,7 @@ Ext.define('Lino.ActionFormPanel', {
   //~ ,frame: true
   window_title : "Action Parameters",
   constructor : function(config){
-    config.bbar = [
+    config.buttons = [
         {text: 'OK', handler: this.on_ok, scope: this},
         {text: 'Cancel', handler: this.on_cancel, scope: this}
     ];
@@ -2588,8 +2477,10 @@ Ext.define('Lino.ActionFormPanel', {
         pk = panel.get_current_record().id;
     }
     if (pk == undefined) {
-        Lino.alert("Sorry, dialog action without base_params.mk");
-        return;
+        // list actions e.g. VerifyUser, SignIn
+        pk = '-99998';
+        // Lino.alert("Sorry, dialog action without base_params.mk");
+        // return;
     }
     var self = this;
     // function on_success() { self.get_containing_window().close(); };
@@ -2674,7 +2565,7 @@ Ext.define('Lino.ActionFormPanel', {
         {   // HKC
             //key: Ext.EventObject.ENTER,
             key : Ext.event.Event.ENTER,
-            fn: this.on_ok }
+            fn: this.on_ok, scope: this }
       ];
       
       if (!wincfg.defaultButton) {
@@ -3535,7 +3426,164 @@ if (this.disable_editing | record.data.disable_editing) {
 
 });
 
+// #1045 Allowing typing to start editing a cell.
 
+var TypeEditResetValue = false;
+// global variable for checking if we're
+//wanting to clear the value of an editor when starting to edit via key-stroke
+
+Ext.override(Ext.grid.plugin.CellEditing, {
+
+        requires: [
+            'Ext.grid.column.Column',
+            'Ext.util.KeyMap'
+        ],
+
+    initEditTriggers: function() {
+        var me = this,
+            view = me.view;
+
+        // Listen for the edit trigger event.
+        if (me.triggerEvent === 'cellfocus') {
+            me.mon(view, 'cellfocus', me.onCellFocus, me);
+        } else if (me.triggerEvent === 'rowfocus') {
+            me.mon(view, 'rowfocus', me.onRowFocus, me);
+        } else {
+
+            // Prevent the View from processing when the SelectionModel focuses.
+            // This is because the SelectionModel processes the mousedown event, and
+            // focusing causes a scroll which means that the subsequent mouseup might
+            // take place at a different document XY position, and will therefore
+            // not trigger a click.
+            // This Editor must call the View's focusCell method directly when we recieve a request to edit
+            if (view.getSelectionModel().isCellModel) {
+                view.onCellFocus = me.beforeViewCellFocus.bind(me);
+            }
+
+            // We want to have an option to disable click-editing, as we use double for detail open, and single for selection
+            if (me.clicksToEdit) {
+            // Listen for whichever click event we are configured to use
+            me.mon(view, me.triggerEvent || ('cell' + (me.clicksToEdit === 1 ? 'click' : 'dblclick')), me.onCellClick, me);
+            }
+        }
+
+        // add/remove header event listeners need to be added immediately because
+        // columns can be added/removed before render
+        me.initAddRemoveHeaderEvents();
+
+        // Attach new bindings to the View's NavigationModel which processes cellkeydown events.
+        me.view.getNavigationModel().addKeyBindings({
+            esc: me.onEscKey,
+            scope: me
+        });
+
+        // Start of Edits
+        view.on('render', function() {
+                me.keyNav = new Ext.util.KeyMap({
+                    target : view.el,
+                    binding:[
+                    {
+                        // key: [65, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105],  // 0123456789 + numpad0123456789
+                        key: [56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90 ,65, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105],  // 0123456789 + numpad0123456789
+                        // key: /[a-z]/,
+                        // key: ['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 96, 97, 98, 99, 100, 101, 102, 103, 104, 105],
+                        handler: me.onNumberKey,
+                        scope: me
+                    },
+                    // {
+                    //     key: 13,    // ENTER
+                    //     handler: me.onEnterKey,
+                    //     scope: me
+                    // }, {
+                    //     key: 27,    // ESC
+                    //     handler: me.onEscKey,
+                    //     scope: me
+                    // }
+                ]});
+            }, me, { single: true });
+        //End of Edits
+
+    },
+
+
+        onNumberKey: function(e) {
+            var me = this,
+                grid = me.grid,
+                selModel = grid.getSelectionModel(),
+                record,
+                columnHeader = grid.headerCt.getHeaderAtIndex(0);
+//            console.log("onNumberKey");
+//            console.log(e);
+            // Calculate editing start position from SelectionModel
+            // CellSelectionModel
+            if (selModel.getCurrentPosition) {
+                pos = selModel.getCurrentPosition();
+                record = grid.store.getAt(pos.row);
+                columnHeader = grid.headerCt.getHeaderAtIndex(pos.column);
+            }
+            // RowSelectionModel
+            else {
+                record = selModel.getLastSelected();
+            }
+
+            // if current cell have editor, then save numeric key in global variable
+            var ed = me.getEditor(record, columnHeader);
+            // console.log(ed.editing)
+            //todo get maskre and if match open editor
+            if (!ed.editing) {
+//                console.log("has ed")
+                // newValue = String.fromCharCode(e);
+                if (ed.field.selectOnFocus){ // There is a race condition here with selecting on keystart
+                    ed.field.selectOnFocus = false;
+                    setTimeout(function(ed){
+                     ed.field.selectOnFocus = ed.field.config.selectOnFocus;
+                    }.bind(this,ed), 100);
+                    }
+//                console.log("RV = true")
+                TypeEditResetValue = true
+
+            }
+
+            // start cell edit mode
+//            TypeEdit = true
+            me.startEdit(record, columnHeader);
+        }
+});
+
+Ext.override(Ext.Editor, {
+    startEdit : function(el, value, focus) {
+        var me = this,
+            field = me.field;
+
+        me.completeEdit();
+//        console.log(el, value, focus);
+        me.boundEl = Ext.get(el);
+        value = Ext.isDefined(value) ? value : me.boundEl.dom.innerHTML;
+
+        if (!me.rendered) {
+            me.render(me.parentEl || document.body);
+        }
+
+        if (me.fireEvent('beforestartedit', me, me.boundEl, value) !== false) {
+//            console.log("startEdit")
+            me.startValue = value;
+            me.show();
+            field.reset();
+            field.setValue((TypeEditResetValue ? "" : value));
+            me.realign(true);
+            if (focus){field.focus(false,10);}
+            if (field.autoSize) {
+                field.autoSize();
+            }
+            me.editing = true;
+
+            // reset global newValue
+
+//            console.log("RV = false")
+            TypeEditResetValue = false;
+        }
+    }
+});
 
 Lino.getRowClass = function(record, rowIndex, rowParams, store) {
     //~ console.log(20130816,record);
@@ -3564,8 +3612,8 @@ Ext.define('Lino.GridStore', {
     // ,mixins: ['Ext.data.BufferedStore']
     //extend : 'Ext.data.ArrayStore'
     ,autoLoad: true // 20160915
-    ,leadingBufferZone: 5
-     ,pageSize: 10 // 20160915
+    ,leadingBufferZone: 20
+     ,pageSize: 35 // 20160915
     // ,buffered: true // 20160915
   ,prefetch: function(options) {
     //~ foo.bar = baz; // 20120213
@@ -3687,7 +3735,7 @@ Ext.define('Lino.GridPanel', {
       config.plugins = [];
       config.plugins.push({
           ptype: 'cellediting',
-          clicksToEdit: 1
+          clicksToEdit: 0 // disabled
       });
 {% if settings.SITE.use_gridfilters %}
     //config.plugins = [new Lino.GridFilters()];
@@ -4271,7 +4319,7 @@ Ext.define('Lino.GridPanel', {
             return;
         }
         */
-        console.log('handleKeyDown',e)
+//        console.log('handleKeyDown',e)
         var k = e.getKey(),
             // g = this.grid,
             s = this.selection,
@@ -4782,6 +4830,12 @@ Ext.define('Lino.GridPanel', {
                   recToUpdate.set(r.records[0].getData());
                   recToUpdate.commit(false);
                   self.getView().refreshNode(store.indexOfId(e.record.id));
+                  if (e.rowIdx == self.getSelectionModel().selection.rowIdx
+                  &&  e.colIdx == self.getSelectionModel().selection.colIdx){  // If user closed editor via [Enter] rather then click away,
+//                  self.getView.focusRow(row);
+                    // Focus on that cell only if it's already selected, not if user has clicked away.
+                    self.getView().getNavigationModel().setPosition(e.rowIdx, e.colIdx);
+                    }
               }
               else{
               self.items.items[0].grid.refresh_with_after()

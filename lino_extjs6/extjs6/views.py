@@ -61,7 +61,7 @@ from lino.core.views import json_response, json_response_kw
 from lino.core import constants
 from lino.core.requests import BaseRequest
 
-from lino.modlib.extjs.views import Authenticate, RunJasmine, EidAppletService, Callbacks, elem2rec_empty, choices_for_field, choices_response
+from lino.modlib.extjs.views import RunJasmine, EidAppletService, Callbacks, elem2rec_empty, choices_for_field, choices_response
 
 
 MAX_ROW_COUNT = 300
@@ -388,11 +388,11 @@ class ApiList(View):
             rows = [rh.store.row2list(ar, row)
                     for row in ar.sliced_data_iterator]
             total_count = ar.get_total_count()
-            if ar.offset + ar.limit >= total_count:  # 20160916
-                for row in ar.create_phantom_rows():
+            for row in ar.create_phantom_rows():
+                if len(rows)+1 < ar.limit:
                     d = rh.store.row2list(ar, row)
                     rows.append(d)
-                    total_count += 1
+                total_count += 1
             kw = dict(count=total_count,
                       rows=rows,
                       success=True,
