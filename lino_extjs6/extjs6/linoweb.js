@@ -1960,7 +1960,8 @@ Lino.build_buttons = function(panel,actions) {
       cmenu[i] = {
             text : a.menu_item_text,
             iconCls : a.iconCls,
-            menu : a.menu
+            menu : a.menu,
+            itemId : a.itemId
           };
       if (a.panel_btn_handler) {
           //Edited by HKC
