@@ -467,6 +467,7 @@ Lino.perc2width = function(perc) {
 Ext.define('Lino.MainPanel',{
     extend: 'Ext.panel.Panel',
   is_home_page : false,
+  auto_apply_params: true,
   setting_param_values : false,
   config_containing_window : function(wincfg) { }
   ,init_containing_window : function(win) { }
@@ -611,14 +612,17 @@ Ext.define('Lino.MainPanel',{
           }
         });
         tbar = tbar.concat([this.toggle_params_panel_btn]);
-        var refresh = function(newValue, oldValue, eOpts) {
+
+        if (this.auto_apply_params) {
+          
+          var refresh = function(newValue, oldValue, eOpts) {
             if (!t.setting_param_values && this.isValid()) {
                 t._force_dirty = true;
                 t.refresh();
             }
-        };
-        Ext.each(this.params_panel.fields,function(f) {
-            f.on('change',refresh);
+          };
+          Ext.each(this.params_panel.fields,function(f) {
+              f.on('change',refresh);
           //~ f.on('valid',function() {t.refresh()});
           // if (f instanceof Ext.form.Checkbox) {
           //     f.on('check',refresh);
@@ -635,6 +639,7 @@ Ext.define('Lino.MainPanel',{
           //         f.on('change',refresh);
           //   }
           });
+        }
       }
       return tbar;
   }
@@ -1955,7 +1960,8 @@ Lino.build_buttons = function(panel,actions) {
       cmenu[i] = {
             text : a.menu_item_text,
             iconCls : a.iconCls,
-            menu : a.menu
+            menu : a.menu,
+            itemId : a.itemId
           };
       if (a.panel_btn_handler) {
           //Edited by HKC
@@ -2172,29 +2178,6 @@ Lino.run_row_action = function(
   }
   fn(panel, null, null);
 }
-
-Lino.put = function(requesting_panel, pk, data) {
-    var panel = Ext.getCmp(requesting_panel);
-    //~ var panel = null; // 20131026
-    var p = {};
-    p.{{constants.URL_PARAM_ACTION_NAME}} = 'put'; // SubmitDetail.action_name
-
-    Ext.apply(p,data);
-    var req = {
-        params:p
-        ,waitMsg: 'Saving your data...'
-        ,scope: panel
-        ,success: Lino.action_handler( panel, function(result) { 
-            panel.refresh();
-        })
-        ,failure: Lino.ajax_error_handler(panel)
-    };
-    req.method = 'PUT';
-    req.url = '{{extjs.build_plain_url("api")}}' + panel.ls_url + '/' + pk;
-    if (panel.loadMask) panel.loadMask.show();
-    Ext.Ajax.request(req);
-};
-
 
 
 Lino.show_detail = function(panel, btn) {
