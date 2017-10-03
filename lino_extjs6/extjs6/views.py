@@ -389,10 +389,12 @@ class ApiList(View):
                     for row in ar.sliced_data_iterator]
             total_count = ar.get_total_count()
             for row in ar.create_phantom_rows():
-                if len(rows)+1 < ar.limit:
+                if len(rows)+1 < ar.limit or\
+                        ar.limit == total_count + 1:
                     d = rh.store.row2list(ar, row)
                     rows.append(d)
                 total_count += 1
+            # assert len(rows) <= ar.limit
             kw = dict(count=total_count,
                       rows=rows,
                       success=True,
