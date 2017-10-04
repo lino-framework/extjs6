@@ -165,8 +165,8 @@ class Plugin(Plugin):
                         constants.URL_PARAM_MASTER_TYPE)
                 else:
                     yield (
-                        "%s.setContextValue(%r, record ? record."
-                        "data[%r] : undefined);" % (
+                        "%s.setContextValue('%s', record ? record."
+                        "data['%s'] : undefined);" % (
                             e.as_ext(), f.name, form_field_name(f)))
 
     # def get_css_includes(self, site):

@@ -333,7 +333,8 @@ class LayoutElement(VisibleComponent):
         # ~ self.update(label = None)
         if self.label:
             if isinstance(parent, Panel):
-                if parent.label_align == layouts.LABEL_ALIGN_LEFT:
+                if self.layout_handle.layout.label_align == layouts.LABEL_ALIGN_LEFT:
+                # if parent.label_align == layouts.LABEL_ALIGN_LEFT:
                     self.preferred_width += len(self.label)
 
     def ext_options(self, **kw):
@@ -565,6 +566,7 @@ class FieldElement(LayoutElement):
             # 1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
             pass
         kw.update(hidden=False)
+        kw.update(labelAlign=self.layout_handle.layout.label_align)
 
         # When used as editor of an EditorGridPanel, don't set the
         # name attribute because it is not needed for grids and might
@@ -1489,12 +1491,12 @@ class Container(LayoutElement):
     is_fieldset = False
     value_template = "Ext.create('Ext.Container',%s)"
     hideCheckBoxLabels = True
-    label_align = layouts.LABEL_ALIGN_TOP
+    # 20171004 label_align = layouts.LABEL_ALIGN_TOP
 
     declare_type = jsgen.DECLARE_VAR
 
     def __init__(self, layout_handle, name, *elements, **kw):
-        self.label_align = kw.pop('label_align', layouts.LABEL_ALIGN_TOP)
+        # 20171004 self.label_align = kw.pop('label_align', layouts.LABEL_ALIGN_TOP)
         self.active_children = []
         self.elements = elements
         if elements:
@@ -1562,7 +1564,7 @@ class Container(LayoutElement):
 
     def ext_options(self, **kw):
         kw = LayoutElement.ext_options(self, **kw)
-        kw.update(labelAlign=self.label_align)
+        # 20171004 kw.update(labelAlign=self.label_align)
         # not necessary to filter elements here, jsgen does that
         kw.update(items=self.elements)
         # if all my children are hidden, i am myself hidden
@@ -1598,14 +1600,11 @@ class Container(LayoutElement):
 class Wrapper(VisibleComponent):
     """
     """
-
-    # ~ label = None
-
     def __init__(self, e, **kw):
         kw.update(layout='form')
         if not isinstance(e, TextFieldElement):
             kw.update(autoHeight=True)
-        kw.update(labelAlign=e.parent.label_align)
+        # 20171004 kw.update(labelAlign=e.parent.label_align)
         kw.update(items=e, xtype='panel')
         VisibleComponent.__init__(self, e.name + "_ct", **kw)
         self.wrapped = e
@@ -1738,7 +1737,7 @@ class Panel(Container):
 
         if d['layout'] == 'form':
             assert self.vertical
-            self.update(labelAlign=self.label_align)
+            # 20171004 self.update(labelAlign=self.label_align)
             self.wrap_formlayout_elements()
             if len(self.elements) == 1 and self.elements[0].vflex:
                 self.elements[0].update(anchor=FULLWIDTH + ' ' + FULLHEIGHT)
@@ -2120,8 +2119,8 @@ def create_layout_panel(lh, name, vertical, elems, **kwargs):
     """
     pkw = dict()
     # pkw.update(labelAlign=kwargs.pop('label_align', 'top'))
-    pkw.update(label_align=kwargs.pop(
-        'label_align', lh.layout.label_align))
+    # 20171004 pkw.update(label_align=kwargs.pop(
+    # 20171004     'label_align', lh.layout.label_align))
     pkw.update(hideCheckBoxLabels=kwargs.pop('hideCheckBoxLabels', True))
     pkw.update(label=kwargs.pop('label', None))
     pkw.update(width=kwargs.pop('width', None))
