@@ -3516,7 +3516,7 @@ Ext.override(Ext.grid.plugin.CellEditing, {
             if (!ed.editing) {
 //                console.log("has ed")
                 // newValue = String.fromCharCode(e);
-                if (ed.field.selectOnFocus){ // There is a race condition here with selecting on keystart
+                if (ed.field && ed.field.selectOnFocus){ // There is a race condition here with selecting on keystart
                     ed.field.selectOnFocus = false;
                     setTimeout(function(ed){
                      ed.field.selectOnFocus = ed.field.config.selectOnFocus;
