@@ -4285,10 +4285,25 @@ Ext.define('Lino.GridPanel', {
   },
 
     on_celldblclick : function(view, record, item, index, e, eOpts ){
+
+
       if (this.ls_detail_handler) {
           //~ Lino.notify('show detail');
-          Lino.show_detail(this);
+          if (index.crudState != "C") {Lino.show_detail(this);}
+          else if (this.ls_insert_handler) {Lino.show_insert(this);}
+          else { this.editingPlugin.startEditByPosition({row: eOpts,
+                                                         column: item})}
           return false;
+      }
+      else {
+          if (index.crudState == "C"){ //end row
+            if (this.ls_insert_handler){ Lino.show_insert(this);
+                                         return false;}
+            }
+          this.editingPlugin.startEditByPosition({row: eOpts,
+                                                         column: item})
+          return false;
+
       }
     }
 
