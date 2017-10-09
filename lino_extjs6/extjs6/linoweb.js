@@ -4855,8 +4855,9 @@ Ext.define('Lino.GridPanel', {
         scope: this,
         failure: Lino.ajax_error_handler(this)
     };
-    // This is condition is not perfect but 'e.record.phantom' is not relevant any more.
-    if (typeof(e.record.id) == "string") {
+    // The 'e.record.phantom' flag has already been removed because
+    // for ExtJS is is no longer a phantom record.
+    if (typeof(e.record.id) == "string" && e.record.id.starsWith("extModel")){
       req.params.{{constants.URL_PARAM_ACTION_NAME}} = 'grid_post'; // CreateRow.action_name
       Ext.apply(req,{
         method: 'POST',
