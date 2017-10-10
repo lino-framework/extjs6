@@ -3516,7 +3516,7 @@ Ext.override(Ext.grid.plugin.CellEditing, {
             if (!ed.editing) {
 //                console.log("has ed")
                 // newValue = String.fromCharCode(e);
-                if (ed.field.selectOnFocus){ // There is a race condition here with selecting on keystart
+                if (ed.field && ed.field.selectOnFocus){ // There is a race condition here with selecting on keystart
                     ed.field.selectOnFocus = false;
                     setTimeout(function(ed){
                      ed.field.selectOnFocus = ed.field.config.selectOnFocus;
@@ -4285,10 +4285,25 @@ Ext.define('Lino.GridPanel', {
   },
 
     on_celldblclick : function(view, record, item, index, e, eOpts ){
+
+
       if (this.ls_detail_handler) {
           //~ Lino.notify('show detail');
-          Lino.show_detail(this);
+          if (index.crudState != "C") {Lino.show_detail(this);}
+          else if (this.ls_insert_handler) {Lino.show_insert(this);}
+          else { this.editingPlugin.startEditByPosition({row: eOpts,
+                                                         column: item})}
           return false;
+      }
+      else {
+          if (index.crudState == "C"){ //end row
+            if (this.ls_insert_handler){ Lino.show_insert(this);
+                                         return false;}
+            }
+          this.editingPlugin.startEditByPosition({row: eOpts,
+                                                         column: item})
+          return false;
+
       }
     }
 
@@ -4840,8 +4855,9 @@ Ext.define('Lino.GridPanel', {
         scope: this,
         failure: Lino.ajax_error_handler(this)
     };
-    // This is condition is not perfect but 'e.record.phantom' is not relevant any more.
-    if (typeof(e.record.id) == "string") {
+    // The 'e.record.phantom' flag has already been removed because
+    // for ExtJS is is no longer a phantom record.
+    if (typeof(e.record.id) == "string" && e.record.id.starsWith("extModel")){
       req.params.{{constants.URL_PARAM_ACTION_NAME}} = 'grid_post'; // CreateRow.action_name
       Ext.apply(req,{
         method: 'POST',

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 SETUP_INFO = dict(
     name='lino_extjs6',
-    version='0.0.1',
+    version='17.10.0',
     install_requires=['lino', 'lino_noi'],
     tests_require=[],
     test_suite='tests',
