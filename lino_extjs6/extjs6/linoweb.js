@@ -3839,7 +3839,8 @@ Ext.define('Lino.GridPanel', {
     });
     //~ config.store = new Ext.data.JsonStore({ 
     //this.store = new Ext.data.ArrayStore({
-    this.store = Ext.create('Lino.GridStore',{
+
+    this.store = Ext.create((!this.use_paging)?'Lino.GridStore':'Lino.GridJsonStore',{
       grid_panel: this
       ,listeners: { exception: Lino.on_store_exception }
       ,remoteSort: true
@@ -3973,20 +3974,22 @@ Ext.define('Lino.GridPanel', {
       
       this.tbar = Ext.create('Ext.toolbar.Toolbar',{items: tbar});
 
-      // this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
-      //   store: this.store, 
-      //   prependButtons: true, 
-      //   // pageSize: 1, 
-      //   displayInfo: true, 
-      //   beforePageText: "{{_('Page')}}",
-      //   afterPageText: "{{_('of {0}')}}",
-      //   displayMsg: "{{_('Displaying {0} - {1} of {2}')}}",
-      //   firstText: "{{_('First page')}}",
-      //   lastText: "{{_('Last page')}}",
-      //   prevText: "{{_('Previous page')}}",
-      //   nextText: "{{_('Next page')}}",
-      //   items: tbar
-      // });
+      if (this.store instanceof Lino.GridJsonStore){
+       this.paging_toolbar = this.tbar = Ext.create('Ext.toolbar.Paging',{
+         store: this.store,
+         prependButtons: true,
+         // pageSize: 1,
+         displayInfo: true,
+         beforePageText: "{{_('Page')}}",
+         afterPageText: "{{_('of {0}')}}",
+         displayMsg: "{{_('Displaying {0} - {1} of {2}')}}",
+         firstText: "{{_('First page')}}",
+         lastText: "{{_('Last page')}}",
+         prevText: "{{_('Previous page')}}",
+         nextText: "{{_('Next page')}}",
+         items: tbar
+       });
+      }
     }
       
     if (this.cell_edit) {

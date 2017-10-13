@@ -1248,6 +1248,10 @@ class ExtRenderer(JsRenderer):
 
         if not rh.actor.editable:
             kw.update(disable_editing=True)
+
+        if rh.actor.use_paging:
+            kw.update(use_paging=True)
+
         if rh.actor.params_panel_hidden:
             kw.update(params_panel_hidden=True)
 
