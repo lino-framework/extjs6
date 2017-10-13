@@ -3589,24 +3589,29 @@ Lino.getRowClass = function(record, rowIndex, rowParams, store) {
 
 //Edited by HKC
 //Lino.GridStore = Ext.extend(Ext.data.ArrayStore,{
-Ext.define('Lino.GridStore', {
-    extend: 'Ext.data.BufferedStore'
-    // extend : 'Ext.data.JsonStore'
-    // ,mixins: ['Ext.data.BufferedStore']
-    //extend : 'Ext.data.ArrayStore'
-    ,autoLoad: true // 20160915
+Lino.GridStoreConfig = {
+    autoLoad: true // 20160915
     ,leadingBufferZone: 20
-     ,pageSize: 35 // 20160915
+    ,pageSize: 35 // 20160915
     // ,buffered: true // 20160915
-  ,prefetch: function(options) {
+
+    ,setup_options: function(options){
+        if (!options) options = {};
+        if (!options.params) options.params = {};
+        options.params.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
+        options.params.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.grid_panel.getId();
+        Lino.insert_subst_user(options.params); // since 20121016
+        options.params['idParam'] = this.idParam;
+        options.params['id'] = this.idParam;
+        this.grid_panel.add_param_values(options.params);
+        return options;
+    }
+
+    // TFP OLD CODE,
+    //  , load: function(options){
     //~ foo.bar = baz; // 20120213
     // console.log("20160701 GridStore.load()", this, options);
-    if (!options) options = {};
-    if (!options.params) options.params = {};
-    options.params.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
-    options.params.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.grid_panel.getId();
-    Lino.insert_subst_user(options.params); // since 20121016
-      
+
     // var start = this.grid_panel.start_at_bottom ? -1 : 0;
     // // 20160915
     // // if (this.grid_panel.hide_top_toolbar) {
@@ -3652,19 +3657,40 @@ Ext.define('Lino.GridStore', {
     // this.grid_panel.paging_toolbar.store.load(options.params);
     //     this.grid_panel.paging_toolbar.store.proxy.config.reader.limit = options.limit;
     //     this.grid_panel.paging_toolbar.store.proxy.config.reader.start = options.start;
-        options.params['idParam'] = this.idParam;
-        options.params['id'] = this.idParam;
-    this.grid_panel.add_param_values(options.params);
     //~ Lino.insert_subst_user(options.params);
     // console.log("20160701 GridStore.load()", options.params, this.baseParams);
     // return Lino.GridStore.superclass.prefetch.call(this, options);
-    return this.callSuper(arguments);
-  }
+    //    return this.callSuper(arguments);
+    //  }
   // ,insert : function(index, records) {
   //   return Ext.data.Store.prototype.insert.call(this, index, records)
     // return Lino.GridStore.superclass.insert.call(this, index, records);
   // }
-});
+};
+
+
+Ext.define('Lino.GridStore', Ext.apply(Lino.GridStoreConfig,{
+    extend: 'Ext.data.BufferedStore'
+    // ,mixins: ['Ext.data.BufferedStore']
+    //extend : 'Ext.data.ArrayStore'
+
+    ,prefetch: function(options) {
+    options = this.setup_options(options);
+     return this.callSuper(arguments);
+     }
+}));
+
+Ext.define('Lino.GridJsonStore', Ext.apply(Lino.GridStoreConfig,{
+    extend : 'Ext.data.JsonStore'
+    // ,mixins: ['Ext.data.BufferedStore']
+    //extend : 'Ext.data.ArrayStore'
+
+    ,load: function(options) {
+    options = this.setup_options(options);
+     return this.callSuper(arguments);
+     }
+}));
+
 
 Lino.get_current_grid_config = function(panel) {
     return panel.get_current_grid_config();
