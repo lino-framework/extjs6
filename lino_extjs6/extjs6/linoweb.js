@@ -1485,6 +1485,11 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
         //~ h(panel,{record_id:result.goto_record[1]});
     //~ }
     
+    if (result.goto_url) {
+        document.location = result.goto_url;
+        return;
+    }
+    
     if (result.xcallback) {
         //~ var config = {title:"{{_('Confirmation')}}"};
         var config = {title:result.xcallback.title};
