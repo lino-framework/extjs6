@@ -1338,8 +1338,7 @@ class ExtRenderer(JsRenderer):
         elif isinstance(ba.action, ShowTable):
             mainPanelClass = "Lino.%s.GridPanel" % rpt
         elif ba.action.parameters and not ba.action.no_params_window:
-            params_panel = ba.action.make_params_layout_handle(
-                settings.SITE.plugins.extjs6)
+            params_panel = ba.action.make_params_layout_handle()
         elif ba.action.extjs_main_panel:
             pass
         else:
