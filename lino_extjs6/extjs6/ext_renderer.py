@@ -1248,6 +1248,10 @@ class ExtRenderer(JsRenderer):
 
         if not rh.actor.editable:
             kw.update(disable_editing=True)
+
+        if rh.actor.use_paging:
+            kw.update(use_paging=True)
+
         if rh.actor.params_panel_hidden:
             kw.update(params_panel_hidden=True)
 
@@ -1338,8 +1342,7 @@ class ExtRenderer(JsRenderer):
         elif isinstance(ba.action, ShowTable):
             mainPanelClass = "Lino.%s.GridPanel" % rpt
         elif ba.action.parameters and not ba.action.no_params_window:
-            params_panel = ba.action.make_params_layout_handle(
-                settings.SITE.plugins.extjs6)
+            params_panel = ba.action.make_params_layout_handle()
         elif ba.action.extjs_main_panel:
             pass
         else:
