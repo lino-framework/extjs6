@@ -688,9 +688,9 @@ Ext.define('Lino.MainPanel',{
             for (var field in this.params_panel.fields){
                 var current_field = this.params_panel.fields[field];
                 if (current_field instanceof Lino.ComboBox){
-                    pv[current_field.hiddenName] = current_field.getValue();
+                    pv[current_field.hiddenName] = current_field.hiddenvalue_tosubmit;
                     if (current_field.isDirty()){
-                        current_field.hiddenvalue_id = current_field.getValue();
+                        current_field.hiddenvalue_id = current_field.hiddenvalue_tosubmit;
                     }
                     pv[current_field.name] = current_field.rawValue;
                 }
@@ -3872,7 +3872,7 @@ Ext.define('Lino.GridPanel', {
       
     var this_ = this;
     //~ var grid = this;
-    this.store.on('load', function(records, successful, operation, eOpts) {
+    this.store.on('load', function(store, records, successful, operation, eOpts) {
         // console.log('20160701 GridStore.on(load)',
         //             this, records, successful, operation, eOpts);
         // this_.set_param_values(this_.store.reader.arrayData.param_values);
