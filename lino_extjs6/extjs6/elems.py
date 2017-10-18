@@ -850,7 +850,7 @@ class ChoiceListFieldElement(ChoicesFieldElement):
         # ~ kw.update(store=js_code('Lino.%s.choices' % self.field.choicelist.actor_id))
         js = 'Lino.%s' % self.field.choicelist.actor_id
         if self.field.blank:
-            js = "[['','<br>']].concat(%s)" % js
+            js = "[['','']].concat(%s)" % js
         kw.update(store=js_code(js))
         return kw
 

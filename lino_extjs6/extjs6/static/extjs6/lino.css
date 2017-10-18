@@ -114,7 +114,11 @@ e.g. welfare.jobs.NewJobsOverview needs
     white-space: nowrap; 
 }
 
-
+/* Removes the need for <br/> in combox stores
+*/
+.x-boundlist-item {
+min-height: 20px;
+}
 
 
 /* 
