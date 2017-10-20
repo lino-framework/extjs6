@@ -469,7 +469,7 @@ Ext.define('Lino.MainPanel',{
   is_home_page : false,
   auto_apply_params: true,
   setting_param_values : false,
-  config_containing_window : function(wincfg) { }
+  config_containing_window : function(cls, wincfg) { }
   ,init_containing_window : function(win) { }
   ,is_loading : function() {
       if (!this.rendered) return true;
@@ -2547,14 +2547,13 @@ Ext.define('Lino.ActionFormPanel', {
           this.before_row_edit();
       }
   }
-  ,config_containing_window : function(wincfg) { 
+  ,config_containing_window : function(cls, wincfg) {
       wincfg.title = this.window_title;
-      wincfg.keys = [
-        {   // HKC
-            //key: Ext.EventObject.ENTER,
-            key : Ext.event.Event.ENTER,
-            fn: this.on_ok, scope: this }
-      ];
+      wincfg.keyMap = { ENTER: {handler: this.on_ok,
+                                scope: this},
+                        ESC: {handler: this.on_cancel,
+                             scope: this}
+      };
       
       if (!wincfg.defaultButton) {
           var f = this.getForm();
@@ -3467,6 +3466,7 @@ Ext.override(Ext.grid.plugin.CellEditing, {
 
         // Start of Edits
         view.on('render', function() {
+                //bookmark
                 me.keyNav = new Ext.util.KeyMap({
                     target : view.el,
                     binding:[
