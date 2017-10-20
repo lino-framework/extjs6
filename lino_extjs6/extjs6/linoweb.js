@@ -4891,13 +4891,13 @@ Ext.define('Lino.GridPanel', {
                         if (view.ensureVisibleRecord_calls == 2){
                             view.ensureVisibleRecord_calls = undefined;
                             // Need to get navinfo from the responce and add to eOpts
-//                            view.grid.ensureVisible(3,{select:true, highlight:true, focus:true});
+                            view.grid.ensureVisible(view.ensureVisibleRecord_row,{select:true, highlight:true, focus:true});
                             view.un("refresh", view.ensureVisibleRecord, this);
                             }
                     }
 
                 self.view.on('refresh', self.view.ensureVisibleRecord,self);
-
+                self.view.ensureVisibleRecord_row = result.navinfo.recno - 1;
                 self.store.reload();
               }
 //              store.reload();
