@@ -563,16 +563,18 @@ class FieldElement(LayoutElement):
             kw.update(xtype=self.xtype)
 
         if is_hidden_babel_field(self.field):
-            # 1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
+            kw.update(hidden=True)
             pass
-        kw.update(hidden=False)
         kw.update(labelAlign=self.layout_handle.layout.label_align)
 
         # When used as editor of an EditorGridPanel, don't set the
         # name attribute because it is not needed for grids and might
         # conflict with fields of a surronding detail form. See ticket
         # #38 (`/blog/2011/0408`).  Also don't set a label then.
-        if not isinstance(self.layout_handle.layout, ColumnsLayout):
+        if isinstance(self.layout_handle.layout, ColumnsLayout):
+            # ticket#1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
+            kw.update(hidden=False)
+        else:
             kw.update(name=self.field.name)
             if self.label:
                 label = self.label
@@ -923,7 +925,10 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
         if pw is not None:
             kw.setdefault('preferred_width', pw)
         actor = self.field.rel.model.get_default_table()
-        if not isinstance(self.layout_handle.layout, ColumnsLayout):
+        if isinstance(self.layout_handle.layout, ColumnsLayout):
+            # ticket#1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
+            kw.update(hidden=False)
+        else:
             a1 = actor.detail_action
             a2 = actor.insert_action
             if a1 is not None or a2 is not None:
@@ -936,7 +941,6 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
         if actor.model is not None:
             kw.update(emptyText=_('Select a %s...') %
                                 actor.model._meta.verbose_name)
-            kw.update(hidden=False)
         return kw
 
     def cell_html(self, ui, row):

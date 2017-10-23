@@ -469,7 +469,7 @@ Ext.define('Lino.MainPanel',{
   is_home_page : false,
   auto_apply_params: true,
   setting_param_values : false,
-  config_containing_window : function(wincfg) { }
+  config_containing_window : function(cls, wincfg) { }
   ,init_containing_window : function(win) { }
   ,is_loading : function() {
       if (!this.rendered) return true;
@@ -2547,14 +2547,13 @@ Ext.define('Lino.ActionFormPanel', {
           this.before_row_edit();
       }
   }
-  ,config_containing_window : function(wincfg) { 
+  ,config_containing_window : function(cls, wincfg) {
       wincfg.title = this.window_title;
-      wincfg.keys = [
-        {   // HKC
-            //key: Ext.EventObject.ENTER,
-            key : Ext.event.Event.ENTER,
-            fn: this.on_ok, scope: this }
-      ];
+      wincfg.keyMap = { ENTER: {handler: this.on_ok,
+                                scope: this},
+                        ESC: {handler: this.on_cancel,
+                             scope: this}
+      };
       
       if (!wincfg.defaultButton) {
           var f = this.getForm();
@@ -3467,6 +3466,7 @@ Ext.override(Ext.grid.plugin.CellEditing, {
 
         // Start of Edits
         view.on('render', function() {
+                //bookmark
                 me.keyNav = new Ext.util.KeyMap({
                     target : view.el,
                     binding:[
@@ -3910,6 +3910,19 @@ Ext.define('Lino.GridPanel', {
         //~ this.quick_search_field.focus(); // 20121024
       }, this
     );
+
+    this.on('afterrender', function (grid) {
+      var store = grid.getStore();
+      store.load({
+          callback: function (){
+              // snip
+              console.log("19102017 afterrender");
+//              var view = topicPanel.getView();
+//              view.refresh();
+//              topicPanel.getPlugin('bufferedrenderer').scrollTo(store.getTotalCount()-1);
+           }
+      });
+    });
 
     var actions = Lino.build_buttons(this, this.ls_bbar_actions);
     //var actions;
@@ -4870,7 +4883,22 @@ Ext.define('Lino.GridPanel', {
                     }
               }
               else{
-              self.items.items[0].grid.refresh_with_after()
+
+                self.view.ensureVisibleRecord = function (view, eOpts) {
+//                        console.log("19102017, afterrender");
+                        if (view.ensureVisibleRecord_calls == undefined) view.ensureVisibleRecord_calls = 0;
+                        view.ensureVisibleRecord_calls += 1;
+                        if (view.ensureVisibleRecord_calls == 2){
+                            view.ensureVisibleRecord_calls = undefined;
+                            // Need to get navinfo from the responce and add to eOpts
+//                            view.grid.ensureVisible(3,{select:true, highlight:true, focus:true});
+                            view.un("refresh", view.ensureVisibleRecord, this);
+                            }
+                    }
+
+                self.view.on('refresh', self.view.ensureVisibleRecord,self);
+
+                self.store.reload();
               }
 //              store.reload();
 //
@@ -4891,7 +4919,7 @@ Ext.define('Lino.GridPanel', {
     };
     // The 'e.record.phantom' flag has already been removed because
     // for ExtJS is is no longer a phantom record.
-    if (typeof(e.record.id) == "string" && e.record.id.starsWith("extModel")){
+    if (typeof(e.record.id) == "string" && e.record.id.startsWith("extModel")){
       req.params.{{constants.URL_PARAM_ACTION_NAME}} = 'grid_post'; // CreateRow.action_name
       Ext.apply(req,{
         method: 'POST',
