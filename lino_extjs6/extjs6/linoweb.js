@@ -2549,11 +2549,11 @@ Ext.define('Lino.ActionFormPanel', {
   }
   ,config_containing_window : function(cls, wincfg) {
       wincfg.title = this.window_title;
-      wincfg.keyMap = { ENTER: {handler: this.on_ok,
-                                scope: this},
-                        ESC: {handler: this.on_cancel,
-                             scope: this}
-      };
+      wincfg.keyMap.ENTER = {handler: this.on_ok,
+                                scope: this};
+      wincfg.keyMap.ESC = {handler: this.on_cancel,
+                             scope: this};
+
       
       if (!wincfg.defaultButton) {
           var f = this.getForm();
@@ -2966,6 +2966,20 @@ Ext.define('Lino.FormPanel', {
         st.active_tab = tp.getActiveTab();
       }
       st.param_values = this.status_param_values;
+
+      // find focus item and see if it's a grid view or not.
+      var e = Ext.get(Ext.Element.getActiveElement())
+      var p = e.parent()
+      while(p){
+          if (p.component){break}
+//          console.log(p);
+          p = p.parent();}
+      if (p.component && p.component.id.startsWith("tableview")){
+          var sel = p.component.getSelectionModel().getCurrentPosition();
+          if (sel) {
+                st.focus = sel;
+                st.focus.rp = p.component.grid.id;
+          }}
       return st;
   },
 
@@ -3010,6 +3024,16 @@ Ext.define('Lino.FormPanel', {
             this.set_current_record(undefined);
         }
     }
+
+    if (status.focus) {
+
+//        status.focus.view.on('refresh', status.focus.view.grid.ensureVisibleRecord,
+//                              status.focus.view.grid, {row:status.focus.row,
+//                                                       column:status.focus.column});
+//        status.focus.view.grid.store.reload();
+        }
+
+
     // this.init_focus();
   }
   ,get_base_params : function() {  /* FormPanel */
@@ -3069,7 +3093,7 @@ Ext.define('Lino.FormPanel', {
 
   ,do_when_clean : function(auto_save, todo) {
     var this_ = this;
-    if (this.form.isDirty()) {
+    if (this.form.isDirty()) { // todo this is True for some reason when it shouldn't
         // console.log('20140421 do_when_clean : form is dirty')
         if (auto_save) {
             this_.save(todo);
@@ -3382,7 +3406,7 @@ if (this.disable_editing | record.data.disable_editing) {
           //}
       //});
         // New feature by Extjs 6.2.0 , see http://docs.sencha.com/extjs/6.2.0/modern/Ext.mixin.Keyboard.html
-      wincfg.keyMap = {};
+
 {% if extjs.enter_submits_form %}
       wincfg.keyHandlers.push({
               //key: Ext.EventObject.ENTER,
@@ -3745,6 +3769,10 @@ Ext.define('Lino.GridPanel', {
         
   // loadMask: {message:"{{_('Please wait...')}}"},
 
+  ls_focus : function(e, el){this.ensureVisible(0,{focus:true,select:true});
+                                                e.stopEvent();
+                                                },
+
   constructor : function(config){
       config.plugins = [];
       config.plugins.push({
@@ -3954,7 +3982,13 @@ Ext.define('Lino.GridPanel', {
           //~ scope:this, 
           //~ ,enableKeyEvents: true
           //~ listeners: { keypress: this.search_keypress }, 
-          //~ id: "seachString" 
+          //~ id: "seachString"
+
+          ,keyMap:{ENTER:{scope:this,
+                          handler:this.ls_focus}
+                   ,DOWN:{scope:this,
+                          handler:this.ls_focus}
+                          }
       })];
 
       tbar = this.add_params_panel(tbar);
@@ -4087,7 +4121,16 @@ Ext.define('Lino.GridPanel', {
       //~ this.refresh();
   //~ },
   
-  
+  config_containing_window : function(cmp, wincfg){
+
+      wincfg.keyMap.ESC = {
+                            handler: function(){
+                            this.get_containing_window().hide();
+                                                },
+                            scope :cmp}
+                            },
+
+
   get_status : function(){
     var st = { base_params : this.get_base_params()};
     if (this.paging_toolbar) {
@@ -4095,6 +4138,12 @@ Ext.define('Lino.GridPanel', {
     }
     st.param_values = this.status_param_values;
     //~ console.log("20120213 GridPanel.get_status",st);
+    var sel_model = this.getSelectionModel()
+    if (sel_model){
+        st.focus = sel_model.getCurrentPosition();
+        // {view: constructor, record: constructor, row: 2, columnHeader: constructor, column: 1}
+        st.focus.rp = this.id;
+        }
     return st;
   },
   
@@ -4116,6 +4165,14 @@ Ext.define('Lino.GridPanel', {
             this.toggle_params_panel_btn.toggle(status.show_params_panel);
         }
     }
+    if (status.focus != undefined){
+        //commented out for debugging reasons
+//        this.view.on('refresh', this.ensureVisibleRecord,this, {row:status.focus.row,
+//                                                                 column:status.focus.column});
+//        this.store.reload();
+        }
+
+
     // this.store.loadPage(1);
     // 20160915 if (this.paging_toolbar) {
     //   //~ console.log("20120213 GridPanel.getTopToolbar().changePage",
@@ -4382,7 +4439,7 @@ Ext.define('Lino.GridPanel', {
         }
 
         switch(k){
-            case e.ESC:
+            case e.ESC: // Also in the window's scope
                 this.get_containing_window().hide();
                 e.stopEvent();
                 break;
@@ -4884,20 +4941,8 @@ Ext.define('Lino.GridPanel', {
               }
               else{
 
-                self.view.ensureVisibleRecord = function (view, eOpts) {
-//                        console.log("19102017, afterrender");
-                        if (view.ensureVisibleRecord_calls == undefined) view.ensureVisibleRecord_calls = 0;
-                        view.ensureVisibleRecord_calls += 1;
-                        if (view.ensureVisibleRecord_calls == 2){
-                            view.ensureVisibleRecord_calls = undefined;
-                            // Need to get navinfo from the responce and add to eOpts
-                            view.grid.ensureVisible(view.ensureVisibleRecord_row,{select:true, highlight:true, focus:true});
-                            view.un("refresh", view.ensureVisibleRecord, this);
-                            }
-                    }
 
-                self.view.on('refresh', self.view.ensureVisibleRecord,self);
-                self.view.ensureVisibleRecord_row = result.navinfo.recno - 1;
+                self.view.on('refresh', self.ensureVisibleRecord,self, {row:result.navinfo.recno - 1});
                 self.store.reload();
               }
 //              store.reload();
@@ -4966,8 +5011,29 @@ Ext.define('Lino.GridPanel', {
           end: function() {tbar.moveLast(); },
           scope: this
         });
-    }
+        }
+    },
 
+  // bind to the view 'refresh' event to select a row after a refresh
+  // the oOpts.row is the row position of the row to be selected + focused
+  // The scope doesn't matter
+  ensureVisibleRecord : function (view, records, eOpts) {
+  //console.log("19102017, ensureVis);
+    if (eOpts.count == undefined) eOpts.count = 0;
+    if (!this.store.loading) eOpts.count ++;
+    console.log("Make vis: ",eOpts)
+    if ( eOpts.count== 2)
+        {
+        view.grid.ensureVisible(eOpts.row,
+                                {column:eOpts.column,
+                                 select:true,
+                                 highlight:true,
+                                 focus:true
+                                 });
+/*        Idea: Also ensure visible without select row + ~10 inorder to have the low record to not be at the bottom. */
+        eOpts.count = undefined;
+        view.un("refresh", view.grid.ensureVisibleRecord, this);
+        }
   },
   after_delete : function() {
     //~ console.log('Lino.GridPanel.after_delete');
@@ -5466,14 +5532,16 @@ Ext.define('Lino.Window', {
   draggable: false,
   width: 700,
   height: 500,
-  listeners:
-        {
-        show: function()
-        {
-            this.removeCls("x-unselectable");
-        }
-        }  ,
+//  listeners:
+//        {
+//        show: function()
+//        {
+////            this.removeCls("x-unselectable");
+//        }
+//        }  ,
   constructor : function (config) {
+
+    if (!config.keyMap){config.keyMap = {}}  //init keymap as {} to allow for inheritance
     if (config.main_item.params_panel) {
         config.layout = 'border';
         config.main_item.region = 'center';
@@ -5575,6 +5643,9 @@ Ext.define('Lino.Window', {
     this.on('show', function(win) {
         // console.log('20140829 Lino.Window.on(show) : add resize handler');
         main_area.on('resize', win.onWindowResize, win);
+        this.removeCls("x-unselectable");
+        // Focus quick-search on first opening, (does not fire when refocusing, but does on reopening)
+        if (this.main_item.quick_search_field != undefined) this.main_item.quick_search_field.focus();
     });
     this.on('hide', function(win) {
         // console.log('20140829 Lino.Window.on(hide) : remove resize handler');
