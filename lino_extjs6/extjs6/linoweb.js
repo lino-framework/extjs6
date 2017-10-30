@@ -837,9 +837,12 @@ Lino.close_window = function(status_update, norestore) {
       if(!norestore) { Lino.viewport.refresh(); }
   }
   if (cw) cw.hide_really();
+    // Should be refreshed inside of set_status or elsewhere. 
+  /*
   if (ww && (typeof ww.window.main_item.refresh == 'function')) {
         ww.window.main_item.refresh();
     }
+    */
   return retval;
 };
 
@@ -2974,7 +2977,7 @@ Ext.define('Lino.FormPanel', {
           if (p.component){break}
 //          console.log(p);
           p = p.parent();}
-      if (p.component && p.component.id.startsWith("tableview")){
+      if (p && p.component && p.component.id.startsWith("tableview")){
           var sel = p.component.getSelectionModel().getCurrentPosition();
           if (sel) {
                 st.focus = sel;
@@ -3027,9 +3030,9 @@ Ext.define('Lino.FormPanel', {
 
     if (status.focus) {
 
-//        status.focus.view.on('refresh', status.focus.view.grid.ensureVisibleRecord,
-//                              status.focus.view.grid, {row:status.focus.row,
-//                                                       column:status.focus.column});
+        status.focus.view.grid.store.on('load', status.focus.view.grid.ensureVisibleRecord,
+                              status.focus.view.grid, {row:status.focus.row,
+                                                       column:status.focus.column});
 //        status.focus.view.grid.store.reload();
         }
 
@@ -4167,10 +4170,11 @@ Ext.define('Lino.GridPanel', {
     }
     if (status.focus != undefined){
         //commented out for debugging reasons
-//        this.view.on('refresh', this.ensureVisibleRecord,this, {row:status.focus.row,
-//                                                                 column:status.focus.column});
-//        this.store.reload();
+        this.store.on('load', this.ensureVisibleRecord,this, {row:status.focus.row,
+                                                              column:status.focus.column,
+                                                              });
         }
+    this.refresh()
 
 
     // this.store.loadPage(1);
@@ -4942,7 +4946,7 @@ Ext.define('Lino.GridPanel', {
               else{
 
 
-                self.view.on('refresh', self.ensureVisibleRecord,self, {row:result.navinfo.recno - 1});
+                self.store.on('load', self.ensureVisibleRecord,self, {row:result.navinfo.recno - 1});
                 self.store.reload();
               }
 //              store.reload();
@@ -5014,26 +5018,25 @@ Ext.define('Lino.GridPanel', {
         }
     },
 
-  // bind to the view 'refresh' event to select a row after a refresh
+  // bind to the store's 'load' event to select a row after a refresh
   // the oOpts.row is the row position of the row to be selected + focused
-  // The scope doesn't matter
-  ensureVisibleRecord : function (view, records, eOpts) {
-  //console.log("19102017, ensureVis);
-    if (eOpts.count == undefined) eOpts.count = 0;
-    if (!this.store.loading) eOpts.count ++;
-    console.log("Make vis: ",eOpts)
-    if ( eOpts.count== 2)
-        {
-        view.grid.ensureVisible(eOpts.row,
-                                {column:eOpts.column,
-                                 select:true,
-                                 highlight:true,
-                                 focus:true
-                                 });
-/*        Idea: Also ensure visible without select row + ~10 inorder to have the low record to not be at the bottom. */
-        eOpts.count = undefined;
-        view.un("refresh", view.grid.ensureVisibleRecord, this);
-        }
+  // The scope should be the grid
+  ensureVisibleRecord : function (records, successful, operation, eOpts) {
+//    console.log("#2010 30102017 Make vis: ",eOpts, )
+    eOpts = arguments[arguments.length-1]; // different args for Buffered Store and normal
+    this.getSelectionModel().deselectAll()
+    this.ensureVisible(eOpts.row,
+                            {column:eOpts.column,
+                             select:true,
+                             // highlight:true, // If used with select causes the selection box to be delayed slightly
+                             focus:true,
+                             callback: function(s,r,n){
+                                var med = Math.floor(this.view.getHeight() / 21 /2) + eOpts.row; /*Half the viewport*/
+//                                 console.log("Callback",med,eOpts.row, s,r,n);
+                                 this.ensureVisible(med);
+                                 }
+                             });
+    this.store.un("load", this.ensureVisibleRecord, this);
   },
   after_delete : function() {
     //~ console.log('Lino.GridPanel.after_delete');
