@@ -1878,6 +1878,7 @@ Ext.define('Lino.NullNumberColumn', {
 Ext.define('Lino.NavigationModel', {
     override : 'Ext.grid.NavigationModel',
     onCellMouseDown: function(view, cell, cellIndex, record, row, recordIndex, mousedownEvent) {
+        /*// Old Hamza code, the JS is correct inside of href, no need to do any evaluations.
         if (mousedownEvent.target.text == '➚'){
             mousedownEvent.preventDefault(true);
             var href = mousedownEvent.target.href;
@@ -1888,10 +1889,16 @@ Ext.define('Lino.NavigationModel', {
             var detail_panel_object = eval(detail_panel);
             detail_panel_object.run(null,{record_id:record_id});
         }
-        else if  (mousedownEvent.target.text != undefined){
+        */
+        if  (mousedownEvent.target.text != undefined){
+            // Clicked on a link, we want to interrupt the event, so that it doesn't active the cell and start editing
+            // Ticket: #2127 (31102017)
+            return
+            /*
             var targetEl = mousedownEvent.getTarget(null, null, true);
             targetEl.focus();
             this.callParent(arguments);
+            */
         }
         else {
             // var targetEl = mousedownEvent.getTarget(null, null, true);
