@@ -4145,7 +4145,7 @@ Ext.define('Lino.GridPanel', {
     if (sel_model){
         st.focus = sel_model.getCurrentPosition();
         // {view: constructor, record: constructor, row: 2, columnHeader: constructor, column: 1}
-        st.focus.rp = this.id;
+        if (st.focus) {st.focus.rp = this.id;}
         }
     return st;
   },
