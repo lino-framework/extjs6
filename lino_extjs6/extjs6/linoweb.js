@@ -3910,6 +3910,24 @@ Ext.define('Lino.GridPanel', {
       
     var this_ = this;
     //~ var grid = this;
+    /**
+    *
+    * Keep track of load operations and cancel the previous one if we get a new load request.
+    * Prevents Ajax race conditions. Ticket #2136
+    *
+    **/
+    this.store._storeOperations = []
+    this.store.on('beforeload', function(theStore, operation, eOpts) {
+                        var lastOperation = theStore._storeOperations.pop();
+                        if (lastOperation) {
+//                            console.log("aborting previous operation safely");
+                            lastOperation.abort(); //this abort is safe so no need to check !lastOperation.isComplete()
+                            }
+                        theStore._storeOperations.push(operation); //add this operation for later usage
+                        return true; //let the loading begin
+                        }
+                  );
+
     this.store.on('load', function(store, records, successful, operation, eOpts) {
         // console.log('20160701 GridStore.on(load)',
         //             this, records, successful, operation, eOpts);
