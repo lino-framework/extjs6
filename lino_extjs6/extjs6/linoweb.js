@@ -1870,7 +1870,7 @@ Ext.define('Lino.NullNumberColumn', {
     format : '{{settings.SITE.default_number_format_extjs}}', 
     renderer : function(value, metaData, record, rowIndex, colIndex, store) {
         //~ console.log(20130128,"NullNumberColumn.renderer",value);
-        if (value === null) return '';
+        if (value === null || (Ext.isString(value) && value.startsWith("extModel"))) return '';
         return Ext.util.Format.number(value, this.format);
     }
 });
