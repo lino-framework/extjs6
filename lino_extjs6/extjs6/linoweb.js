@@ -3919,7 +3919,7 @@ Ext.define('Lino.GridPanel', {
     this.store._storeOperations = []
     this.store.on('beforeload', function(theStore, operation, eOpts) {
                         var lastOperation = theStore._storeOperations.pop();
-                        if (lastOperation) {
+                        if (lastOperation && Ext.isFunction(operation.abort)) {
 //                            console.log("aborting previous operation safely");
                             lastOperation.abort(); //this abort is safe so no need to check !lastOperation.isComplete()
                             }
