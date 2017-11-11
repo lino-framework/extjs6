@@ -1870,7 +1870,7 @@ Ext.define('Lino.NullNumberColumn', {
     format : '{{settings.SITE.default_number_format_extjs}}', 
     renderer : function(value, metaData, record, rowIndex, colIndex, store) {
         //~ console.log(20130128,"NullNumberColumn.renderer",value);
-        if (value === null) return '';
+        if (value === null || (Ext.isString(value) && value.startsWith("extModel"))) return '';
         return Ext.util.Format.number(value, this.format);
     }
 });
@@ -1878,6 +1878,7 @@ Ext.define('Lino.NullNumberColumn', {
 Ext.define('Lino.NavigationModel', {
     override : 'Ext.grid.NavigationModel',
     onCellMouseDown: function(view, cell, cellIndex, record, row, recordIndex, mousedownEvent) {
+        /*// Old Hamza code, the JS is correct inside of href, no need to do any evaluations.
         if (mousedownEvent.target.text == '➚'){
             mousedownEvent.preventDefault(true);
             var href = mousedownEvent.target.href;
@@ -1888,10 +1889,16 @@ Ext.define('Lino.NavigationModel', {
             var detail_panel_object = eval(detail_panel);
             detail_panel_object.run(null,{record_id:record_id});
         }
-        else if  (mousedownEvent.target.text != undefined){
+        */
+        if  (mousedownEvent.target.text != undefined){
+            // Clicked on a link, we want to interrupt the event, so that it doesn't active the cell and start editing
+            // Ticket: #2127 (31102017)
+            return
+            /*
             var targetEl = mousedownEvent.getTarget(null, null, true);
             targetEl.focus();
             this.callParent(arguments);
+            */
         }
         else {
             // var targetEl = mousedownEvent.getTarget(null, null, true);
@@ -3903,6 +3910,24 @@ Ext.define('Lino.GridPanel', {
       
     var this_ = this;
     //~ var grid = this;
+    /**
+    *
+    * Keep track of load operations and cancel the previous one if we get a new load request.
+    * Prevents Ajax race conditions. Ticket #2136
+    *
+    **/
+    this.store._storeOperations = []
+    this.store.on('beforeload', function(theStore, operation, eOpts) {
+                        var lastOperation = theStore._storeOperations.pop();
+                        if (lastOperation && Ext.isFunction(operation.abort)) {
+//                            console.log("aborting previous operation safely");
+                            lastOperation.abort(); //this abort is safe so no need to check !lastOperation.isComplete()
+                            }
+                        theStore._storeOperations.push(operation); //add this operation for later usage
+                        return true; //let the loading begin
+                        }
+                  );
+
     this.store.on('load', function(store, records, successful, operation, eOpts) {
         // console.log('20160701 GridStore.on(load)',
         //             this, records, successful, operation, eOpts);
@@ -4145,7 +4170,7 @@ Ext.define('Lino.GridPanel', {
     if (sel_model){
         st.focus = sel_model.getCurrentPosition();
         // {view: constructor, record: constructor, row: 2, columnHeader: constructor, column: 1}
-        st.focus.rp = this.id;
+        if (st.focus) {st.focus.rp = this.id;}
         }
     return st;
   },
