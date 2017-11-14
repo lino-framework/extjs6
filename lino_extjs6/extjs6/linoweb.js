@@ -1490,6 +1490,7 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
     
     if (result.goto_url) {
         document.location = result.goto_url;
+        if (result.close_window) Lino.close_window();
         return;
     }
     
