@@ -2743,9 +2743,10 @@ Ext.define('Lino.form.Panel', {
                         field.changed = true;
                     if(this.trackResetOnLoad){
                         field.originalValue = field.getValue();
-                        //~ if (field.hiddenField) {
-                          //~ field.hiddenField.originalValue = field.hiddenField.value;
-                        //~ }
+                        if (values[field.hiddenName]) {
+                          field.originalValue = values[field.hiddenName];
+                         }
+
                     }
                 }
             }
@@ -5330,7 +5331,7 @@ Ext.define('Lino.ComboBox', {
       /* `record_data` is used to get the text corresponding to this value */
       //~ if(this.name == 'city')
 //      console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
-      if (!(this.valueField && Ext.isDefined(record_data))){
+      if (true || !(this.valueField && Ext.isDefined(record_data))){
 //        console.log("Calling Parrent");
              return this.callSuper(arguments);
              //this.callParent(arguments);  // 20160701
@@ -5548,6 +5549,11 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
   displayField: 'value',
   valueField: undefined,
   forceSelection: false
+  ,isDirty : function () {
+        var me = this;
+        if (me.originalValue == "") {me.originalValue = null;}
+        return !me.disabled && !me.isEqual(me.getValue(), me.originalValue);
+    }
 });
 
 
