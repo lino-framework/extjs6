@@ -280,6 +280,58 @@ Ext.Ajax.on('beforerequest', function (conn, options) {
    }
 }, this);
 
+Ext.define('Ext.grid.ViewDropZone', {
+    override: 'Ext.grid.ViewDropZone',
+    handleNodeDrop: function(data, record, position) {
+        var view = this.view,
+            store = view.getStore(),
+            crossView = view !== data.view,
+            index, records, i, len;
+        // If the copy flag is set, create a copy of the models
+        if (data.copy) {
+            records = data.records;
+            for (i = 0 , len = records.length; i < len; i++) {
+                records[i] = records[i].copy();
+            }
+        } else if (crossView) {
+            /*
+             * Remove from the source store only if we are moving to a different store.
+             */
+            data.view.store.remove(data.records);
+        }
+        if (record && position) {
+
+            /*
+            * Need to switch the data of the two records.
+            * Send an Ajax PUT request to update the selected row
+            * Update the sorting INT for all rows
+            *
+            * Might be better to just save the row with the requested position.
+            */
+
+            index = store.indexOf(record);
+            // 'after', or undefined (meaning a drop at index -1 on an empty View)...
+            // records[0].data.seqno = records.data.seqno
+            if (position !== 'before') {
+                index++;
+//                records[0].data.seqno++;
+            }
+            store.insert(index, data.records);
+        } else // No position specified - append.
+        {
+            store.add(data.records);
+        }
+        // Select the dropped nodes unless dropping in the same view.
+        // In which case we do not disturb the selection.
+        if (crossView) {
+            view.getSelectionModel().select(data.records);
+        }
+        // Focus the first dropped node.
+        view.getNavigationModel().setPosition(data.records[0]);
+    }
+});
+
+
 
 /*
 My fix for the "Cannot set QuickTips dismissDelay to 0" bug,
