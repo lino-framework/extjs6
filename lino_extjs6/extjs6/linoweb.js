@@ -3935,6 +3935,9 @@ Ext.define('Lino.GridPanel', {
         //             this, records, successful, operation, eOpts);
         // this_.set_param_values(this_.store.reader.arrayData.param_values);
         // console.log(20151221, this_.store.getProxy().getReader());
+        if (!successful && records == null){
+            return
+        }
         this_.set_param_values(this_.store.getProxy().getReader().rawData.param_values);
             //console.log(this_.store.getData());
          //this_.set_param_values(this_.store.first().data.rows);
@@ -3950,6 +3953,7 @@ Ext.define('Lino.GridPanel', {
         if (this_.containing_window)
             this_.set_window_title(this_.store.getProxy().getReader().rawData.title);
             //~ this_.containing_window.setTitle(this_.store.reader.arrayData.title);
+        /* //
         if (!this.is_searching) { // disabled 20121025: quick_search_field may not lose focus
           this.is_searching = false;
           if (this_.selModel instanceof Ext.selection.CellModel){
@@ -3962,6 +3966,7 @@ Ext.define('Lino.GridPanel', {
               this_.getView().focusEl.focus();
           }
         }
+        */
         //~ else console.log("is_searching -> no focussing");
         //~ var t = this.getTopToolbar();
         //~ var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
