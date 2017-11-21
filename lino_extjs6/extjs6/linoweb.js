@@ -198,6 +198,14 @@ Ext.onReady(function() {
 
 //Ext.preg('monthPickerPlugin', Ext.form.field.Month);
 
+// Ticket 1959 Column widths change on layout flush
+Ext.define('Ext.fix.layout.container.Box', {
+    override: 'Ext.layout.container.Box',
+
+    roundFlex: function(width) {
+        return Math.round(width);
+    }
+});
 
 /**
 JC Watsons solution (adapted to ExtJS 3.3.1 by LS) is elegant and simple:
