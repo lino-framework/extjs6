@@ -317,14 +317,35 @@ Ext.define('Ext.grid.ViewDropZone', {
             * Might be better to just save the row with the requested position.
             */
 
-            index = store.indexOf(record);
+            index = store.indexOf(record); // original
+            var r = data.records[0];
+            var c = {
+                grid: view.grid,
+                record: r,
+                field: view.grid.viewConfig.plugins.sequenced_field,
+                originalValue: r.data.seqno,
+                value: r.data.seqno,
+                cancel: false
+            };
             // 'after', or undefined (meaning a drop at index -1 on an empty View)...
-            // records[0].data.seqno = records.data.seqno
-            if (position !== 'before') {
+            r.data[c.field]= record.data[c.field];
+            if (position !== 'before') { // orginal
                 index++;
-//                records[0].data.seqno++;
+                r.data[c.field]++; // new
             }
-            store.insert(index, data.records);
+            c.value = r.data[c.field];
+            view.grid.on_beforeedit(null, c);
+            if (!c.cancel){
+                r.modified = {};
+                r.modified[c.field] =  c.originalValue;
+                view.grid.store.on('load', view.grid.ensureVisibleRecord, view.grid,
+                              {row:index}
+                               /*,column:status.focus.column}*/);
+                view.grid.on_afteredit(null,c);
+
+            }
+
+//            store.insert(index, data.records); // original
         } else // No position specified - append.
         {
             store.add(data.records);
@@ -4787,6 +4808,7 @@ Ext.define('Lino.GridPanel', {
   },
   
   apply_grid_config : function(index,grid_configs,rpt_columns) {
+    // Dead code, not in use any more, user grid_configs are disabled.
     //~ var rpt_columns = this.ls_columns;
     var gc = grid_configs[index];    
     //~ console.log('apply_grid_config() 20100812',name,gc);

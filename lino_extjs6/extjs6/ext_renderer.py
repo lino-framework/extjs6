@@ -1244,6 +1244,13 @@ class ExtRenderer(JsRenderer):
         '</td>')""" % (rh.actor.row_height * 11)
             vc.update(cellTpl=js_code(tpl))
 
+
+        if rh.actor.drag_drop_sequenced_field is not None:
+            vc.update(plugins={
+            'ptype': 'gridviewdragdrop',
+            'dragText': 'Drag and drop to reorganize',
+            'sequenced_field' : rh.actor.drag_drop_sequenced_field})
+        #todo get a field atrib also into the config somehow.
         kw.update(viewConfig=vc)
 
         if not rh.actor.editable:
