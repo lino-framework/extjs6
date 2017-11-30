@@ -1130,6 +1130,7 @@ Lino.on_tab_activate = function(item) {
 Ext.define('Lino.TimeField', {
     extend: 'Ext.form.field.Time',
     format: '{{settings.SITE.time_format_extjs}}',
+    altFormats: '{{settings.SITE.alt_time_formats_extjs}}',
     completeEdit: function() {
         var me = this,
             // val = me.getValue();   original code
