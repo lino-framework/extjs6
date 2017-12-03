@@ -3296,7 +3296,11 @@ if (this.disable_editing | record.data.disable_editing) {
           this.form.getFields().each(function(cmp){
 //            console.log("20120202");
             if (record.data.disabled_fields[cmp.name]) cmp.disable();
-            else cmp.enable();
+            else {
+                    cmp.enable();
+                    cmp.unmask(); // Attempt for fixing
+                  }
+
           },this);
 
           //~ if (record.data.disabled_fields) {
