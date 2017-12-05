@@ -2106,7 +2106,7 @@ Lino.call_ajax_action = function(
 
   if (panel.get_selected) {
       var selected_recs = panel.get_selected();
-      //~ console.log("20130831",selected_recs);
+      console.log("20130831",selected_recs);
       var rs = Array(selected_recs.length);
       for(var i=0; i < selected_recs.length;i++) {
           rs[i] = selected_recs[i].data.id;
@@ -4092,39 +4092,21 @@ Ext.define('Lino.GridPanel', {
        });
       }
     }
-      
-    if (this.cell_edit) {
-      //  Edited by HKC
-      //this.selModel = new Ext.grid.CellSelectionModel();
-      this.selModel = Ext.create('Ext.selection.CellModel', {allowDeselect:true});
-      // this.selModel = 'cellmodel';
-      this.get_selected = function() {
-          //~ console.log(this.getSelectionModel().selection);
-          if (this.selModel.selection)
-              return [ this.selModel.selection.record ];
-          return [this.store.getAt(0)];
-      };
-      this.get_current_record = function() { 
-          if (this.getSelectionModel().selection) 
-              return this.selModel.selection.record;
-          return this.store.getAt(0);
-      };
-    } else { 
-      //this.selModel = new Ext.grid.RowSelectionModel();
-        this.selModel = Ext.create('Ext.selection.RowModel',{allowDeselect:true});
-      this.get_selected = function() {
-        var sels = this.selModel.getSelections();
+
+     this.selModel = Ext.create('Ext.selection.RowModel', {allowDeselect:true, mode:'multi'});
+
+     this.get_selected = function() {
+        var sels = this.selModel.getSelected().items;
         if (sels.length == 0) sels = [this.store.getAt(0)];
         return sels
       };
-      this.get_current_record = function() { 
-        var rec = this.selModel.getSelected();
-        if (rec == undefined) rec = this.store.getAt(0);
-        return rec
+     this.get_current_record = function() {
+        var rec = this.selModel.getSelected().items;
+        if (rec == undefined) rec = [this.store.getAt(0)];
+        return rec[0]
       };
-    };
     this.columns  = this.apply_grid_config(this.gc_name,this.ls_grid_configs,this.ls_columns);
-    
+
 
     this.on('resize', function(){
       //~ console.log("20120213 resize",arguments)
@@ -4140,15 +4122,8 @@ Ext.define('Lino.GridPanel', {
     this.on('beforeedit', this.on_beforeedit);
     this.on('beforeedit',function(e) { this.before_row_edit(e.grid.get_current_record())},this); //e is cell_editor
 //    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
-    if (this.cell_edit) {
-        this.on('cellcontextmenu', Lino.cell_context_menu, this);
-        //this.on({
-        //    scope : this,
-        //    cellcontextmenu : Lino.cell_context_menu,
-        //});
-    } else {
-        this.on('rowcontextmenu', Lino.row_context_menu, this);
-    }
+    this.on('cellcontextmenu', Lino.cell_context_menu, this);
+
       
     this.on('celldblclick' , this.on_celldblclick , this);
     this.on('cellkeydown' , this.on_cellkeydown , this);
@@ -5199,6 +5174,16 @@ Ext.define('Lino.selection.CellModel', {
 
 Lino.row_context_menu = function(grid,row,col,e) {
   console.log('20130927 rowcontextmenu',grid,row,col,e,grid.store.getProxy().getReader().rawData.rows[row]);
+    grid = this;
+//    e.stopEvent();
+  //  todo loop disabled fields for each selected rows' DA,
+//  todo render c-menu
+if(!grid.cmenu.el){
+      //grid.cmenu.el.render();
+      grid.cmenu.render();
+      //grid.cmenu.showAt(e.getXY());
+  }
+
 }
 
 //Lino.cell_context_menu = function(_this, _grid,row,col,_e,a, e) {
@@ -5212,10 +5197,10 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   //~ grid.getView().focusCell(row,col);
   //  HKC
   //grid.getSelectionModel().select(row,col);
-  grid.getSelectionModel().select({
-                row: rowIndex,
-                column: cellIndex
-            });
+//  grid.getSelectionModel().select({
+//                row: rowIndex,
+//                column: cellIndex
+//            });
     //this.getSelectionModel().select(row,col);
   //~ console.log(grid.store.getAt(row));
   //~ grid.getView().focusRow(row);
@@ -5230,13 +5215,20 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   
 //  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
 // seems that the proxy reader data can sometimes only include the last 10 records collected by infinite scroll
-  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_fields;
-  if (da) {
-      this.cmenu.cascade(function(item){ 
-        //~ console.log(20120531, item.itemId, da[item.itemId]);
-        if (da[item.itemId]) item.disable(); else item.enable();
+  var rows = grid.getSelectionModel().getSelected();
+  this.cmenu.cascade(function(item){
+                // Enable all cmenu items, then disable them if any row has the action disabled.
+                item.enable();
+              });
+  rows.items.forEach(function(row){
+          var da = row.data.disabled_fields
+          if (da){
+              grid.cmenu.cascade(function(item){
+                //~ console.log(20120531, item.itemId, da[item.itemId]);
+                if (da[item.itemId]) item.disable();
+              });
+          }
       });
-  };
   
   var xy = e.getXY();
   //xy[1] -= grid.cmenu.el.getHeight();
