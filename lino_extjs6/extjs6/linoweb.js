@@ -2103,8 +2103,9 @@ Lino.call_ajax_action = function(
   // console.log("20150130 a", p.{{constants.URL_PARAM_PARAM_VALUES}});
   // Ext.apply(p, panel.get_base_params());
   // console.log("20150130 b", p.{{constants.URL_PARAM_PARAM_VALUES}});
-
-  if (panel.get_selected) {
+  // if some other method has defined selected
+  if (panel.get_selected && p.{{constants.URL_PARAM_SELECTED}} === undefined)
+  {
       var selected_recs = panel.get_selected();
       console.log("20130831",selected_recs);
       var rs = Array(selected_recs.length);
@@ -2197,12 +2198,10 @@ Lino.run_row_action = function(
   }
   if (panel && is_on_main_actor) {
       Ext.apply(params, panel.get_base_params())
-  } else {
-      // 20170731
-      // params.{{constants.URL_PARAM_PARAM_VALUES}} = Array();
-      // delete params.{{constants.URL_PARAM_PARAM_VALUES}};
-      Lino.insert_subst_user(params);
+  }else {
+     params.{{constants.URL_PARAM_SELECTED}} = pk
   }
+  Lino.insert_subst_user(params);
   var fn = function(panel, btn, step) {
     Lino.call_ajax_action(panel, meth, url, params, actionName, step, fn);
   }
