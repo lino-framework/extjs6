@@ -3053,8 +3053,8 @@ Ext.define('Lino.FormPanel', {
     if (status.focus) {
 
         status.focus.view.grid.store.on('load', status.focus.view.grid.ensureVisibleRecord,
-                              status.focus.view.grid, {row:status.focus.row,
-                                                       column:status.focus.column});
+                              status.focus.view.grid, {row:status.focus.rowIdx,
+                                                       column:status.focus.colIdx});
 //        status.focus.view.grid.store.reload();
         }
 
@@ -3553,7 +3553,16 @@ Ext.override(Ext.grid.plugin.CellEditing, {
 //            console.log(e);
             // Calculate editing start position from SelectionModel
             // CellSelectionModel
-            if (selModel.getCurrentPosition) {
+            pos = this.view.ownerGrid.getNavigationModel().getPosition();
+//            record = grid.store.getAt(pos.rowIdx);
+            if (pos)
+                {record = pos.record;
+    //          columnHeader = grid.headerCt.getHeaderAtIndex(pos.columnIdx);
+                columnHeader = pos.column;}
+            else{
+                return
+            }
+            /*if (selModel.getCurrentPosition) {
                 pos = selModel.getCurrentPosition();
                 record = grid.store.getAt(pos.row);
                 columnHeader = grid.headerCt.getHeaderAtIndex(pos.column);
@@ -3562,7 +3571,7 @@ Ext.override(Ext.grid.plugin.CellEditing, {
             else {
                 record = selModel.getLastSelected();
             }
-
+*/
             // if current cell have editor, then save numeric key in global variable
             var ed = me.getEditor(record, columnHeader);
             // console.log(ed.editing)
@@ -3794,8 +3803,8 @@ Ext.define('Lino.GridPanel', {
         
   // loadMask: {message:"{{_('Please wait...')}}"},
 
-  ls_focus : function(e, el){this.ensureVisible(0,{focus:true,select:true});
-                                                e.stopEvent();
+  ls_focus : function(e, el){this.ensureVisible(0,{column:0,focus:true,select:true});
+                             e.stopEvent();
                                                 },
 
   constructor : function(config){
@@ -4189,9 +4198,9 @@ Ext.define('Lino.GridPanel', {
         }
     }
     if (status.focus != undefined){
-        //commented out for debugging reasons
-        this.store.on('load', this.ensureVisibleRecord,this, {row:status.focus.row,
-                                                              column:status.focus.column,
+        /*Row selection uses rowIdx and ColIdx, cell uses row and column*/
+        this.store.on('load', this.ensureVisibleRecord,this, {row:status.focus.rowIdx
+//                                                              ,column:status.focus.colIdx,
                                                               });
         }
     this.refresh()
@@ -4619,7 +4628,8 @@ Ext.define('Lino.GridPanel', {
         }
 
 
-        if(newCell){
+        if(false){
+//        if(newCell){
           e.stopEvent();
           r = newCell.rowIdx;
           c = newCell.colIdx;
@@ -4957,8 +4967,9 @@ Ext.define('Lino.GridPanel', {
                   recToUpdate.set(r.records[0].getData());
                   recToUpdate.commit(false);
                   self.getView().refreshNode(store.indexOfId(e.record.id));
-                  if (e.rowIdx == self.getSelectionModel().selection.rowIdx
-                  &&  e.colIdx == self.getSelectionModel().selection.colIdx){  // If user closed editor via [Enter] rather then click away,
+                  var pos = self.getNavigationModel().getPosition();
+                  if (e.rowIdx == pos.rowIdx
+                  &&  e.colIdx == pos.colIdx){  // If user closed editor via [Enter] rather then click away,
 //                  self.getView.focusRow(row);
                     // Focus on that cell only if it's already selected, not if user has clicked away.
                     self.getView().getNavigationModel().setPosition(e.rowIdx, e.colIdx);
@@ -5042,7 +5053,7 @@ Ext.define('Lino.GridPanel', {
   // bind to the store's 'load' event to select a row after a refresh
   // the oOpts.row is the row position of the row to be selected + focused
   // The scope should be the grid
-  ensureVisibleRecord : function (records, successful, operation, eOpts) {
+  ensureVisibleRecord : function (store, records, successful, eOpts) {
 //    console.log("#2010 30102017 Make vis: ",eOpts, )
     eOpts = arguments[arguments.length-1]; // different args for Buffered Store and normal
     this.getSelectionModel().deselectAll()
