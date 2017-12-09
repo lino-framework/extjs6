@@ -960,21 +960,21 @@ class ExtRenderer(JsRenderer):
                         elems_by_field[e.field.name] = l
                     l.append(e)
 
-        for e in field_elems:
-            # ~ if isinstance(e,FileFieldElement):
-            # ~ kw.update(fileUpload=True)
-            holder = main.layout_handle.layout.get_chooser_holder()
-            chooser = holder.get_chooser_for_field(e.field.name)
-            if chooser:
-                # ~ logger.debug("20100615 %s.%s has chooser", self.lh.layout, e.field.name)
-                for f in chooser.context_fields:
-                    for el in elems_by_field.get(f.name, []):
-                        # ~ if main.has_field(f):
-                        # ~ varname = varname_field(f)
-                        # ~ on_render.append("%s.on('change',Lino.chooser_handler(%s,%r));" % (varname,e.ext_name,f.name))
-                        on_render.append(
-                            "%s.on('change',Lino.chooser_handler(%s,'%s'));" % (
-                                el.as_ext(), e.as_ext(), f.name))
+        # for e in field_elems:
+        #     # ~ if isinstance(e,FileFieldElement):
+        #     # ~ kw.update(fileUpload=True)
+        #     holder = main.layout_handle.layout.get_chooser_holder()
+        #     chooser = holder.get_chooser_for_field(e.field.name)
+        #     if chooser:
+        #         # ~ logger.debug("20100615 %s.%s has chooser", self.lh.layout, e.field.name)
+        #         for f in chooser.context_fields:
+        #             for el in elems_by_field.get(f.name, []):
+        #                 # ~ if main.has_field(f):
+        #                 # ~ varname = varname_field(f)
+        #                 # ~ on_render.append("%s.on('change',Lino.chooser_handler(%s,%r));" % (varname,e.ext_name,f.name))
+        #                 on_render.append(
+        #                     "%s.on('change',Lino.chooser_handler(%s,'%s'));" % (
+        #                         el.as_ext(), e.as_ext(), f.name))
         return on_render
 
     SUPPRESSED = set(('items', 'layout'))

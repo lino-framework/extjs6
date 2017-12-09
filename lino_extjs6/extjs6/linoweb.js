@@ -717,7 +717,8 @@ Ext.define('Lino.MainPanel',{
       //~ this.params_panel.form.suspendEvents(false);
       this.setting_param_values = true;
       if (pv) {
-          this.params_panel.form.my_loadRecord(pv);
+          // this.params_panel.form.my_loadRecord(pv);
+          this.params_panel.form.setValues(pv);
       } else {
         this.params_panel.form.reset();
       }
@@ -2563,7 +2564,8 @@ Ext.define('Lino.ActionFormPanel', {
       //~ console.log('20120203 MainPanel.set_param_values', pv);
       this.status_field_values = pv;
       if (pv) {
-          this.form.my_loadRecord(pv);
+          // this.form.my_loadRecord(pv);
+          this.form.setValues(pv);
           var record = { data: pv };
           this.before_row_edit(record);
       } else {
@@ -3202,7 +3204,8 @@ Ext.define('Lino.FormPanel', {
     this.current_record = record;
     if (record && record.data) {
       this.enable();
-      this.form.my_loadRecord(record.data);
+      // this.form.my_loadRecord(record.data);
+      this.form.setValues(record.data);
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
       //  console.log("HKC disable getBottomToolbar");
@@ -5246,12 +5249,12 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
 };
 
 
-Lino.chooser_handler = function(combo,name) {
-  return function(cmp, newValue, oldValue) {
-    //~ console.log('Lino.chooser_handler()',cmp,oldValue,newValue);
-    combo.setContextValue(name, newValue);
-  }
-};
+// Lino.chooser_handler = function(combo,name) {
+//   return function(cmp, newValue, oldValue) {
+//     //~ console.log('Lino.chooser_handler()',cmp,oldValue,newValue);
+//     combo.setContextValue(name, newValue);
+//   }
+// };
 
 
 // Edited by HKC
@@ -5273,195 +5276,7 @@ Ext.define('Lino.ComboBox', {
   queryMode : 'remote',
   hiddenvalue_tosubmit: "",
   hiddenvalue_id: null,
-  //~ initComponent : Ext.form.ComboBox.prototype.initComponent.createSequence(function() {
-  initComponent : function(){
-      this.contextParams = {};
-      //~ Ext.form.ComboBox.initComponent(this);
-      // Lino.ComboBox.superclass.initComponent.call(this);
-      this.callSuper(arguments);
-      // this.callParent();  // 20160630
-  },
-
-    findRecordByValue: function(value) {
-        var result = this.store.byText.get(value),
-            ret = false;
-        // If there are duplicate keys, tested behaviour is to return the *first* match.
-        if (result) {
-            ret = result[0] || result;
-        }
-        return ret;
-    },
-
-    updateValue: function() {
-        // modified copy of the original ComboBox.updateValue defined
-        // in `ext-all-debug.js`. We additionally store the selected
-        // value to `hiddenvalue_tosubmit` and set the `changed`
-        // flag. Note that this hack breaks when multiple choices are
-        // selected
-        var me = this,
-            selectedRecords = me.valueCollection.getRange(),
-            len = selectedRecords.length,
-            valueArray = [],
-            displayTplData = me.displayTplData || (me.displayTplData = []),
-            inputEl = me.inputEl,
-            i, record;
-        // Loop through values, matching each from the Store, and collecting matched records
-//        console.log('20120203 updateValue', this.name,);
-        displayTplData.length = 0;
-        if (len == 0){
-            me.hiddenvalue_tosubmit = "Mynull";
-            me.changed = true;
-        }
-        for (i = 0; i < len; i++) {
-            record = selectedRecords[i];
-//            console.log('20120203', this.name,'.updateValue() this=', this, 'record=',record);
-            displayTplData.push(me.getRecordDisplayData(record));
-            // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
-            if (record !== me.valueNotFoundRecord && !record.phantom) {
-                // valueArray.push(record.get(me.valueField)); original code
-                var selector = me.valueField;
-                if (me instanceof Lino.RemoteComboFieldElement){
-                    selector = '{{constants.CHOICES_VALUE_FIELD}}';
-                }
-                valueArray.push(record.get(selector));
-                me.hiddenvalue_tosubmit = record.get(selector);
-                me.hiddenvalue_id = record.get(selector);
-                me.changed = true;
-                // console.log("20160504 field :",me.name," -> val",record.get(selector));
-            }
-        }
-        // Set the value of this field. If we are multiselecting, then that is an array.
-        me.setHiddenValue(valueArray);
-        me.value = me.multiSelect ? valueArray : valueArray[0];
-        if (!Ext.isDefined(me.value)) {
-            me.value = undefined;
-        }
-        me.displayTplData = displayTplData;
-        //store for getDisplayValue method
-        if (inputEl && me.emptyText && !Ext.isEmpty(me.value)) {
-            inputEl.removeCls(me.emptyCls);
-        }
-        // Calculate raw value from the collection of Model data
-        me.setRawValue(me.getDisplayValue());
-        me.checkChange();
-        // me.applyEmptyText();  Remove with Extjs 6.2.0
-    },
-    setValue : function(v,record_data){
-      /*
-      Based on feature request developed in http://extjs.net/forum/showthread.php?t=75751
-      */
-      /* `record_data` is used to get the text corresponding to this value */
-      //~ if(this.name == 'city')
-//      console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
-      if (true || !(this.valueField && Ext.isDefined(record_data))){
-//        console.log("Calling Parrent");
-             return this.callSuper(arguments);
-             //this.callParent(arguments);  // 20160701
-        }
-//      console.log("Calling our Thing");
-
-
-        if (v !== null && v.crudState){
-            var text = v.get(this.displayField);
-        }
-        else {
-            var text = v;
-        }
-      if(this.valueField){
-        if(v == null || v == '') {
-            //~ if (this.name == 'birth_country')
-                //~ console.log(this.name,'.setValue',v,'no lookup needed, value is empty');
-            //~ v = undefined;
-            v = '';
-            //~ text = '';
-        } else if (Ext.isDefined(record_data)) {
-          text = record_data[this.name];
-            this.hiddenvalue_id = record_data[this.hiddenName];
-        } else {
-          // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
-          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!this.store.data.length))){
-              //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
-              // HKC
-              //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
-              this.store.on('load', this.setValue.bind(this,[arguments]), null, {single: true});
-              if(this.store.lastOptions === null || this.lastQuery === null){
-                  var params;
-                  if(this.valueParam){
-                      params = {};
-                      params[this.valueParam] = v;
-                  }else{
-                      var q = this.allQuery;
-                      this.lastQuery = q;
-                      // this.store.setBaseParam(this.queryParam, q);
-                      this.store.getProxy().setExtraParam(this.queryParam, q);
-                      params = this.getParams(q);
-                  }
-                  //~ if (this.name == 'birth_country')
-                    //~ console.log(this.name,'.setValue',v,' : call load() with params ',params);
-                  this.store.load({params: params});
-              //~ }else{
-                  //~ if (this.name == 'birth_country')
-                    //~ console.log(this.name,'.setValue',v,' : but store is loading',this.store.lastOptions);
-              }
-              return;
-          //~ }else{
-              //~ if (this.name == 'birth_country')
-                //~ console.log(this.name,'.setValue',v,' : store is loaded, lastQuery is "',this.lastQuery,'"');
-          }
-          var r = this.findRecord(this.valueField, v);
-//          console.log("FR- r=",r," this.valueField=",this.valueField," v=(",v,")" );
-
-          if(r){
-              text = r.data[this.displayField];
-          }else if(this.valueNotFoundText !== undefined && this.valueNotFoundText !== null ){
-              text = this.valueNotFoundText;
-          }
-        }
-      }
-      this.lastSelectionText = text;
-      if(this.hiddenField){
-          //~ this.hiddenField.originalValue = v;
-          this.hiddenField.value = v;
-      }
-      this.value = v; // needed for grid.afteredit
-      Ext.form.ComboBox.superclass.setValue.call(this, text);
-      // this.callSuper(text);
-      // this.callParent(arguments);  // 20160701
-//      console.log("SetValue end this=",this);
-  },
-  
-  getParams : function(q){
-    // p = Ext.form.ComboBox.superclass.getParams.call(this, q);
-    // causes "Ext.form.ComboBox.superclass.getParams is undefined"
-    // var p = {};
-    var p = {},
-            param = this.queryParam;
-    if (param) {
-        p[param] = q;
-    }
-    if(this.pageSize){
-        p['{{constants.URL_PARAM_LIMIT}}'] = this.pageSize;
-        //p['{{constants.URL_PARAM_START}}'] = 0;
-        // This is being run on every query, causing start search value to always be 0, seems that it sets it correctly later if not set.
-        // ticket #1879
-        // p['{{constants.URL_PARAM_START}}'] = (pageNum - 1) * this.pageSize;
-}
-    // now my code:
-    if(this.contextParams) Ext.apply(p, this.contextParams);
-    return p;
-  },
-  setContextValue : function(name,value) {
-    //~ console.log('setContextValue',this,this.name,':',name,'=',value);
-     if (this.contextParams === undefined) {
-         this.contextParams = Array(); // this.contextParams.length);
-     }
-    if (this.contextParams[name] != value) {
-      //~ console.log('setContextValue 1',this.contextParams);
-      this.contextParams[name] = value;
-      this.lastQuery = null;
-      //~ console.log('setContextValue 2',this.contextParams);
-    }
-  }
+    
 });
 
 Ext.define('Lino.ChoicesFieldElement',{
@@ -5523,23 +5338,6 @@ Ext.define('Lino.RemoteComboFieldElement',{
   //~ typeAhead: true,
   //~ selectOnFocus: true, // select any existing text in the field immediately on focus.
   resizable: false
-  ,initList : function() {
-      //Lino.RemoteComboFieldElement.superclass.initList.call(this);
-         this.callSuper();
-      if (this.pageTb) {
-          
-          var me = this;
-          this.pageTb.on("beforechange", function(toolbar, o){
-              if(me.contextParams)
-                  Ext.apply(o, me.contextParams);
-          });
-          
-          //~ 
-          //~ var btn = ls_buttons
-          //~ this.pageTb.items = this.pageTb.items.concat([btn]);
-          //~ console.log("20131022 pageTb.items is", this.pageTb.items)
-      }
-  }
 });
 
 /*
@@ -5571,11 +5369,11 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
   displayField: 'value',
   valueField: undefined,
   forceSelection: false
-  ,isDirty : function () {
-        var me = this;
-        if (me.originalValue == "") {me.originalValue = null;}
-        return !me.disabled && !me.isEqual(me.getValue(), me.originalValue);
-    }
+  // ,isDirty : function () {
+  //       var me = this;
+  //       if (me.originalValue == "") {me.originalValue = null;}
+  //       return !me.disabled && !me.isEqual(me.getValue(), me.originalValue);
+  //   }
 });
 
 
