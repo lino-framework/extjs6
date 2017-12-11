@@ -5119,8 +5119,107 @@ Ext.define('Lino.GridPanel', {
   },
   load_record_id : function(record_id,after) {
       Lino.run_detail_handler(this,record_id)
-  }
-  
+  },
+  ensureVisible : function(record, options) {
+        // Handle the case where this is a lockable assembly
+        if (this.lockable) {
+            return this.ensureLockedVisible(record, options);
+        }
+        // Allow them to pass the record id.
+        if (typeof record !== 'number' && !record.isEntity) {
+            record = this.store.getById(record);
+        }
+        var me = this,
+            view = me.getView(),
+            domNode = view.getNode(record),
+            callback, scope, animate, highlight, select, doFocus, scrollable, column, cell;
+        if (options) {
+            callback = options.callback;
+            scope = options.scope;
+            animate = options.animate;
+            highlight = options.highlight;
+            select = options.select;
+            doFocus = options.focus;
+            column = options.column;
+        }
+        // Always supercede any prior deferred request
+        if (me.deferredEnsureVisible) {
+            me.deferredEnsureVisible.destroy();
+        }
+        // We have not yet run the layout.
+        // Add this to the end of the first sizing process.
+        // By using the resize event, we will come in AFTER any Component's onResize and onBoxReady handling.
+        if (!view.componentLayoutCounter) {
+            me.deferredEnsureVisible = view.on({
+                resize: me.doEnsureVisible,
+                args: Ext.Array.slice(arguments),
+                scope: me,
+                single: true,
+                destroyable: true
+            });
+            return;
+        }
+        if (typeof column === 'number') {
+            column = me.ownerGrid.getVisibleColumnManager().getColumns()[column];
+        }
+        // We found the DOM node associated with the record
+        if (domNode) {
+            scrollable = view.getScrollable();
+            if (column) {
+                cell = Ext.fly(domNode).selectNode(column.getCellSelector());
+            }
+            if (scrollable) {
+                scrollable.scrollIntoView(cell || domNode, !!column, animate, highlight);
+            }
+            if (!record.isEntity) {
+                record = view.getRecord(domNode);
+            }
+            /**
+             * Following two blocks are edited to allow for focusing and selection of a cenn in a certain column.
+             * Edits have also been make in ext-all.js
+             */
+            if (select) {
+
+//                    view.getSelectionModel().select({row:record,
+//                                                     column: column ? column : undefined}); // for cell selection mode
+                 view.getSelectionModel().select(record); /*Original line*/
+            }
+            if (doFocus) {
+//                    if (cell) {view.getNavigationModel().setPosition(cell);} // Useful for cell selection mode
+//                    else{
+//                    view.getNavigationModel().setPosition(record, 0); /*Original line*/
+                    view.getNavigationModel().setPosition(record, column ? column : undefined);
+//                    }
+                    }
+            Ext.callback(callback, scope || me, [
+                true,
+                record,
+                domNode
+            ]);
+        }
+        // If we didn't find it, it's probably because of buffered rendering
+        else if (view.bufferedRenderer) {
+            view.bufferedRenderer.scrollTo(record, {
+                animate: animate,
+                highlight: highlight,
+                select: select,
+                focus: doFocus,
+                column: column,
+                callback: function(recordIdx, record, domNode) {
+                    Ext.callback(callback, scope || me, [
+                        true,
+                        record,
+                        domNode
+                    ]);
+                }
+            });
+        } else {
+            Ext.callback(callback, scope || me, [
+                false,
+                null
+            ]);
+        }
+    }
 });
   
 Ext.define('Lino.selection.CellModel', {
