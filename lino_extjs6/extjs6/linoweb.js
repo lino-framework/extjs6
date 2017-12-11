@@ -3205,6 +3205,7 @@ Ext.define('Lino.FormPanel', {
     if (record && record.data) {
       this.enable();
       // this.form.my_loadRecord(record.data);
+      // Todo rework record.data to find hidden_values for comboboxes and make them into models
       this.form.setValues(record.data);
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
@@ -3397,16 +3398,9 @@ if (this.disable_editing | record.data.disable_editing) {
     var form = this.getForm();
     for (i = 0; i < form.getFields().length ; i++){
         field = form.getFields().items[i];
-        if (field.hiddenvalue_tosubmit && field.changed){
-            if (field.hiddenvalue_tosubmit == "Mynull"){
-                hiddenvalue_tosubmit = null;
+        if (field.isDirty()){
+            submit_config['params'][field.hiddenName] = field.value;
             }
-            else {
-                hiddenvalue_tosubmit = field.hiddenvalue_tosubmit;
-            }
-            submit_config['params'][field.hiddenName] = hiddenvalue_tosubmit;
-            field.changed = false;
-        }
     }
     form.submit(submit_config);
   }
@@ -5282,6 +5276,15 @@ Ext.define('Lino.ComboBox', {
 Ext.define('Lino.ChoicesFieldElement',{
     extend : 'Lino.ComboBox',
     mode: 'local',
+    findRecordByValue: function(value) {
+        var result = this.store.byText.get(value),
+            ret = false;
+        // If there are duplicate keys, tested behaviour is to return the *first* match.
+        if (result) {
+            ret = result[0] || result;
+        }
+        return ret;
+    },
 });
 Ext.define('Lino.SimpleRemoteComboStore',{
   extend:'Ext.data.JsonStore',
