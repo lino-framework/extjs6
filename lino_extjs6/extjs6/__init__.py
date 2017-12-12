@@ -143,31 +143,31 @@ class Plugin(Plugin):
     def get_row_edit_lines(self, e, panel):
         from lino_extjs6.extjs6.elems import (GridElement, HtmlBoxElement,
                                              FieldElement, form_field_name)
-        # from lino.core import constants
-        # master_field = panel.layout_handle.layout._datasource.master_field
+        from lino.core import constants
+        master_field = panel.layout_handle.layout._datasource.master_field
         if isinstance(e, GridElement):
             yield "%s.on_master_changed();" % e.as_ext()
         elif isinstance(e, HtmlBoxElement):
             yield "%s.refresh();" % e.as_ext()
-        # elif isinstance(e, FieldElement):
-        #     holder = panel.layout_handle.layout.get_chooser_holder()
-        #     chooser = holder.get_chooser_for_field(e.field.name)
-        #     if not chooser:
-        #         return
-        #     for f in chooser.context_fields:
-        #         if master_field and master_field.name == f.name:
-        #             yield "var bp = this.get_base_params();"
-        #             yield "%s.setContextValue('%s',bp['%s']);" % (
-        #                 e.as_ext(), constants.URL_PARAM_MASTER_PK,
-        #                 constants.URL_PARAM_MASTER_PK)
-        #             yield "%s.setContextValue('%s',bp['%s']);" % (
-        #                 e.as_ext(), constants.URL_PARAM_MASTER_TYPE,
-        #                 constants.URL_PARAM_MASTER_TYPE)
-        #         else:
-        #             yield (
-        #                 "%s.setContextValue('%s', record ? record."
-        #                 "data['%s'] : undefined);" % (
-        #                     e.as_ext(), f.name, form_field_name(f)))
+        elif isinstance(e, FieldElement):
+            holder = panel.layout_handle.layout.get_chooser_holder()
+            chooser = holder.get_chooser_for_field(e.field.name)
+            if not chooser:
+                return
+            for f in chooser.context_fields:
+                if master_field and master_field.name == f.name:
+                    yield "var bp = this.get_base_params();"
+                    yield "%s.setContextValue('%s',bp['%s']);" % (
+                        e.as_ext(), constants.URL_PARAM_MASTER_PK,
+                        constants.URL_PARAM_MASTER_PK)
+                    yield "%s.setContextValue('%s',bp['%s']);" % (
+                        e.as_ext(), constants.URL_PARAM_MASTER_TYPE,
+                        constants.URL_PARAM_MASTER_TYPE)
+                else:
+                    yield (
+                        "%s.setContextValue('%s', record ? record."
+                        "data['%s'] : undefined);" % (
+                            e.as_ext(), f.name, form_field_name(f)))
 
     # def get_css_includes(self, site):
         # yield self.build_lib_url('resources/css/ext-all.css')
