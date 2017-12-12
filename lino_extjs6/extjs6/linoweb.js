@@ -2630,6 +2630,13 @@ Lino.fields2array = function(fields,values) {
     return pv;
 };
 
+Ext.define('Lino.ComboModel', {
+    extend: 'Ext.data.Model',
+    fields: [
+      {name: 'text'  }, // No type, to prevent any conversions.
+      {name: 'value' }
+    ]
+    });
 
 Ext.define('Lino.form.field.HtmlEditor',{
     override : 'Ext.form.field.HtmlEditor',
@@ -3194,6 +3201,22 @@ Ext.define('Lino.FormPanel', {
     Lino.close_window();
   }
 
+
+  ,make_models : function(data, form){
+
+    for (var key in data){
+        var field = form.findField(key);
+        if (field && field.hiddenName
+        && field.hiddenName in data
+        && field.__proto__.$className != "Lino.ChoicesFieldElement"){
+            data[key] = Ext.create("Lino.ComboModel", {
+                text : data[key],
+                value : data[field.hiddenName]
+            });
+        }
+    }
+  }
+
   ,set_current_record : function(record, after) {
       // console.log('20150905 set_current_record', record);
     if (this.record_selector) {
@@ -3206,6 +3229,7 @@ Ext.define('Lino.FormPanel', {
       this.enable();
       // this.form.my_loadRecord(record.data);
       // Todo rework record.data to find hidden_values for comboboxes and make them into models
+      this.make_models(record.data, this.form);
       this.form.setValues(record.data);
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
