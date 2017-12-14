@@ -701,7 +701,8 @@ Ext.define('Lino.MainPanel',{
         var field = form.findField(key);
         if (field && field.hiddenName
         && field.hiddenName in data
-        && field.__proto__.$className != "Lino.ChoicesFieldElement"){
+        && Ext.getClassName(field)!= "Lino.ChoicesFieldElement"
+        && Ext.getClassName(data[key]) != "Lino.ComboModel"){
             data[key] = Ext.create("Lino.ComboModel", {
                 text : data[key],
                 value : data[field.hiddenName]
