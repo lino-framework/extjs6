@@ -711,7 +711,7 @@ Ext.define('Lino.MainPanel',{
   },
   set_param_values : function(pv) {
     if (this.params_panel) {
-        if (this._force_dirty){
+        /*if (this._force_dirty){
             pv = {};
             for (var field in this.params_panel.fields){
                 var current_field = this.params_panel.fields[field];
@@ -726,7 +726,7 @@ Ext.define('Lino.MainPanel',{
                     pv[current_field.name] = current_field.getValue();
                 }
             }
-        }
+        }*/
       //~ console.log('20120203 MainPanel.set_param_values', pv);
       this.status_param_values = pv;
       //~ this.params_panel.form.suspendEvents(false);
@@ -2625,7 +2625,7 @@ Lino.fields2array = function(fields,values) {
                 pv[i] = null;
             }
             else {
-                pv[i] = f.hiddenvalue_id;
+                pv[i] = v;
             }
             // v = f.rawValue;
             // var data = f.config.store;
