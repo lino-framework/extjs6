@@ -2128,7 +2128,7 @@ Lino.call_ajax_action = function(
       console.log("20130831",selected_recs);
       var rs = Array(selected_recs.length);
       for(var i=0; i < selected_recs.length;i++) {
-          rs[i] = selected_recs[i].data.id;
+          rs[i] = selected_recs[i].data[panel.ls_id_property];
       };
       p.{{constants.URL_PARAM_SELECTED}} = rs;
   }
@@ -3689,8 +3689,8 @@ Lino.GridStoreConfig = {
         options.params.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
         options.params.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.grid_panel.getId();
         Lino.insert_subst_user(options.params); // since 20121016
-        options.params['idParam'] = this.idParam;
-        options.params['id'] = this.idParam;
+        // options.params['idParam'] = this.idParam;
+        // options.params['id'] = this.idParam;
         this.grid_panel.add_param_values(options.params);
         return options;
     }
