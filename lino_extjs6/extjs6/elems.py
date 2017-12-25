@@ -157,7 +157,7 @@ class GridColumn(jsgen.Component):
             def fk_renderer(fld, name):
                 # FK fields are clickable only if their target has a
                 # detail view
-                rpt = fld.rel.model.get_default_table()
+                rpt = fld.remote_field.model.get_default_table()
                 if rpt.detail_action is not None:
                     if rpt.detail_action.get_view_permission(
                             get_user_profile()):
@@ -878,12 +878,12 @@ class RemoteComboFieldElement(ComboFieldElement):
 
     def get_field_options(self, **kw):
         kw = ComboFieldElement.get_field_options(self, **kw)
-        sto = self.store_options()
-        sto.update(autoLoad=True)
-        # print repr(sto)
         if self.editable:
+            sto = self.store_options()
+            sto.update(autoLoad=True)
             kw.update(store=js_code("Ext.create('Lino.ComplexRemoteComboStore',%s)" %
-                                py2js(sto)))
+                                    py2js(sto)))
+        # print repr(sto)
         return kw
 
 
@@ -918,13 +918,13 @@ class ForeignKeyElement(ComplexRemoteComboFieldElement):
 
     def get_field_options(self, **kw):
         kw = super(ForeignKeyElement, self).get_field_options(**kw)
-        if isinstance(self.field.rel.model, six.string_types):
-            raise Exception("20130827 %s.rel.model is %r" %
-                            (self.field, self.field.rel.model))
-        pw = self.field.rel.model.preferred_foreignkey_width
+        if isinstance(self.field.remote_field.model, six.string_types):
+            raise Exception("20130827 %s.remote_field.model is %r" %
+                            (self.field, self.field.remote_field.model))
+        pw = self.field.remote_field.model.preferred_foreignkey_width
         if pw is not None:
             kw.setdefault('preferred_width', pw)
-        actor = self.field.rel.model.get_default_table()
+        actor = self.field.remote_field.model.get_default_table()
         if isinstance(self.layout_handle.layout, ColumnsLayout):
             # ticket#1964 : Omit the 'Hidden' value for the column editor even if the field is hidden
             kw.update(hidden=False)
@@ -1456,7 +1456,7 @@ is 'summary'.
 
 class ManyRelatedObjectElement(HtmlBoxElement):
     def __init__(self, lh, relobj, **kw):
-        name = relobj.field.rel.related_name
+        name = relobj.field.remote_field.related_name
 
         def f(obj, ar):
             return qs2summary(ar, getattr(obj, name).all())

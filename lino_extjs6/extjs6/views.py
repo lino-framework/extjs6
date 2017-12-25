@@ -42,7 +42,8 @@ import json
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_text
 
-from lino.api import dd
+from lino.core.signals import pre_ui_delete
+from lino.core.utils import obj2unicode
 
 from lino.utils.xmlgen import html as xghtml
 
@@ -83,14 +84,14 @@ def delete_element(ar, elem):
 
     # ~ changes.log_delete(ar.request,elem)
 
-    dd.pre_ui_delete.send(sender=elem, request=ar.request)
+    pre_ui_delete.send(sender=elem, request=ar.request)
 
     try:
         elem.delete()
     except Exception as e:
         dblogger.exception(e)
         msg = _("Failed to delete %(record)s : %(error)s."
-                ) % dict(record=dd.obj2unicode(elem), error=e)
+                ) % dict(record=obj2unicode(elem), error=e)
         # ~ msg = "Failed to delete %s." % element_name(elem)
         ar.error(None, msg)
         return ar.renderer.render_action_response(ar)
@@ -107,7 +108,7 @@ class AdminIndex(View):
     def get(self, request, *args, **kw):
         # logger.info("20150427 AdminIndex.get()")
         # settings.SITE.startup()
-        renderer = dd.plugins.extjs6.renderer
+        renderer = settings.SITE.plugins.extjs6.renderer
         # if settings.SITE.user_model is not None:
         #     user = request.subst_user or request.user
         #     a = settings.SITE.get_main_action(user)
@@ -272,7 +273,11 @@ class ApiElement(View):
         if pk and pk != '-99999' and pk != '-99998':
             # ~ ar = ba.request(request=request,selected_pks=[pk])
             # ~ print 20131004, ba.actor
-            ar = ba.request(request=request, selected_pks=[pk])
+            # Use url selected rows as selected PKs if defined, otherwise use the PK defined in the url path
+            sr = request.GET.getlist(constants.URL_PARAM_SELECTED)
+            if not sr:
+                sr = [pk]
+            ar = ba.request(request=request, selected_pks=sr)
             elem = ar.selected_rows[0]
         else:
             ar = ba.request(request=request)

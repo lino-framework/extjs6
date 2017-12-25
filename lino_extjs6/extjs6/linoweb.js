@@ -198,6 +198,14 @@ Ext.onReady(function() {
 
 //Ext.preg('monthPickerPlugin', Ext.form.field.Month);
 
+// Ticket 1959 Column widths change on layout flush
+Ext.define('Ext.fix.layout.container.Box', {
+    override: 'Ext.layout.container.Box',
+
+    roundFlex: function(width) {
+        return Math.round(width);
+    }
+});
 
 /**
 JC Watsons solution (adapted to ExtJS 3.3.1 by LS) is elegant and simple:
@@ -280,6 +288,79 @@ Ext.Ajax.on('beforerequest', function (conn, options) {
    }
 }, this);
 
+Ext.define('Ext.grid.ViewDropZone', {
+    override: 'Ext.grid.ViewDropZone',
+    handleNodeDrop: function(data, record, position) {
+        var view = this.view,
+            store = view.getStore(),
+            crossView = view !== data.view,
+            index, records, i, len;
+        // If the copy flag is set, create a copy of the models
+        if (data.copy) {
+            records = data.records;
+            for (i = 0 , len = records.length; i < len; i++) {
+                records[i] = records[i].copy();
+            }
+        } else if (crossView) {
+            /*
+             * Remove from the source store only if we are moving to a different store.
+             */
+            data.view.store.remove(data.records);
+        }
+        if (record && position) {
+
+            /*
+            * Need to switch the data of the two records.
+            * Send an Ajax PUT request to update the selected row
+            * Update the sorting INT for all rows
+            *
+            * Might be better to just save the row with the requested position.
+            */
+
+            index = store.indexOf(record); // original
+            var r = data.records[0];
+            var c = {
+                grid: view.grid,
+                record: r,
+                field: view.grid.viewConfig.plugins.sequenced_field,
+                originalValue: r.data.seqno,
+                value: r.data.seqno,
+                cancel: false
+            };
+            // 'after', or undefined (meaning a drop at index -1 on an empty View)...
+            r.data[c.field]= record.data[c.field];
+            if (position !== 'before') { // orginal
+                index++;
+                r.data[c.field]++; // new
+            }
+            c.value = r.data[c.field];
+            view.grid.on_beforeedit(null, c);
+            if (!c.cancel){
+                r.modified = {};
+                r.modified[c.field] =  c.originalValue;
+                view.grid.store.on('load', view.grid.ensureVisibleRecord, view.grid,
+                              {row:index}
+                               /*,column:status.focus.column}*/);
+                view.grid.on_afteredit(null,c);
+
+            }
+
+//            store.insert(index, data.records); // original
+        } else // No position specified - append.
+        {
+            store.add(data.records);
+        }
+        // Select the dropped nodes unless dropping in the same view.
+        // In which case we do not disturb the selection.
+        if (crossView) {
+            view.getSelectionModel().select(data.records);
+        }
+        // Focus the first dropped node.
+        view.getNavigationModel().setPosition(data.records[0]);
+    }
+});
+
+
 
 /*
 My fix for the "Cannot set QuickTips dismissDelay to 0" bug,
@@ -331,74 +412,6 @@ see http://www.sencha.com/forum/showthread.php?183515
        //this.callSuper([xy]);
     //}
 //});
-
-/*
-Another hack. See /docs/blog/touch 2012/0228
-*/
-// Editef by HKC (Migration to Exjts6)
-// https://docs.sencha.com/extjs/6.0/core_concepts/components.html -> Subclassing
-//Ext.Element.addMethods(
-Ext.define('My.Lino.Component', {
-    extend: 'Ext.Element',
-    newMethod : function() {
-        var VISIBILITY      = "visibility",
-            DISPLAY         = "display",
-            HIDDEN          = "hidden",
-            NONE            = "none",
-            XMASKED         = "x-masked",
-            XMASKEDRELATIVE = "x-masked-relative",
-            data            = Ext.Element.data;
-
-        return {
-
-            mask : function(msg, msgCls) {
-                var me  = this,
-                    dom = me.dom,
-                    dh  = Ext.DomHelper,
-                    EXTELMASKMSG = "ext-el-mask-msg",
-                    el,
-                    mask;
-                // removed the following lines. See /docs/blog/2012/0228
-                //~ if (!(/^body/i.test(dom.tagName) && me.getStyle('position') == 'static')) {
-                    //~ console.log(20120228,dom.tagName,me);
-                    //~ me.addClass(XMASKEDRELATIVE);
-                //~ }
-                if (el = data(dom, 'maskMsg')) {
-                    el.remove();
-                }
-                if (el = data(dom, 'mask')) {
-                    el.remove();
-                }
-
-                mask = dh.append(dom, {cls : "ext-el-mask"}, true);
-                data(dom, 'mask', mask);
-
-                me.addClass(XMASKED);
-                mask.setDisplayed(true);
-
-                if (typeof msg == 'string') {
-                    var mm = dh.append(dom, {cls : EXTELMASKMSG, cn:{tag:'div'}}, true);
-                    data(dom, 'maskMsg', mm);
-                    mm.dom.className = msgCls ? EXTELMASKMSG + " " + msgCls : EXTELMASKMSG;
-                    mm.dom.firstChild.innerHTML = msg;
-                    mm.setDisplayed(true);
-                    mm.center(me);
-                }
-
-
-                if (Ext.isIE && !(Ext.isIE7 && Ext.isStrict) && me.getStyle('height') == 'auto') {
-                    mask.setSize(undefined, me.getHeight());
-                }
-
-                return mask;
-            }
-
-
-        };
-    }()
-});
-//);
-
 
 
 Ext.namespace('Lino');
@@ -681,9 +694,25 @@ Ext.define('Lino.MainPanel',{
   get_param_values : function() { // similar to get_field_values()
       return Lino.fields2array(this.params_panel.fields);
   },
+
+  make_models : function(data, form){
+
+    for (var key in data){
+        var field = form.findField(key);
+        if (field && field.hiddenName
+        && field.hiddenName in data
+        && Ext.getClassName(field)!= "Lino.ChoicesFieldElement"
+        && Ext.getClassName(data[key]) != "Lino.ComboModel"){
+            data[key] = Ext.create("Lino.ComboModel", {
+                text : data[key],
+                value : data[field.hiddenName]
+            });
+        }
+    }
+  },
   set_param_values : function(pv) {
     if (this.params_panel) {
-        if (this._force_dirty){
+        /*if (this._force_dirty){
             pv = {};
             for (var field in this.params_panel.fields){
                 var current_field = this.params_panel.fields[field];
@@ -698,13 +727,15 @@ Ext.define('Lino.MainPanel',{
                     pv[current_field.name] = current_field.getValue();
                 }
             }
-        }
+        }*/
       //~ console.log('20120203 MainPanel.set_param_values', pv);
       this.status_param_values = pv;
       //~ this.params_panel.form.suspendEvents(false);
       this.setting_param_values = true;
       if (pv) {
-          this.params_panel.form.my_loadRecord(pv);
+          // this.params_panel.form.my_loadRecord(pv);
+          this.make_models(pv, this.params_panel.form)
+          this.params_panel.form.setValues(pv);
       } else {
         this.params_panel.form.reset();
       }
@@ -1117,6 +1148,7 @@ Lino.on_tab_activate = function(item) {
 Ext.define('Lino.TimeField', {
     extend: 'Ext.form.field.Time',
     format: '{{settings.SITE.time_format_extjs}}',
+    altFormats: '{{settings.SITE.alt_time_formats_extjs}}',
     completeEdit: function() {
         var me = this,
             // val = me.getValue();   original code
@@ -1490,6 +1522,7 @@ Lino.handle_action_result = function (panel, result, on_success, on_confirm) {
     
     if (result.goto_url) {
         document.location = result.goto_url;
+        if (result.close_window) Lino.close_window();
         return;
     }
     
@@ -2088,13 +2121,14 @@ Lino.call_ajax_action = function(
   // console.log("20150130 a", p.{{constants.URL_PARAM_PARAM_VALUES}});
   // Ext.apply(p, panel.get_base_params());
   // console.log("20150130 b", p.{{constants.URL_PARAM_PARAM_VALUES}});
-
-  if (panel.get_selected) {
+  // if some other method has defined selected
+  if (panel.get_selected && p.{{constants.URL_PARAM_SELECTED}} === undefined)
+  {
       var selected_recs = panel.get_selected();
-      //~ console.log("20130831",selected_recs);
+      console.log("20130831",selected_recs);
       var rs = Array(selected_recs.length);
       for(var i=0; i < selected_recs.length;i++) {
-          rs[i] = selected_recs[i].data.id;
+          rs[i] = selected_recs[i].data[panel.ls_id_property];
       };
       p.{{constants.URL_PARAM_SELECTED}} = rs;
   }
@@ -2182,12 +2216,10 @@ Lino.run_row_action = function(
   }
   if (panel && is_on_main_actor) {
       Ext.apply(params, panel.get_base_params())
-  } else {
-      // 20170731
-      // params.{{constants.URL_PARAM_PARAM_VALUES}} = Array();
-      // delete params.{{constants.URL_PARAM_PARAM_VALUES}};
-      Lino.insert_subst_user(params);
+  }else {
+     params.{{constants.URL_PARAM_SELECTED}} = pk
   }
+  Lino.insert_subst_user(params);
   var fn = function(panel, btn, step) {
     Lino.call_ajax_action(panel, meth, url, params, actionName, step, fn);
   }
@@ -2549,7 +2581,9 @@ Ext.define('Lino.ActionFormPanel', {
       //~ console.log('20120203 MainPanel.set_param_values', pv);
       this.status_field_values = pv;
       if (pv) {
-          this.form.my_loadRecord(pv);
+          // this.form.my_loadRecord(pv);
+          this.make_models(pv, this.form)
+          this.form.setValues(pv);
           var record = { data: pv };
           this.before_row_edit(record);
       } else {
@@ -2592,7 +2626,7 @@ Lino.fields2array = function(fields,values) {
                 pv[i] = null;
             }
             else {
-                pv[i] = f.hiddenvalue_id;
+                pv[i] = v;
             }
             // v = f.rawValue;
             // var data = f.config.store;
@@ -2614,6 +2648,13 @@ Lino.fields2array = function(fields,values) {
     return pv;
 };
 
+Ext.define('Lino.ComboModel', {
+    extend: 'Ext.data.Model',
+    fields: [
+      {name: 'text'  }, // No type, to prevent any conversions.
+      {name: 'value' }
+    ]
+    });
 
 Ext.define('Lino.form.field.HtmlEditor',{
     override : 'Ext.form.field.HtmlEditor',
@@ -2742,9 +2783,10 @@ Ext.define('Lino.form.Panel', {
                         field.changed = true;
                     if(this.trackResetOnLoad){
                         field.originalValue = field.getValue();
-                        //~ if (field.hiddenField) {
-                          //~ field.hiddenField.originalValue = field.hiddenField.value;
-                        //~ }
+                        if (values[field.hiddenName]) {
+                          field.originalValue = values[field.hiddenName];
+                         }
+
                     }
                 }
             }
@@ -3038,8 +3080,8 @@ Ext.define('Lino.FormPanel', {
     if (status.focus) {
 
         status.focus.view.grid.store.on('load', status.focus.view.grid.ensureVisibleRecord,
-                              status.focus.view.grid, {row:status.focus.row,
-                                                       column:status.focus.column});
+                              status.focus.view.grid, {row:status.focus.rowIdx,
+                                                       column:status.focus.colIdx});
 //        status.focus.view.grid.store.reload();
         }
 
@@ -3177,6 +3219,8 @@ Ext.define('Lino.FormPanel', {
     Lino.close_window();
   }
 
+
+
   ,set_current_record : function(record, after) {
       // console.log('20150905 set_current_record', record);
     if (this.record_selector) {
@@ -3187,7 +3231,10 @@ Ext.define('Lino.FormPanel', {
     this.current_record = record;
     if (record && record.data) {
       this.enable();
-      this.form.my_loadRecord(record.data);
+      // this.form.my_loadRecord(record.data);
+      // Todo rework record.data to find hidden_values for comboboxes and make them into models
+      this.make_models(record.data, this.form);
+      this.form.setValues(record.data);
       this.set_window_title(record.title);
       //~ this.getBottomToolbar().enable();
       //  console.log("HKC disable getBottomToolbar");
@@ -3379,16 +3426,9 @@ if (this.disable_editing | record.data.disable_editing) {
     var form = this.getForm();
     for (i = 0; i < form.getFields().length ; i++){
         field = form.getFields().items[i];
-        if (field.hiddenvalue_tosubmit && field.changed){
-            if (field.hiddenvalue_tosubmit == "Mynull"){
-                hiddenvalue_tosubmit = null;
+        if (field.isDirty()){
+            submit_config['params'][field.hiddenName] = field.value;
             }
-            else {
-                hiddenvalue_tosubmit = field.hiddenvalue_tosubmit;
-            }
-            submit_config['params'][field.hiddenName] = hiddenvalue_tosubmit;
-            field.changed = false;
-        }
     }
     form.submit(submit_config);
   }
@@ -3538,7 +3578,16 @@ Ext.override(Ext.grid.plugin.CellEditing, {
 //            console.log(e);
             // Calculate editing start position from SelectionModel
             // CellSelectionModel
-            if (selModel.getCurrentPosition) {
+            pos = this.view.ownerGrid.getNavigationModel().getPosition();
+//            record = grid.store.getAt(pos.rowIdx);
+            if (pos)
+                {record = pos.record;
+    //          columnHeader = grid.headerCt.getHeaderAtIndex(pos.columnIdx);
+                columnHeader = pos.column;}
+            else{
+                return
+            }
+            /*if (selModel.getCurrentPosition) {
                 pos = selModel.getCurrentPosition();
                 record = grid.store.getAt(pos.row);
                 columnHeader = grid.headerCt.getHeaderAtIndex(pos.column);
@@ -3547,7 +3596,7 @@ Ext.override(Ext.grid.plugin.CellEditing, {
             else {
                 record = selModel.getLastSelected();
             }
-
+*/
             // if current cell have editor, then save numeric key in global variable
             var ed = me.getEditor(record, columnHeader);
             // console.log(ed.editing)
@@ -3640,8 +3689,8 @@ Lino.GridStoreConfig = {
         options.params.{{constants.URL_PARAM_FORMAT}} = '{{constants.URL_FORMAT_JSON}}';
         options.params.{{constants.URL_PARAM_REQUESTING_PANEL}} = this.grid_panel.getId();
         Lino.insert_subst_user(options.params); // since 20121016
-        options.params['idParam'] = this.idParam;
-        options.params['id'] = this.idParam;
+        // options.params['idParam'] = this.idParam;
+        // options.params['id'] = this.idParam;
         this.grid_panel.add_param_values(options.params);
         return options;
     }
@@ -3779,8 +3828,8 @@ Ext.define('Lino.GridPanel', {
         
   // loadMask: {message:"{{_('Please wait...')}}"},
 
-  ls_focus : function(e, el){this.ensureVisible(0,{focus:true,select:true});
-                                                e.stopEvent();
+  ls_focus : function(e, el){this.ensureVisible(0,{column:0,focus:true,select:true});
+                             e.stopEvent();
                                                 },
 
   constructor : function(config){
@@ -3933,6 +3982,9 @@ Ext.define('Lino.GridPanel', {
         //             this, records, successful, operation, eOpts);
         // this_.set_param_values(this_.store.reader.arrayData.param_values);
         // console.log(20151221, this_.store.getProxy().getReader());
+        if (!successful && records == null){
+            return
+        }
         this_.set_param_values(this_.store.getProxy().getReader().rawData.param_values);
             //console.log(this_.store.getData());
          //this_.set_param_values(this_.store.first().data.rows);
@@ -3948,6 +4000,7 @@ Ext.define('Lino.GridPanel', {
         if (this_.containing_window)
             this_.set_window_title(this_.store.getProxy().getReader().rawData.title);
             //~ this_.containing_window.setTitle(this_.store.reader.arrayData.title);
+        /* //
         if (!this.is_searching) { // disabled 20121025: quick_search_field may not lose focus
           this.is_searching = false;
           if (this_.selModel instanceof Ext.selection.CellModel){
@@ -3960,6 +4013,7 @@ Ext.define('Lino.GridPanel', {
               this_.getView().focusEl.focus();
           }
         }
+        */
         //~ else console.log("is_searching -> no focussing");
         //~ var t = this.getTopToolbar();
         //~ var activePage = Math.ceil((t.cursor + t.pageSize) / t.pageSize);
@@ -4071,39 +4125,21 @@ Ext.define('Lino.GridPanel', {
        });
       }
     }
-      
-    if (this.cell_edit) {
-      //  Edited by HKC
-      //this.selModel = new Ext.grid.CellSelectionModel();
-      this.selModel = Ext.create('Ext.selection.CellModel', {allowDeselect:true});
-      // this.selModel = 'cellmodel';
-      this.get_selected = function() {
-          //~ console.log(this.getSelectionModel().selection);
-          if (this.selModel.selection)
-              return [ this.selModel.selection.record ];
-          return [this.store.getAt(0)];
-      };
-      this.get_current_record = function() { 
-          if (this.getSelectionModel().selection) 
-              return this.selModel.selection.record;
-          return this.store.getAt(0);
-      };
-    } else { 
-      //this.selModel = new Ext.grid.RowSelectionModel();
-        this.selModel = Ext.create('Ext.selection.RowModel',{allowDeselect:true});
-      this.get_selected = function() {
-        var sels = this.selModel.getSelections();
+
+     this.selModel = Ext.create('Ext.selection.RowModel', {allowDeselect:true, mode:'multi'});
+
+     this.get_selected = function() {
+        var sels = this.selModel.getSelected().items;
         if (sels.length == 0) sels = [this.store.getAt(0)];
         return sels
       };
-      this.get_current_record = function() { 
-        var rec = this.selModel.getSelected();
-        if (rec == undefined) rec = this.store.getAt(0);
-        return rec
+     this.get_current_record = function() {
+        var rec = this.selModel.getSelected().items;
+        if (rec == undefined) rec = [this.store.getAt(0)];
+        return rec[0]
       };
-    };
     this.columns  = this.apply_grid_config(this.gc_name,this.ls_grid_configs,this.ls_columns);
-    
+
 
     this.on('resize', function(){
       //~ console.log("20120213 resize",arguments)
@@ -4119,15 +4155,8 @@ Ext.define('Lino.GridPanel', {
     this.on('beforeedit', this.on_beforeedit);
     this.on('beforeedit',function(e) { this.before_row_edit(e.grid.get_current_record())},this); //e is cell_editor
 //    this.on('beforeedit',function(e) { this.before_row_edit(e.record)},this);
-    if (this.cell_edit) {
-        this.on('cellcontextmenu', Lino.cell_context_menu, this);
-        //this.on({
-        //    scope : this,
-        //    cellcontextmenu : Lino.cell_context_menu,
-        //});
-    } else {
-        this.on('rowcontextmenu', Lino.row_context_menu, this);
-    }
+    this.on('cellcontextmenu', Lino.cell_context_menu, this);
+
       
     this.on('celldblclick' , this.on_celldblclick , this);
     this.on('cellkeydown' , this.on_cellkeydown , this);
@@ -4194,9 +4223,9 @@ Ext.define('Lino.GridPanel', {
         }
     }
     if (status.focus != undefined){
-        //commented out for debugging reasons
-        this.store.on('load', this.ensureVisibleRecord,this, {row:status.focus.row,
-                                                              column:status.focus.column,
+        /*Row selection uses rowIdx and ColIdx, cell uses row and column*/
+        this.store.on('load', this.ensureVisibleRecord,this, {row:status.focus.rowIdx
+//                                                              ,column:status.focus.colIdx,
                                                               });
         }
     this.refresh()
@@ -4624,7 +4653,8 @@ Ext.define('Lino.GridPanel', {
         }
 
 
-        if(newCell){
+        if(false){
+//        if(newCell){
           e.stopEvent();
           r = newCell.rowIdx;
           c = newCell.colIdx;
@@ -4720,6 +4750,7 @@ Ext.define('Lino.GridPanel', {
   },
   
   apply_grid_config : function(index,grid_configs,rpt_columns) {
+    // Dead code, not in use any more, user grid_configs are disabled.
     //~ var rpt_columns = this.ls_columns;
     var gc = grid_configs[index];    
     //~ console.log('apply_grid_config() 20100812',name,gc);
@@ -4961,8 +4992,9 @@ Ext.define('Lino.GridPanel', {
                   recToUpdate.set(r.records[0].getData());
                   recToUpdate.commit(false);
                   self.getView().refreshNode(store.indexOfId(e.record.id));
-                  if (e.rowIdx == self.getSelectionModel().selection.rowIdx
-                  &&  e.colIdx == self.getSelectionModel().selection.colIdx){  // If user closed editor via [Enter] rather then click away,
+                  var pos = self.getNavigationModel().getPosition();
+                  if (e.rowIdx == pos.rowIdx
+                  &&  e.colIdx == pos.colIdx){  // If user closed editor via [Enter] rather then click away,
 //                  self.getView.focusRow(row);
                     // Focus on that cell only if it's already selected, not if user has clicked away.
                     self.getView().getNavigationModel().setPosition(e.rowIdx, e.colIdx);
@@ -5046,7 +5078,7 @@ Ext.define('Lino.GridPanel', {
   // bind to the store's 'load' event to select a row after a refresh
   // the oOpts.row is the row position of the row to be selected + focused
   // The scope should be the grid
-  ensureVisibleRecord : function (records, successful, operation, eOpts) {
+  ensureVisibleRecord : function (store, records, successful, eOpts) {
 //    console.log("#2010 30102017 Make vis: ",eOpts, )
     eOpts = arguments[arguments.length-1]; // different args for Buffered Store and normal
     this.getSelectionModel().deselectAll()
@@ -5115,8 +5147,107 @@ Ext.define('Lino.GridPanel', {
   },
   load_record_id : function(record_id,after) {
       Lino.run_detail_handler(this,record_id)
-  }
-  
+  },
+  ensureVisible : function(record, options) {
+        // Handle the case where this is a lockable assembly
+        if (this.lockable) {
+            return this.ensureLockedVisible(record, options);
+        }
+        // Allow them to pass the record id.
+        if (typeof record !== 'number' && !record.isEntity) {
+            record = this.store.getById(record);
+        }
+        var me = this,
+            view = me.getView(),
+            domNode = view.getNode(record),
+            callback, scope, animate, highlight, select, doFocus, scrollable, column, cell;
+        if (options) {
+            callback = options.callback;
+            scope = options.scope;
+            animate = options.animate;
+            highlight = options.highlight;
+            select = options.select;
+            doFocus = options.focus;
+            column = options.column;
+        }
+        // Always supercede any prior deferred request
+        if (me.deferredEnsureVisible) {
+            me.deferredEnsureVisible.destroy();
+        }
+        // We have not yet run the layout.
+        // Add this to the end of the first sizing process.
+        // By using the resize event, we will come in AFTER any Component's onResize and onBoxReady handling.
+        if (!view.componentLayoutCounter) {
+            me.deferredEnsureVisible = view.on({
+                resize: me.doEnsureVisible,
+                args: Ext.Array.slice(arguments),
+                scope: me,
+                single: true,
+                destroyable: true
+            });
+            return;
+        }
+        if (typeof column === 'number') {
+            column = me.ownerGrid.getVisibleColumnManager().getColumns()[column];
+        }
+        // We found the DOM node associated with the record
+        if (domNode) {
+            scrollable = view.getScrollable();
+            if (column) {
+                cell = Ext.fly(domNode).selectNode(column.getCellSelector());
+            }
+            if (scrollable) {
+                scrollable.scrollIntoView(cell || domNode, !!column, animate, highlight);
+            }
+            if (!record.isEntity) {
+                record = view.getRecord(domNode);
+            }
+            /**
+             * Following two blocks are edited to allow for focusing and selection of a cenn in a certain column.
+             * Edits have also been make in ext-all.js
+             */
+            if (select) {
+
+//                    view.getSelectionModel().select({row:record,
+//                                                     column: column ? column : undefined}); // for cell selection mode
+                 view.getSelectionModel().select(record); /*Original line*/
+            }
+            if (doFocus) {
+//                    if (cell) {view.getNavigationModel().setPosition(cell);} // Useful for cell selection mode
+//                    else{
+//                    view.getNavigationModel().setPosition(record, 0); /*Original line*/
+                    view.getNavigationModel().setPosition(record, column ? column : undefined);
+//                    }
+                    }
+            Ext.callback(callback, scope || me, [
+                true,
+                record,
+                domNode
+            ]);
+        }
+        // If we didn't find it, it's probably because of buffered rendering
+        else if (view.bufferedRenderer) {
+            view.bufferedRenderer.scrollTo(record, {
+                animate: animate,
+                highlight: highlight,
+                select: select,
+                focus: doFocus,
+                column: column,
+                callback: function(recordIdx, record, domNode) {
+                    Ext.callback(callback, scope || me, [
+                        true,
+                        record,
+                        domNode
+                    ]);
+                }
+            });
+        } else {
+            Ext.callback(callback, scope || me, [
+                false,
+                null
+            ]);
+        }
+    }
 });
   
 Ext.define('Lino.selection.CellModel', {
@@ -5177,6 +5308,16 @@ Ext.define('Lino.selection.CellModel', {
 
 Lino.row_context_menu = function(grid,row,col,e) {
   console.log('20130927 rowcontextmenu',grid,row,col,e,grid.store.getProxy().getReader().rawData.rows[row]);
+    grid = this;
+//    e.stopEvent();
+  //  todo loop disabled fields for each selected rows' DA,
+//  todo render c-menu
+if(!grid.cmenu.el){
+      //grid.cmenu.el.render();
+      grid.cmenu.render();
+      //grid.cmenu.showAt(e.getXY());
+  }
+
 }
 
 //Lino.cell_context_menu = function(_this, _grid,row,col,_e,a, e) {
@@ -5190,10 +5331,10 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   //~ grid.getView().focusCell(row,col);
   //  HKC
   //grid.getSelectionModel().select(row,col);
-  grid.getSelectionModel().select({
-                row: rowIndex,
-                column: cellIndex
-            });
+//  grid.getSelectionModel().select({
+//                row: rowIndex,
+//                column: cellIndex
+//            });
     //this.getSelectionModel().select(row,col);
   //~ console.log(grid.store.getAt(row));
   //~ grid.getView().focusRow(row);
@@ -5208,13 +5349,20 @@ Lino.cell_context_menu = function(view, td, cellIndex, record, tr, rowIndex, e, 
   
 //  var da = this.store.getProxy().getReader().rawData.rows[rowIndex][grid.disabled_actions_index];
 // seems that the proxy reader data can sometimes only include the last 10 records collected by infinite scroll
-  var da = grid.getSelectionModel().getSelected().items[0].data.disabled_fields;
-  if (da) {
-      this.cmenu.cascade(function(item){ 
-        //~ console.log(20120531, item.itemId, da[item.itemId]);
-        if (da[item.itemId]) item.disable(); else item.enable();
+  var rows = grid.getSelectionModel().getSelected();
+  this.cmenu.cascade(function(item){
+                // Enable all cmenu items, then disable them if any row has the action disabled.
+                item.enable();
+              });
+  rows.items.forEach(function(row){
+          var da = row.data.disabled_fields
+          if (da){
+              grid.cmenu.cascade(function(item){
+                //~ console.log(20120531, item.itemId, da[item.itemId]);
+                if (da[item.itemId]) item.disable();
+              });
+          }
       });
-  };
   
   var xy = e.getXY();
   //xy[1] -= grid.cmenu.el.getHeight();
@@ -5258,154 +5406,6 @@ Ext.define('Lino.ComboBox', {
       // this.callParent();  // 20160630
   },
 
-    findRecordByValue: function(value) {
-        var result = this.store.byText.get(value),
-            ret = false;
-        // If there are duplicate keys, tested behaviour is to return the *first* match.
-        if (result) {
-            ret = result[0] || result;
-        }
-        return ret;
-    },
-
-    updateValue: function() {
-        // modified copy of the original ComboBox.updateValue defined
-        // in `ext-all-debug.js`. We additionally store the selected
-        // value to `hiddenvalue_tosubmit` and set the `changed`
-        // flag. Note that this hack breaks when multiple choices are
-        // selected
-        var me = this,
-            selectedRecords = me.valueCollection.getRange(),
-            len = selectedRecords.length,
-            valueArray = [],
-            displayTplData = me.displayTplData || (me.displayTplData = []),
-            inputEl = me.inputEl,
-            i, record;
-        // Loop through values, matching each from the Store, and collecting matched records
-//        console.log('20120203 updateValue', this.name,);
-        displayTplData.length = 0;
-        if (len == 0){
-            me.hiddenvalue_tosubmit = "Mynull";
-            me.changed = true;
-        }
-        for (i = 0; i < len; i++) {
-            record = selectedRecords[i];
-//            console.log('20120203', this.name,'.updateValue() this=', this, 'record=',record);
-            displayTplData.push(me.getRecordDisplayData(record));
-            // There might be the bogus "value not found" record if forceSelect was set. Do not include this in the value.
-            if (record !== me.valueNotFoundRecord && !record.phantom) {
-                // valueArray.push(record.get(me.valueField)); original code
-                var selector = me.valueField;
-                if (me instanceof Lino.RemoteComboFieldElement){
-                    selector = '{{constants.CHOICES_VALUE_FIELD}}';
-                }
-                valueArray.push(record.get(selector));
-                me.hiddenvalue_tosubmit = record.get(selector);
-                me.hiddenvalue_id = record.get(selector);
-                me.changed = true;
-                // console.log("20160504 field :",me.name," -> val",record.get(selector));
-            }
-        }
-        // Set the value of this field. If we are multiselecting, then that is an array.
-        me.setHiddenValue(valueArray);
-        me.value = me.multiSelect ? valueArray : valueArray[0];
-        if (!Ext.isDefined(me.value)) {
-            me.value = undefined;
-        }
-        me.displayTplData = displayTplData;
-        //store for getDisplayValue method
-        if (inputEl && me.emptyText && !Ext.isEmpty(me.value)) {
-            inputEl.removeCls(me.emptyCls);
-        }
-        // Calculate raw value from the collection of Model data
-        me.setRawValue(me.getDisplayValue());
-        me.checkChange();
-        // me.applyEmptyText();  Remove with Extjs 6.2.0
-    },
-    setValue : function(v,record_data){
-      /*
-      Based on feature request developed in http://extjs.net/forum/showthread.php?t=75751
-      */
-      /* `record_data` is used to get the text corresponding to this value */
-      //~ if(this.name == 'city')
-//      console.log('20120203', this.name,'.setValue(', v ,') this=', this,'record_data=',record_data);
-      if (!(this.valueField && Ext.isDefined(record_data))){
-//        console.log("Calling Parrent");
-             return this.callSuper(arguments);
-             //this.callParent(arguments);  // 20160701
-        }
-//      console.log("Calling our Thing");
-
-
-        if (v !== null && v.crudState){
-            var text = v.get(this.displayField);
-        }
-        else {
-            var text = v;
-        }
-      if(this.valueField){
-        if(v == null || v == '') {
-            //~ if (this.name == 'birth_country')
-                //~ console.log(this.name,'.setValue',v,'no lookup needed, value is empty');
-            //~ v = undefined;
-            v = '';
-            //~ text = '';
-        } else if (Ext.isDefined(record_data)) {
-          text = record_data[this.name];
-            this.hiddenvalue_id = record_data[this.hiddenName];
-        } else {
-          // if(this.mode == 'remote' && !Ext.isDefined(this.store.totalLength)){
-          if(this.queryMode == 'remote' && ( this.lastQuery === null || (!this.store.data.length))){
-              //~ if (this.name == 'birth_country') console.log(this.name,'.setValue',v,'store not yet loaded');
-              // HKC
-              //this.store.on('load', this.setValue.createDelegate(this, arguments), null, {single: true});
-              this.store.on('load', this.setValue.bind(this,[arguments]), null, {single: true});
-              if(this.store.lastOptions === null || this.lastQuery === null){
-                  var params;
-                  if(this.valueParam){
-                      params = {};
-                      params[this.valueParam] = v;
-                  }else{
-                      var q = this.allQuery;
-                      this.lastQuery = q;
-                      // this.store.setBaseParam(this.queryParam, q);
-                      this.store.getProxy().setExtraParam(this.queryParam, q);
-                      params = this.getParams(q);
-                  }
-                  //~ if (this.name == 'birth_country')
-                    //~ console.log(this.name,'.setValue',v,' : call load() with params ',params);
-                  this.store.load({params: params});
-              //~ }else{
-                  //~ if (this.name == 'birth_country')
-                    //~ console.log(this.name,'.setValue',v,' : but store is loading',this.store.lastOptions);
-              }
-              return;
-          //~ }else{
-              //~ if (this.name == 'birth_country')
-                //~ console.log(this.name,'.setValue',v,' : store is loaded, lastQuery is "',this.lastQuery,'"');
-          }
-          var r = this.findRecord(this.valueField, v);
-//          console.log("FR- r=",r," this.valueField=",this.valueField," v=(",v,")" );
-
-          if(r){
-              text = r.data[this.displayField];
-          }else if(this.valueNotFoundText !== undefined && this.valueNotFoundText !== null ){
-              text = this.valueNotFoundText;
-          }
-        }
-      }
-      this.lastSelectionText = text;
-      if(this.hiddenField){
-          //~ this.hiddenField.originalValue = v;
-          this.hiddenField.value = v;
-      }
-      this.value = v; // needed for grid.afteredit
-      Ext.form.ComboBox.superclass.setValue.call(this, text);
-      // this.callSuper(text);
-      // this.callParent(arguments);  // 20160701
-//      console.log("SetValue end this=",this);
-  },
-  
   getParams : function(q){
     // p = Ext.form.ComboBox.superclass.getParams.call(this, q);
     // causes "Ext.form.ComboBox.superclass.getParams is undefined"
@@ -5443,6 +5443,15 @@ Ext.define('Lino.ComboBox', {
 Ext.define('Lino.ChoicesFieldElement',{
     extend : 'Lino.ComboBox',
     mode: 'local',
+    findRecordByValue: function(value) {
+        var result = this.store.byText.get(value),
+            ret = false;
+        // If there are duplicate keys, tested behaviour is to return the *first* match.
+        if (result) {
+            ret = result[0] || result;
+        }
+        return ret;
+    },
 });
 Ext.define('Lino.SimpleRemoteComboStore',{
   extend:'Ext.data.JsonStore',
@@ -5547,6 +5556,11 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
   displayField: 'value',
   valueField: undefined,
   forceSelection: false
+  ,isDirty : function () {
+        var me = this;
+        if (me.originalValue == "") {me.originalValue = null;}
+        return !me.disabled && !me.isEqual(me.getValue(), me.originalValue);
+    }
 });
 
 
