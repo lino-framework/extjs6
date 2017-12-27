@@ -55,7 +55,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         elif isinstance(el, ext_elems.DetailMainPanel):
             el.value_template = "Ext.create('Ext.Panel',%s)"
         elif isinstance(el, ext_elems.GridElement):
-            el.value_template = "Ext.create('Lino.GridPanel',%s)"
+            pass
         elif isinstance(el, ext_elems.Panel):
             el.value_template = "Ext.create('Ext.Panel',%s)"
         elif isinstance(el, ext_elems.Container):
@@ -66,8 +66,6 @@ class ExtRenderer(ext_renderer.ExtRenderer):
             el.value_template = "Ext.create('Ext.ensible.cal.RecurrenceField',%s)"
         elif isinstance(el, ext_elems.BooleanFieldElement):
             el.value_template = "Ext.create('Ext.form.Checkbox',%s)"
-        elif isinstance(el, ext_elems.DisplayElement):
-            el.value_template = "Ext.create('Ext.form.DisplayField',%s)"
         elif isinstance(el, ext_elems.NumberFieldElement):
             el.value_template = "Ext.create('Ext.form.NumberField',%s)"
             el.grid_column_template = "Ext.create('Lino.NullNumberColumn',%s)"
@@ -89,6 +87,8 @@ class ExtRenderer(ext_renderer.ExtRenderer):
             el.value_template = "Ext.create('Lino.ChoicesFieldElement',%s)"
         elif isinstance(el, ext_elems.CharFieldElement):
             el.value_template = "Ext.create('Ext.form.TextField',%s)"
+        elif isinstance(el, ext_elems.DisplayElement):
+            el.value_template = "Ext.create('Ext.form.DisplayField',%s)"
         elif isinstance(el, ext_elems.Spacer):
             el.value_template = "Ext.create('Ext.Spacer',%s)"
             
