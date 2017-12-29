@@ -5556,11 +5556,11 @@ Ext.define('Lino.SimpleRemoteComboFieldElement',{
   displayField: 'value',
   valueField: undefined,
   forceSelection: false
-  ,isDirty : function () {
+  /*,isDirty : function () {
         var me = this;
         if (me.originalValue == "") {me.originalValue = null;}
         return !me.disabled && !me.isEqual(me.getValue(), me.originalValue);
-    }
+    }*/
 });
 
 
