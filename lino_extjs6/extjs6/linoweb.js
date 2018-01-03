@@ -2250,8 +2250,7 @@ Lino.run_detail_handler = function(panel,pk) {
 
 Lino.show_fk_detail = function(combo,detail_action,insert_action) {
     //~ console.log("Lino.show_fk_detail",combo,handler);
-    // pk = combo.getValue();
-    pk = combo.hiddenvalue_id;
+    pk = combo.getValue();
     if (pk) {
         detail_action.run(null,{record_id: pk})
       } else {
