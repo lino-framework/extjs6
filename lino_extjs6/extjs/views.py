@@ -108,7 +108,7 @@ class AdminIndex(View):
     def get(self, request, *args, **kw):
         # logger.info("20150427 AdminIndex.get()")
         # settings.SITE.startup()
-        renderer = settings.SITE.plugins.extjs6.renderer
+        renderer = settings.SITE.plugins.extjs.renderer
         # if settings.SITE.user_model is not None:
         #     user = request.subst_user or request.user
         #     a = settings.SITE.get_main_action(user)
@@ -124,7 +124,7 @@ class MainHtml(View):
         # ~ raise Exception("20131023")
         ar = BaseRequest(request)
         ar.success(html=settings.SITE.get_main_html(
-            request, extjs=settings.SITE.plugins.extjs6))
+            request, extjs=settings.SITE.plugins.extjs))
         return ar.renderer.render_action_response(ar)
 
 

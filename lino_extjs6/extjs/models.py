@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2015-2016 Luc Saffre
+# Copyright 2015-2017 Luc Saffre
 # License: BSD (see file COPYING for details)
-"""Database models for :mod:`extjs6`.
+"""Database models for this plugin.
 
 """
 
@@ -31,7 +31,7 @@ EXTJS6_THEMES_CHOICES = (
     ("theme-triton", "Theme triton"),
 )
 
-if dd.plugins.extjs6.select_theme:
+if dd.plugins.extjs.select_theme:
     dd.inject_field(
         'users.User', 'preferred_theme',
         models.CharField(_("Preferred theme"), choices=EXTJS6_THEMES_CHOICES, default="", blank=True, max_length=25))
