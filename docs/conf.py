@@ -36,7 +36,7 @@ import lino_extjs6
 
 # General information about the project.
 project = "Lino ExtJS 6 Documentation"
-copyright = '2015-2017, Luc Saffre & Hamza Khchine'
+copyright = '2015-2018 Luc Saffre'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
