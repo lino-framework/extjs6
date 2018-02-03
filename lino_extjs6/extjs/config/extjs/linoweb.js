@@ -3320,7 +3320,7 @@ if (this.disable_editing | record.data.disable_editing) {
     this.refresh();
   },
 
-  get_selected : function() { return [ this.current_record ] },
+//  get_selected : function() { return [ this.current_record ] },
   get_current_record : function() {
     //~ console.log(20100714,this.current_record);
     return this.current_record
