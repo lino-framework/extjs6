@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2017 Luc Saffre
+# Copyright 2009-2018 Luc Saffre
 # License: BSD (see file COPYING for details)
 
 """
@@ -34,7 +34,7 @@ from lino.modlib.users.utils import get_user_profile
 
 # from . import elems as ext_elems
 from lino.modlib.extjs import ext_renderer
-from lino.modlib.extjs import elems as ext_elems
+from lino.core import elems as ext_elems
 
 
 
