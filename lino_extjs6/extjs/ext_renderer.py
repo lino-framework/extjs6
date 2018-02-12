@@ -32,7 +32,6 @@ from lino.utils.jsgen import py2js, js_code
 
 from lino.modlib.users.utils import get_user_profile
 
-# from . import elems as ext_elems
 from lino.modlib.extjs import ext_renderer
 from lino.core import elems as ext_elems
 
@@ -44,63 +43,6 @@ class ExtRenderer(ext_renderer.ExtRenderer):
     """
 
     extjs_version = 6
-
-
-    def setup_layout_element(self, el):
-        # new after 20171227
-        if isinstance(el, ext_elems.TabPanel):
-            el.value_template = "Ext.create('Ext.TabPanel',%s)"
-        elif isinstance(el, ext_elems.ActionParamsPanel):
-            el.value_template = "Ext.create('Lino.ActionParamsPanel',%s)"
-        elif isinstance(el, ext_elems.DetailMainPanel):
-            el.value_template = "Ext.create('Ext.Panel',%s)"
-        elif isinstance(el, ext_elems.GridElement):
-            pass
-        elif isinstance(el, ext_elems.Panel):
-            el.value_template = "Ext.create('Ext.Panel',%s)"
-        elif isinstance(el, ext_elems.Container):
-            el.value_template = "Ext.create('Ext.Container',%s)"
-        elif isinstance(el, ext_elems.HtmlBoxElement):
-            el.value_template = "Ext.create('Lino.HtmlBoxPanel',%s)"
-        elif isinstance(el, ext_elems.RecurrenceElement):
-            el.value_template = "Ext.create('Ext.ensible.cal.RecurrenceField',%s)"
-        elif isinstance(el, ext_elems.BooleanFieldElement):
-            el.value_template = "Ext.create('Ext.form.Checkbox',%s)"
-        elif isinstance(el, ext_elems.NumberFieldElement):
-            el.value_template = "Ext.create('Ext.form.NumberField',%s)"
-            el.grid_column_template = "Ext.create('Lino.NullNumberColumn',%s)"
-        elif isinstance(el, ext_elems.IncompleteDateFieldElement):
-            el.value_template = "Ext.create('Lino.IncompleteDateField',%s)"
-        elif isinstance(el, ext_elems.URLFieldElement):
-            el.value_template = "Ext.create('Lino.URLField',%s)"
-        elif isinstance(el, ext_elems.DateFieldElement):
-            el.value_template = "Ext.create('Lino.DateField',%s)"
-        elif isinstance(el, ext_elems.DatePickerFieldElement):
-            el.value_template = "Ext.create('Lino.DatePickerField',%s)"
-        elif isinstance(el, ext_elems.TimeFieldElement):
-            el.value_template = "Ext.create('Lino.TimeField',%s)"
-        elif isinstance(el, ext_elems.SimpleRemoteComboFieldElement):
-            el.value_template = "Ext.create('Lino.SimpleRemoteComboFieldElement',%s)"
-        elif isinstance(el, ext_elems.RemoteComboFieldElement):
-            el.value_template = "Ext.create('Lino.RemoteComboFieldElement',%s)"
-        elif isinstance(el, ext_elems.ChoicesFieldElement):
-            el.value_template = "Ext.create('Lino.ChoicesFieldElement',%s)"
-        elif isinstance(el, ext_elems.CharFieldElement):
-            el.value_template = "Ext.create('Ext.form.TextField',%s)"
-        elif isinstance(el, ext_elems.DisplayElement):
-            el.value_template = "Ext.create('Ext.form.DisplayField',%s)"
-        elif isinstance(el, ext_elems.Spacer):
-            el.value_template = "Ext.create('Ext.Spacer',%s)"
-            
-        elif isinstance(el, ext_elems.Toolbar):
-            el.value_template = "Ext.create('Ext.Toolbar',%s)"
-        elif isinstance(el, ext_elems.ComboBox):
-            el.value_template = "Ext.create('Ext.form.ComboBox',%s)"
-        elif isinstance(el, ext_elems.ExtPanel):
-            el.value_template = "Ext.create('Ext.Panel',%s)"
-        elif isinstance(el, ext_elems.Calendar):
-            el.value_template = "Ext.create('Lino.CalendarPanel',%s)"
-
     
     def js_render_ParamsPanelSubclass(self, dh):
         yield ""
