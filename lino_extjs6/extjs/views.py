@@ -45,7 +45,7 @@ from django.utils.encoding import force_text
 from lino.core.signals import pre_ui_delete
 from lino.core.utils import obj2unicode
 
-from lino.utils.xmlgen import html as xghtml
+from etgen import html as xghtml
 
 E = xghtml.E
 
