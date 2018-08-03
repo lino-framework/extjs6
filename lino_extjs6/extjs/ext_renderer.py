@@ -378,7 +378,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         yield "});"
         yield ""
 
-    def js_render_window_action(self, rh, ba, unused_profile):
+    def js_render_window_action(self, rh, ba):
         # x = str(rh)
         # if x.startswith('working'):
         #     print "20150421 {0}".format(x)
