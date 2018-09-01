@@ -468,7 +468,7 @@ class ApiList(View):
             doc.body.append(E.h1(doc.title))
             t = doc.add_table()
             # ~ settings.SITE.kernel.ar2html(ar,t,ar.data_iterator)
-            ar.dump2html(t, ar.data_iterator)
+            ar.dump2html(t, ar.data_iterator, header_links=False)
             doc.write(response, encoding='utf-8')
             return response
 
