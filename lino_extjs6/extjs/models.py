@@ -43,7 +43,7 @@ class ThemedUserDetail(UserDetail):
     box1 = """
         username user_type:20 partner
         first_name last_name initials
-        email language timezone preferred_theme
+        email language time_zone preferred_theme
         id created modified
         """
 
