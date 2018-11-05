@@ -8,5 +8,5 @@ ns = setup_from_tasks(
     # locale_dir='lino_extjs/extjs/locale',
     cleanable_files=['docs/api/lino_extjs6.*'],
     demo_projects=[
-        'lino_extjs6/projects/team6',
-        'lino_extjs6/projects/lydia6'])
+        'lino_extjs6.projects.team6',
+        'lino_extjs6.projects.lydia6'])
