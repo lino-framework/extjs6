@@ -1,4 +1,5 @@
--e git+https://github.com/lino-framework/atelier.git@stable#egg=atelier
--e git+https://github.com/lino-framework/lino.git@stable#egg=lino
--e git+https://github.com/lino-framework/xl.git@stable#egg=lino_xl
--e git+https://github.com/lino-framework/noi.git@stable#egg=lino_noi
+git+https://github.com/khchine5/django-mailbox.git#egg=django-mailbox
+-e git+https://github.com/lino-framework/lino.git#egg=lino
+-e git+https://github.com/lino-framework/xl.git#egg=lino_xl
+-e git+https://github.com/lino-framework/noi.git#egg=lino_noi
+-e git+https://github.com/lino-framework/book.git#egg=lino_book
