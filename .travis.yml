@@ -8,7 +8,8 @@ env:
 install:
   - pip install -U setuptools
   - pip install coveralls
-  - test -e "requirements.$TRAVIS_BRANCH.txt" && ( pip install -r "requirements.$TRAVIS_BRANCH.txt" ) || ( pip install -r requirements.txt )
+  - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then pip install -r requirements.python3.txt; else pip install -r requirements.txt;  fi
+  - # test -e "requirements.$TRAVIS_BRANCH.txt" && ( pip install -r "requirements.$TRAVIS_BRANCH.txt" ) || ( pip install -r requirements.txt )
   - pip install Django==$DJANGO
   - pip install -e .
 script:
