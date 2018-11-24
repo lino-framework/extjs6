@@ -13,6 +13,5 @@ media
 warnings_linkcheck.txt
 .DS_Store
 .idea
-docs/api/lino_extjs6.*
 .eggs/
 docs/api/lino*
