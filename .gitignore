@@ -15,3 +15,4 @@ warnings_linkcheck.txt
 .idea
 docs/api/lino_extjs6.*
 .eggs/
+docs/api/lino*
