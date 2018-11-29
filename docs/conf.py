@@ -24,10 +24,10 @@ extensions += ['lino.sphinxcontrib.logo']
 autosummary_generate = True
 
 
-from importlib import import_module
-for n in 'atelier lino lino_xl'.split():
-    m = import_module(n)
-    intersphinx_mapping[n] = (m.intersphinx_urls['docs'], None)
+intersphinx_mapping = {}
+from atelier.sphinxconf import interproject
+interproject.configure(globals(), 'atelier lino_book')
+
 
 import lino_extjs6
 
