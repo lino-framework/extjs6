@@ -2537,7 +2537,7 @@ Ext.define('Lino.ActionFormPanel', {
       // console.log("20150130", p.{{constants.URL_PARAM_PARAM_VALUES}});
 
       Lino.call_ajax_action(
-          panel, 'GET', url, p, actionName, step, fn); //  , on_success);
+          panel, self.http_method || 'GET', url, p, actionName, step, fn); //  , on_success);
     };
     fn(panel, null, null);
     
