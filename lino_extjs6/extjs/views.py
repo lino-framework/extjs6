@@ -140,7 +140,7 @@ class ActionParamChoices(View):
         if ba is None:
             raise Exception("Unknown action %r for %s" % (an, actor))
         field = ba.action.get_param_elem(field)
-        qs, row2dict = choices_for_field(request, ba.action, field)
+        qs, row2dict = choices_for_field(request, ba.request(request=request), field)
         if field.blank:
             emptyValue = ''
         else:
@@ -189,7 +189,7 @@ class Choices(View):
             if field.blank:
                 # ~ logger.info("views.Choices: %r is blank",field)
                 emptyValue = ''
-            qs, row2dict = choices_for_field(request, rpt, field)
+            qs, row2dict = choices_for_field(rpt.request(request=request), rpt, field)
 
         return choices_response(rpt, request, qs, row2dict, emptyValue)
 
