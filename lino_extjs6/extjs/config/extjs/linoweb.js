@@ -690,6 +690,9 @@ Ext.define('Lino.MainPanel',{
       //~ p.{{constants.URL_PARAM_PARAM_VALUES}} = this.get_param_values();
       //~ console.log("20120203 add_param_values added pv",p.pv,"to",p);
     }
+    else if(this.use_detail_params_value){
+      p.{{constants.URL_PARAM_PARAM_VALUES}} = Lino.fields2array(this.ownerCt.ownerCt.ownerCt.config.p.params_panel.fields);
+    }
   },
   get_param_values : function() { // similar to get_field_values()
       return Lino.fields2array(this.params_panel.fields);
@@ -3291,7 +3294,7 @@ if (this.disable_editing | record.data.disable_editing) {
       //~ this.disable();
       //~ this.getBottomToolbar().disable();
         //  HKC
-      this.form.items.each(function(cmp){
+      this.form.items && this.form.items.each(function(cmp){ 
        cmp.disable();
       },this);
       this.set_window_title(this.empty_title);
