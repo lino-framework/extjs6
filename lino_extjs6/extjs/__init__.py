@@ -117,9 +117,9 @@ class Plugin(Plugin):
                 '(?P<an>\w+)/(?P<field>\w+)$',
                 views.ActionParamChoices.as_view()),
             # the thread_id can be a negative number:
-            url(rx + r'callbacks/(?P<thread_id>[\-0-9a-zA-Z]+)/'
-                '(?P<button_id>\w+)$',
-                views.Callbacks.as_view())
+            # url(rx + r'callbacks/(?P<thread_id>[\-0-9a-zA-Z]+)/'
+            #     '(?P<button_id>\w+)$',
+            #     views.Callbacks.as_view())
         ]
         if settings.SITE.use_eid_applet:
             urlpatterns.append(
@@ -129,7 +129,7 @@ class Plugin(Plugin):
             urlpatterns.append(
                 url(rx + r'run-jasmine$', views.RunJasmine.as_view()))
         return urlpatterns
-        
+
 
     def setup_layout_element(self, el):
         from lino.core import elems as ext_elems
@@ -177,7 +177,7 @@ class Plugin(Plugin):
             el.value_template = "Ext.create('Ext.form.DisplayField',%s)"
         elif isinstance(el, ext_elems.Spacer):
             el.value_template = "Ext.create('Ext.Spacer',%s)"
-            
+
         elif isinstance(el, ext_elems.Toolbar):
             el.value_template = "Ext.create('Ext.Toolbar',%s)"
         elif isinstance(el, ext_elems.ComboBox):
@@ -186,5 +186,3 @@ class Plugin(Plugin):
             el.value_template = "Ext.create('Ext.Panel',%s)"
         elif isinstance(el, ext_elems.Calendar):
             el.value_template = "Ext.create('Lino.CalendarPanel',%s)"
-
-    

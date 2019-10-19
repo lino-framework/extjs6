@@ -43,7 +43,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
     """
 
     extjs_version = 6
-    
+
     def js_render_ParamsPanelSubclass(self, dh):
         yield ""
         yield "Lino.%s = Ext.extend(Ext.form.FormPanel, {" % \
@@ -94,7 +94,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         yield ""
         # yield "Lino.%s = Ext.extend(Lino.ActionFormPanel,{" % \
         #     dh.layout._formpanel_name
-        yield "Ext.define('Lino.%s' , { extend : 'Lino.ActionFormPanel'," % \
+        yield "Ext.define('Lino.%s', { extend : 'Lino.ActionFormPanel'," % \
               dh.layout._formpanel_name
         for k, v in list(dh.main.ext_options().items()):
             if k != 'items':
@@ -150,7 +150,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         yield ""
         # yield "Lino.%s = Ext.extend(Lino.FormPanel,{" % \
         #     dh.layout._formpanel_name
-        yield "Ext.define('Lino.%s' , { extend : 'Lino.FormPanel'," % \
+        yield "Ext.define('Lino.%s', { extend : 'Lino.FormPanel'," % \
               dh.layout._formpanel_name
         yield "  layout: 'fit',"
         yield "  auto_save: true,"
@@ -226,7 +226,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         #     action.full_name(), dtl._formpanel_name)
         # Ext.define('Ext.window.Window', {
         # extend: 'Ext.panel.Panel',
-        yield "Ext.define('Lino.%sPanel' , { extend : 'Lino.%s'," % (
+        yield "Ext.define('Lino.%sPanel', { extend : 'Lino.%s'," % (
             action.full_name(), dtl._formpanel_name)
         yield "  empty_title: %s," % py2js(action.get_button_label())
         if action.action.hide_navigator:
@@ -268,7 +268,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         yield ""
         yield "// js_render_GridPanel_class %s" % rh.actor
         # yield "Lino.%s.GridPanel = Ext.extend(Lino.GridPanel,{" % rh.actor
-        yield "Ext.define('Lino.%s.GridPanel' , { extend : 'Lino.GridPanel'," % rh.actor
+        yield "Ext.define('Lino.%s.GridPanel', { extend : 'Lino.GridPanel'," % rh.actor
 
         kw = dict()
         # ~ kw.update(empty_title=%s,rh.actor.get_button_label()
@@ -466,4 +466,3 @@ class ExtRenderer(ext_renderer.ExtRenderer):
             else:
                 yield "  return Ext.create('%s',{p});" % mainPanelClass
         yield "});"
-

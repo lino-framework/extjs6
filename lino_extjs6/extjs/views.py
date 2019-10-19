@@ -4,23 +4,23 @@
 
 """
 
-Summary from <http://en.wikipedia.org/wiki/Restful>: 
+Summary from <http://en.wikipedia.org/wiki/Restful>:
 
     On an element:
 
     - GET : Retrieve a representation of the addressed member of the collection expressed in an appropriate MIME type.
-    - PUT : Update the addressed member of the collection or create it with the specified ID. 
-    - POST : Treats the addressed member as a collection and creates a new subordinate of it. 
-    - DELETE : Delete the addressed member of the collection. 
+    - PUT : Update the addressed member of the collection or create it with the specified ID.
+    - POST : Treats the addressed member as a collection and creates a new subordinate of it.
+    - DELETE : Delete the addressed member of the collection.
 
     On a list:
 
-    - GET : List the members of the collection. 
-    - PUT : Replace the entire collection with another collection. 
-    - POST : Create a new entry in the collection where the ID is assigned automatically by the collection. 
-      The ID created is included as part of the data returned by this operation. 
+    - GET : List the members of the collection.
+    - PUT : Replace the entire collection with another collection.
+    - POST : Create a new entry in the collection where the ID is assigned automatically by the collection.
+      The ID created is included as part of the data returned by this operation.
     - DELETE : Delete the entire collection.
-    
+
 
 
 
@@ -62,7 +62,7 @@ from lino.core.views import json_response, json_response_kw
 from lino.core import constants
 from lino.core.requests import BaseRequest
 
-from lino.modlib.extjs.views import RunJasmine, EidAppletService, Callbacks, elem2rec_empty, choices_for_field, choices_response
+from lino.modlib.extjs.views import RunJasmine, EidAppletService, elem2rec_empty, choices_for_field, choices_response
 
 
 MAX_ROW_COUNT = 300
