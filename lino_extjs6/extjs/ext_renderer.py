@@ -1,39 +1,27 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2018 Rumma & Ko Ltd
+# Copyright 2009-2020 Rumma & Ko Ltd
 # License: BSD (see file COPYING for details)
 
 """
 Defines the :class:`ExtRenderer` class.
 """
 
-from __future__ import unicode_literals
-from builtins import str
-import six
-import logging
-
-logger = logging.getLogger(__name__)
-
+import logging ; logger = logging.getLogger(__name__)
 
 from django.conf import settings
-
 from django.utils.translation import ugettext as _
 
 from lino.core.gfks import ContentType
 
 import lino
 from lino.core import constants
-
-
 from lino.core.actions import ShowDetail, ShowInsert, ShowTable
 from lino.core import dbtables
-
+from lino.core import elems as ext_elems
 from lino.utils import jsgen
 from lino.utils.jsgen import py2js, js_code
-
 from lino.modlib.users.utils import get_user_profile
-
 from lino.modlib.extjs import ext_renderer
-from lino.core import elems as ext_elems
 
 
 
@@ -335,13 +323,13 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         kw.update(page_length=rh.actor.page_length)
         kw.update(stripeRows=True)
 
-        # ~ if rh.actor.master:
+        # if rh.actor.label is not None:
         kw.update(title=rh.actor.label)
         if rh.actor.editable:
             kw.update(
                 disabled_fields_index=rh.store.column_index('disabled_fields'))
 
-        for k, v in list(kw.items()):
+        for k, v in kw.items():
             yield "  %s : %s," % (k, py2js(v))
 
         yield "  initComponent : function() {"
@@ -425,7 +413,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
                 # if isinstance(ws[0], basestring) and ws[0].endswith("%"):
                 #     windowConfig.update(
                 #         width=js_code('Lino.perc2width(%s)' % ws[0][:-1]))
-                if isinstance(ws[0], six.string_types):
+                if isinstance(ws[0], str):
                     windowConfig.update(width=ws[0])
                 else:
                     windowConfig.update(
