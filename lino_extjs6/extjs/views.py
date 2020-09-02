@@ -29,9 +29,7 @@ from __future__ import unicode_literals
 
 import ast
 
-from builtins import str
 import logging
-
 logger = logging.getLogger(__name__)
 
 from django import http
@@ -44,6 +42,8 @@ from django.utils.encoding import force_text
 
 from lino.core.signals import pre_ui_delete
 from lino.core.utils import obj2unicode
+from lino.core import actions
+from lino.core.fields import choices_for_field
 
 from etgen import html as xghtml
 
@@ -52,17 +52,16 @@ E = xghtml.E
 from lino.utils import ucsv
 from lino.utils import isiterable
 from lino.utils import dblogger
-# from lino.core import auth
 
-from lino.core import actions
 
 from lino.core.views import requested_actor, action_request
 from lino.core.views import json_response, json_response_kw
+from lino.core.views import choices_response
 
 from lino.core import constants
 from lino.core.requests import BaseRequest
 
-from lino.modlib.extjs.views import RunJasmine, EidAppletService, elem2rec_empty, choices_for_field, choices_response
+from lino.modlib.extjs.views import RunJasmine, EidAppletService, elem2rec_empty
 
 
 MAX_ROW_COUNT = 300
