@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2009-2016 Rumma & Ko Ltd
+# Copyright 2009-2020 Rumma & Ko Ltd
 # License: BSD (see file COPYING for details)
 
 """The Lino user interface based on ExtJS 6.
@@ -20,9 +20,6 @@ your application.
    ext_renderer
 
 """
-
-from __future__ import unicode_literals
-from __future__ import print_function
 
 from django.utils.translation import ugettext_lazy as _
 from lino.modlib.extjs import Plugin
