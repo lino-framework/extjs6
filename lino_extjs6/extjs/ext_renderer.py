@@ -279,8 +279,8 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         kw.update(cell_edit=rh.actor.cell_edit)
         kw.update(ls_bbar_actions=self.toolbar(
             rh.actor.get_toolbar_actions(rh.actor.default_action.action)))
-        kw.update(ls_grid_configs=[gc.data for gc in rh.actor.grid_configs])
-        kw.update(gc_name=constants.DEFAULT_GC_NAME)
+        # kw.update(ls_grid_configs=[gc.data for gc in rh.actor.grid_configs])
+        # kw.update(gc_name=constants.DEFAULT_GC_NAME)
         # ~ if action != rh.actor.default_action:
         # ~ kw.update(action_name=action.name)
         # ~ kw.update(content_type=rh.report.content_type)
