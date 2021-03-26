@@ -318,8 +318,6 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         if rh.actor.params_panel_hidden:
             kw.update(params_panel_hidden=True)
 
-        if rh.actor.start_at_bottom:
-            kw.update(start_at_bottom=True)
         kw.update(page_length=rh.actor.page_length)
         kw.update(stripeRows=True)
 
