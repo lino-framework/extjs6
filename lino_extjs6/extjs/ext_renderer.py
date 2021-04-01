@@ -217,7 +217,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
         yield "Ext.define('Lino.%sPanel', { extend : 'Lino.%s'," % (
             action.full_name(), dtl._formpanel_name)
         yield "  empty_title: %s," % py2js(action.get_button_label())
-        if action.action.hide_navigator:
+        if rpt.hide_navigator:
             yield "  hide_navigator: true,"
 
         if rh.actor.params_panel_hidden:
@@ -436,7 +436,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
             p = dict()
             # if ba.action is settings.SITE.get_main_action(profile):
             #     p.update(is_home_page=True)
-            if ba.action.hide_top_toolbar or ba.actor.hide_top_toolbar or ba.action.parameters:
+            if ba.actor.hide_top_toolbar or ba.action.parameters:
                 p.update(hide_top_toolbar=True)
             if rpt.hide_window_title:
                 p.update(hide_window_title=True)
