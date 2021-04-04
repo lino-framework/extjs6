@@ -263,11 +263,13 @@ class ApiElement(View):
         ui = settings.SITE.kernel
         rpt = requested_actor(app_label, actor)
 
-        action_name = request.GET.get(constants.URL_PARAM_ACTION_NAME,
-                                      rpt.default_elem_action_name)
-        ba = rpt.get_url_action(action_name)
-        if ba is None:
-            raise http.Http404("%s has no action %r" % (rpt, action_name))
+        action_name = request.GET.get(constants.URL_PARAM_ACTION_NAME, None)
+        if action_name:
+            ba = rpt.get_url_action(action_name)
+            if ba is None:
+                raise http.Http404("%s has no action %r" % (rpt, action_name))
+        else:
+            ba = rpt.detail_action
 
         if pk and pk != '-99999' and pk != '-99998':
             # ~ ar = ba.request(request=request,selected_pks=[pk])
