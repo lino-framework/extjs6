@@ -1,8 +1,7 @@
 # -*- coding: UTF-8 -*-
-# Copyright 2015-2016 Rumma & Ko Ltd
-# License: BSD (see file COPYING for details)
+# Copyright 2015-2021 Rumma & Ko Ltd
+# License: GNU Affero General Public License v3 (see file COPYING for details)
 
-from __future__ import unicode_literals
 
 SETUP_INFO = dict(
     name='lino_extjs6',
@@ -11,21 +10,21 @@ SETUP_INFO = dict(
     tests_require=[],
     test_suite='tests',
     description="The Sencha ExtJS 6 user interface for Lino",
-    license='BSD-2-Clause',
+    license_files=['COPYING'],
     include_package_data=False,
     zip_safe=False,
     author='Luc Saffre',
     author_email='luc.saffre@gmail.com',
-    url="http://www.lino-framework.org",
+    url="https://github.com/lino-framework/ext6",
     classifiers="""\
   Programming Language :: Python
-  Programming Language :: Python :: 2
-  Development Status :: 5 - Production/Stable
+  Programming Language :: Python :: 3
+  Development Status :: 1 - Planning
   Environment :: Web Environment
   Framework :: Django
   Intended Audience :: Developers
   Intended Audience :: System Administrators
-  License :: OSI Approved :: BSD LIcense
+  License :: OSI Approved :: GNU Affero General Public License v3
   Natural Language :: English
   Natural Language :: French
   Natural Language :: German
