@@ -13,8 +13,8 @@ SETUP_INFO = dict(
     license_files=['COPYING'],
     include_package_data=False,
     zip_safe=False,
-    author='Luc Saffre',
-    author_email='luc.saffre@gmail.com',
+    author='Rumma & Ko Ltd',
+    author_email='info@lino-framework.org',
     url="https://github.com/lino-framework/ext6",
     classifiers="""\
   Programming Language :: Python
