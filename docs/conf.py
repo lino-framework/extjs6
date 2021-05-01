@@ -66,7 +66,7 @@ language = 'en'
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
 exclude_patterns = [
-    '.build/*', 
+    '.build/*',
     'include/*',
 ]
 
@@ -152,7 +152,7 @@ if False:
     #~ show_source = True
 
     #~ srcref_base_uri="http://code.google.com/lino"
-    #~ srcref_base_uri="http://code.google.com/p/lino/source/browse/#hg" 
+    #~ srcref_base_uri="http://code.google.com/p/lino/source/browse/#hg"
 
 
     #~ nitpicky = True # use -n in Makefile instead
@@ -163,8 +163,8 @@ if False:
 
     #~ todo_include_todos = True
 
-extlinks.update(
-    ticket=('https://jane.mylino.net/#/api/tickets/AllTickets/%s', '#'))
+# extlinks.update(
+#     ticket=('https://jane.mylino.net/#/api/tickets/AllTickets/%s', '#'))
 
-extlinks.update(
-    srcref=(lino_extjs6.srcref_url, ''))
+# extlinks.update(
+#     srcref=(lino_extjs6.srcref_url, ''))
