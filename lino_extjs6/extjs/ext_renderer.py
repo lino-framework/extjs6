@@ -227,7 +227,7 @@ class ExtRenderer(ext_renderer.ExtRenderer):
             yield "  save_action_name: %s," % py2js(
                 action.action.save_action_name)
         yield "  ls_bbar_actions: %s," % py2js(
-            self.toolbar(rpt.get_toolbar_actions(action.action)))
+            self.toolbar(rpt.get_toolbar_actions(action.action, get_user_profile())))
         yield "  ls_url: %s," % py2js(rpt.actor_url())
         if action.action != rpt.default_action.action:
             yield "  action_name: %s," % py2js(action.action.action_name)
