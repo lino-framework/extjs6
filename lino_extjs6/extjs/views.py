@@ -122,8 +122,7 @@ class MainHtml(View):
         settings.SITE.startup()
         # ~ raise Exception("20131023")
         ar = BaseRequest(request)
-        ar.success(html=settings.SITE.get_main_html(
-            request, extjs=settings.SITE.plugins.extjs))
+        ar.success(html=settings.SITE.get_main_html(request))
         return ar.renderer.render_action_response(ar)
 
 
