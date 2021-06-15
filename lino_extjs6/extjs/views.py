@@ -121,8 +121,9 @@ class MainHtml(View):
         # ~ logger.info("20130719 MainHtml")
         settings.SITE.startup()
         # ~ raise Exception("20131023")
-        ar = BaseRequest(request)
-        ar.success(html=settings.SITE.get_main_html(request))
+        ar = BaseRequest(request,
+            renderer=settings.SITE.kernel.default_renderer)
+        ar.success(html=settings.SITE.get_main_html(ar))
         return ar.renderer.render_action_response(ar)
 
 
