@@ -25,7 +25,7 @@ autosummary_generate = True
 
 
 intersphinx_mapping = {}
-from atelier.sphinxconf import interproject
+from rstgen.sphinxconf import interproject
 interproject.configure(globals(), 'atelier lino_book')
 
 
