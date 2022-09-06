@@ -83,7 +83,8 @@ class Plugin(Plugin):
     def get_patterns(self):
 
         from django.conf import settings
-        from django.conf.urls import url  # patterns
+        # from django.conf.urls import url  # patterns
+        from django.urls import re_path as url
         from . import views
 
         self.renderer.build_site_cache()
