@@ -87,7 +87,8 @@ class Plugin(Plugin):
         from django.urls import re_path as url
         from . import views
 
-        self.renderer.build_site_cache()
+        # if self.site.developer_site_cache:
+        #     self.renderer.build_site_cache()
 
         rx = '^'
 
