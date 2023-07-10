@@ -501,7 +501,7 @@ Ext.define('Lino.MainPanel',{
           p['{{constants.URL_PARAM_MASTER_PK}}'] = rec.id;
       }
     } else {
-      p['mk'] = undefined;
+      p['{{constants.URL_PARAM_MASTER_PK}}'] = undefined;
     }
     //~ console.log('get_master_params returns',p,'using record',rec);
     return p;
@@ -1482,7 +1482,7 @@ Lino.save_wc_handler = function(ww) {
 
 Lino.show_in_own_window_button = function(handler) {
   return {
-    qtip: "{{_("Show this panel in own window")}}",
+    qtip: "{{_('Show this panel in own window')}}",
     //id: "up",
     type: "up",
       callback : function(panel, tool, event) {
