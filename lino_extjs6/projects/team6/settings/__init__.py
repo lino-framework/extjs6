@@ -1,4 +1,5 @@
-from lino_book.projects.noi1e.settings import *
+# from lino_book.projects.noi1e.settings import *
+from lino_noi.lib.noi.settings import *
 
 
 class Site(Site):
