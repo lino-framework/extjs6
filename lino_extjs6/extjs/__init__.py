@@ -33,12 +33,12 @@ class Plugin(Plugin):
 
     """
 
-    disables_plugins = ['tinymce', 'extensible']
-    """These two plugins don't work with ExtJS6 and therefore will
-    automatically disabled if you set :attr:`default_ui` to
-    :mod:`lino_extjs6.extjs6`.
-
-    """
+    # disables_plugins = ['tinymce', 'extensible']
+    # """These two plugins don't work with ExtJS6 and therefore will
+    # automatically disabled if you set :attr:`default_ui` to
+    # :mod:`lino_extjs6.extjs6`.
+    #
+    # """
 
     media_name = 'ext-6.2.0'
 
